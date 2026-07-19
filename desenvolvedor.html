@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desenvolvedor — Organizador de Aulas</title>
+<meta name="description" content="Sobre o criador do Organizador de Aulas: Arimar Diego França da Silva, professor de história e autor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* Prometeu (P) — padrão */
+  --bg:#050b13;--bg2:#081420;--card:#0a1a28;--card2:#0e2436;
+  --txt:#e3f6ff;--txt2:#8fb6cc;--txt3:#4f7183;
+  --acc:#22d3ee;--acc2:#0ea5b7;--gl:rgba(34,211,238,.35);
+  --brd:rgba(34,211,238,.18);--brd2:rgba(255,255,255,.06);
+  --glow1:rgba(34,211,238,.10);--glow2:rgba(14,165,183,.08);
+  --nav:rgba(5,11,19,.72);--btxt:#04121a;--htmlbg:#050b13;
+  --font-h:'Orbitron',sans-serif;--font-b:'Rajdhani',system-ui,sans-serif;
+}
+html.t-D{ --bg:#000;--bg2:#070707;--card:#0d0d0d;--card2:#141414;
+  --txt:#fff;--txt2:#b8b8b8;--txt3:#6f6f6f;--acc:#f2f2f2;--acc2:#cfcfcf;
+  --gl:rgba(255,255,255,.22);--brd:rgba(255,255,255,.16);--brd2:rgba(255,255,255,.06);
+  --glow1:rgba(255,255,255,.05);--glow2:rgba(255,255,255,.03);
+  --nav:rgba(0,0,0,.8);--btxt:#000;--htmlbg:#000;
+  --font-h:'Segoe UI',system-ui,Arial,sans-serif;--font-b:'Segoe UI',system-ui,Arial,sans-serif; }
+html.t-PR{ --bg:#120407;--bg2:#1a060a;--card:#1f0a10;--card2:#2a0e15;
+  --txt:#ffe6ea;--txt2:#e0a3ad;--txt3:#8a5560;--acc:#ff3b5c;--acc2:#c62740;
+  --gl:rgba(255,59,92,.33);--brd:rgba(255,59,92,.20);--brd2:rgba(255,255,255,.06);
+  --glow1:rgba(255,59,92,.10);--glow2:rgba(198,39,64,.07);
+  --nav:rgba(18,4,7,.75);--btxt:#fff;--htmlbg:#120407; }
+html.t-PB{ --bg:#04060f;--bg2:#070c1a;--card:#0a1226;--card2:#0e1832;
+  --txt:#e6edff;--txt2:#9db0d8;--txt3:#556685;--acc:#3b82f6;--acc2:#2563eb;
+  --gl:rgba(59,130,246,.33);--brd:rgba(59,130,246,.20);--brd2:rgba(255,255,255,.06);
+  --glow1:rgba(59,130,246,.10);--glow2:rgba(37,99,235,.07);
+  --nav:rgba(4,6,15,.75);--btxt:#fff;--htmlbg:#04060f; }
+html.t-L{ --bg:#F0EDE8;--bg2:#e7e2da;--card:#ffffff;--card2:#faf7f2;
+  --txt:#2a2320;--txt2:#6b5f57;--txt3:#9a8d83;--acc:#c0563c;--acc2:#a5432b;
+  --gl:rgba(192,86,60,.22);--brd:rgba(192,86,60,.22);--brd2:rgba(0,0,0,.08);
+  --glow1:rgba(192,86,60,.08);--glow2:rgba(165,67,43,.05);
+  --nav:rgba(255,255,255,.82);--btxt:#fff;--htmlbg:#F0EDE8;
+  --font-h:'Segoe UI',system-ui,Arial,sans-serif;--font-b:'Segoe UI',system-ui,Arial,sans-serif; }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--htmlbg);-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
+body{font-family:var(--font-b);background:var(--bg);color:var(--txt);line-height:1.6;font-size:17px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(1100px 560px at 82% -10%,var(--glow1),transparent 60%),
+             radial-gradient(820px 460px at -8% 18%,var(--glow2),transparent 55%);}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+h1,h2,h3,.brand{font-family:var(--font-h)}
+a{color:var(--acc);text-decoration:none}
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(--nav);border-bottom:1px solid var(--brd2)}
+.nav-in{display:flex;align-items:center;gap:10px 14px;min-height:60px;flex-wrap:wrap;padding:8px 0}
+.brand{font-weight:900;font-size:15px;letter-spacing:.5px;color:var(--txt);display:flex;align-items:center;gap:8px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc)}
+.nav-links{margin-left:auto;display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
+.nav-links a{color:var(--txt2);font-size:14px;font-weight:600;transition:color .2s}
+.nav-links a:hover,.nav-links a.here{color:var(--acc)}
+@media(max-width:720px){ .nav-links{gap:6px 12px;width:100%} .nav-links a{font-size:13px} .brand{font-size:13px} }
+.themes{display:flex;gap:6px;align-items:center}
+.sw{width:20px;height:20px;border-radius:50%;border:1px solid var(--brd2);cursor:pointer;padding:0}
+.sw.on{box-shadow:0 0 0 2px var(--acc)}
+.lang{display:flex;gap:2px;border:1px solid var(--brd);border-radius:20px;overflow:hidden}
+.lang button{background:none;border:none;color:var(--txt2);padding:5px 10px;font-family:var(--font-h);font-size:11px;font-weight:700;cursor:pointer}
+.lang button.on{background:var(--acc);color:var(--btxt)}
+
+.hero{display:grid;grid-template-columns:250px 1fr;gap:34px;align-items:center;padding:50px 0 30px}
+.photo{width:250px;height:auto;border-radius:18px;border:1px solid var(--brd);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px var(--gl);background:var(--card);display:block}
+.photo.noimg{height:300px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:64px;color:var(--acc);font-weight:900}
+.hero .role{color:var(--acc);font-family:var(--font-h);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.hero h1{font-size:clamp(26px,4.5vw,40px);font-weight:800;margin-bottom:10px}
+.hero .tagline{color:var(--txt2);font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font-family:var(--font-h);font-size:11px;letter-spacing:.5px;padding:6px 12px;border:1px solid var(--brd);border-radius:20px;color:var(--txt2)}
+
+section{padding:26px 0}
+h2{font-size:22px;margin-bottom:12px}
+p{color:var(--txt2);margin:10px 0}
+.card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--brd);border-radius:14px;padding:24px;margin:10px 0}
+blockquote{border-left:3px solid var(--acc);padding:6px 0 6px 18px;margin:14px 0;color:var(--txt);font-size:19px;font-style:italic}
+blockquote cite{display:block;margin-top:10px;color:var(--txt3);font-size:14px;font-style:normal}
+.todo{color:var(--txt3);font-size:14px;border:1px dashed var(--brd);border-radius:8px;padding:4px 10px;display:inline-block;margin:4px 0}
+.back{display:inline-block;margin-top:10px}
+footer{border-top:1px solid var(--brd2);padding:26px 0 50px;color:var(--txt3);font-size:14px;text-align:center}
+@media(max-width:640px){ .hero{grid-template-columns:1fr;text-align:center;justify-items:center} .chips{justify-content:center} }
+</style>
+</head>
+<body>
+<nav><div class="wrap nav-in">
+  <a class="brand" href="index.html"><span class="dot"></span> ORGANIZADOR DE AULAS</a>
+  <div class="nav-links">
+    <a href="index.html#recursos" data-i="nav1">Recursos</a>
+    <a href="index.html#preco" data-i="nav3">Preço</a>
+    <a href="comprar.html" data-i="nav9">Comprar</a>
+    <a href="galeria.html" data-i="nav6">Galeria</a>
+    <a href="tablet.html" data-i="nav8">Tablet</a>
+    <a href="manual.html" data-i="nav5">Manual</a>
+    <a href="desenvolvedor.html" class="here" data-i="nav7">Desenvolvedor</a>
+    <a href="index.html#instalar" data-i="nav4">Instalar</a>
+    <div class="themes" id="themes" title="Tema">
+      <button class="sw" data-t="P"  style="background:#0a1a28" aria-label="Prometeu"></button>
+      <button class="sw" data-t="PB" style="background:#0a1226" aria-label="Azul"></button>
+      <button class="sw" data-t="PR" style="background:#1f0a10" aria-label="Vermelho"></button>
+      <button class="sw" data-t="D"  style="background:#0d0d0d" aria-label="Escuro"></button>
+      <button class="sw" data-t="L"  style="background:#efe9e1" aria-label="Claro"></button>
+    </div>
+    <div class="lang" id="lang">
+      <button data-l="pt" class="on">PT</button><button data-l="en">EN</button><button data-l="es">ES</button><button data-l="zh">中文</button>
+    </div>
+  </div>
+</div></nav>
+
+<header class="hero wrap">
+  <img class="photo" id="devPhoto" src="dev-foto.jpg" alt="Arimar Diego França da Silva"
+       onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo noimg',textContent:'AD'}))">
+  <div>
+    <div class="role" data-i="role">Criador do app · Professor</div>
+    <h1>Arimar Diego França da Silva</h1>
+    <div class="tagline" data-i="tagline">Professor de história efetivo no estado do Amazonas.</div>
+    <div class="chips">
+      <span class="chip" data-i="chip1">História</span>
+      <span class="chip" data-i="chip2">Ciências políticas</span>
+      <span class="chip" data-i="chip3">Estratégias militares</span>
+      <span class="chip" data-i="chip4">Autor</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <h2 data-i="h-bio">Sobre</h2>
+    <div class="card">
+      <p data-i="bio1">Professor de história da rede pública do Amazonas, especialista em ciências políticas e em estratégias militares. Além da sala de aula, é escritor — autor do livro <b>“O Reino: uma nova utopia social”</b>, que mistura ficção científica, fantasia, história e pesquisa real.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i="h-words">Nas palavras do autor</h2>
+    <div class="card">
+      <blockquote>
+        <span data-i="quote">“O Organizador de Aulas nasceu da minha vivência em sala: a necessidade de planejar, acompanhar e guardar aulas em vídeo de forma simples, offline e sem depender de planilhas — pensado por um professor, para professores e estudantes.”</span>
+        <cite data-i="quote-src">— Arimar Diego França da Silva</cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i="h-more">Mais informações</h2>
+    <div class="card">
+      <p data-i="more-intro">Formação e trajetória:</p>
+      <p><span data-i="todo1">🎓 Licenciado em História pela Universidade Nilton Lins; pós-graduado em Ciências Políticas e Estratégias Militares pela Faculdade La Salle</span></p>
+      <p><span data-i="todo2">📍 Manaus (AM) · professor da rede estadual de ensino (Seduc-AM)</span></p>
+      <p><span data-i="todo3">🏫 Mais de 10 anos de experiência em sala de aula</span></p>
+      <p><span data-i="todo4">📖 Livro “O Reino”: <a href="https://livrooreino.wixsite.com/website" target="_blank" rel="noopener">livrooreino.wixsite.com</a></span></p>
+    </div>
+    <p><a class="back" href="index.html" id="back2" data-i="back">← Voltar ao site</a></p>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span data-i="foot">Contato:</span> <a href="mailto:organizadordeaulas.prometeu@gmail.com">organizadordeaulas.prometeu@gmail.com</a><br>
+  © 2026 Arimar Diego França da Silva · Organizador de Aulas (Prometeu)
+</footer>
+
+<script>
+const LANGS=['pt','en','es','zh'];
+const LANG_HTML={pt:'pt-BR',en:'en',es:'es',zh:'zh-CN'};
+const I={
+  nav1:['Recursos','Features','Recursos','功能'],
+  nav3:['Preço','Pricing','Precio','价格'], nav9:['Comprar','Buy','Comprar','购买'],
+  nav4:['Instalar','Install','Instalar','安装'],
+  nav5:['Manual','Manual','Manual','手册'],
+  nav6:['Galeria','Gallery','Galería','图库'],
+  nav7:['Desenvolvedor','Developer','Desarrollador','开发者'],
+  nav8:['Tablet','Tablet','Tablet','平板'],
+  role:['Criador do app · Professor','App creator · Teacher','Creador de la app · Profesor','应用作者 · 教师'],
+  tagline:['Professor de história efetivo no estado do Amazonas.','Tenured history teacher in Amazonas, Brazil.','Profesor titular de historia en Amazonas, Brasil.','巴西亚马孙州在编历史教师。'],
+  chip1:['História','History','Historia','历史'],
+  chip2:['Ciências políticas','Political science','Ciencias políticas','政治学'],
+  chip3:['Estratégias militares','Military strategy','Estrategias militares','军事战略'],
+  chip4:['Autor','Author','Autor','作家'],
+  'h-bio':['Sobre','About','Acerca de','关于'],
+  bio1:['Professor de história da rede pública do Amazonas, especialista em ciências políticas e em estratégias militares. Além da sala de aula, é escritor — autor do livro <b>“O Reino: uma nova utopia social”</b>, que mistura ficção científica, fantasia, história e pesquisa real.',
+        'A public-school history teacher in Amazonas, Brazil, specialized in political science and military strategy. Beyond the classroom, he is a writer — author of the book <b>“O Reino: uma nova utopia social”</b> (“The Kingdom: a new social utopia”), blending science fiction, fantasy, history and real research.',
+        'Profesor de historia de la escuela pública de Amazonas (Brasil), especializado en ciencias políticas y estrategias militares. Además del aula, es escritor — autor del libro <b>“O Reino: uma nova utopia social”</b> (“El Reino: una nueva utopía social”), que mezcla ciencia ficción, fantasía, historia e investigación real.',
+        '巴西亚马孙州公立学校的历史教师，专攻政治学与军事战略。课堂之外，他还是一名作家 —— 著有《王国：一种新的社会乌托邦》（O Reino: uma nova utopia social），将科幻、奇幻、历史与真实研究融为一体。'],
+  bio2:['O <b>Organizador de Aulas</b> nasceu dessa vivência em sala: a necessidade de planejar, acompanhar e guardar aulas em vídeo de forma simples, offline e sem depender de planilhas — pensado por um professor, para professores e estudantes.',
+        'The <b>Lesson Organizer</b> was born from that classroom experience: the need to plan, track and store video lessons simply, offline and without spreadsheets — designed by a teacher, for teachers and students.',
+        'El <b>Organizador de Clases</b> nació de esa experiencia en el aula: la necesidad de planificar, seguir y guardar clases en vídeo de forma simple, sin conexión y sin hojas de cálculo — pensado por un profesor, para profesores y estudiantes.',
+        '<b>课程管理器</b>正是源于这样的课堂经验：需要一种简单、离线、无需表格的方式来规划、跟踪和保存视频课程 —— 由一位教师为教师和学生而设计。'],
+  'h-words':['Nas palavras do autor','In the author’s words','En palabras del autor','作者自述'],
+  quote:['“O Organizador de Aulas nasceu da minha vivência em sala: a necessidade de planejar, acompanhar e guardar aulas em vídeo de forma simples, offline e sem depender de planilhas — pensado por um professor, para professores e estudantes.”',
+         '“The Lesson Organizer was born from my classroom experience: the need to plan, track and store video lessons simply, offline and without spreadsheets — designed by a teacher, for teachers and students.”',
+         '“El Organizador de Clases nació de mi experiencia en el aula: la necesidad de planificar, seguir y guardar clases en vídeo de forma simple, sin conexión y sin hojas de cálculo — pensado por un profesor, para profesores y estudiantes.”',
+         '"课程管理器源于我的课堂经验：需要一种简单、离线、无需表格的方式来规划、跟踪和保存视频课程 —— 由一位教师为教师和学生而设计。"'],
+  'quote-src':['— Arimar Diego França da Silva','— Arimar Diego França da Silva','— Arimar Diego França da Silva','—— Arimar Diego França da Silva'],
+  'h-more':['Mais informações','More information','Más información','更多信息'],
+  'more-intro':['Formação e trajetória:','Background and career:','Formación y trayectoria:','学历与经历：'],
+  todo1:['🎓 Licenciado em História pela Universidade Nilton Lins; pós-graduado em Ciências Políticas e Estratégias Militares pela Faculdade La Salle',
+         '🎓 BA in History from Universidade Nilton Lins; postgraduate degree in Political Science and Military Strategy from Faculdade La Salle',
+         '🎓 Licenciado en Historia por la Universidade Nilton Lins; posgrado en Ciencias Políticas y Estrategias Militares por la Faculdade La Salle',
+         '🎓 历史学学士（Nilton Lins 大学）；政治学与军事战略研究生（La Salle 学院）'],
+  todo2:['📍 Manaus (AM) · professor da rede estadual de ensino (Seduc-AM)',
+         '📍 Manaus, Brazil · teacher in the Amazonas state school system (Seduc-AM)',
+         '📍 Manaos (Brasil) · profesor de la red estatal de enseñanza (Seduc-AM)',
+         '📍 巴西马瑙斯 · 亚马逊州州立学校教师（Seduc-AM）'],
+  todo3:['🏫 Mais de 10 anos de experiência em sala de aula',
+         '🏫 Over 10 years of classroom experience',
+         '🏫 Más de 10 años de experiencia en el aula',
+         '🏫 超过 10 年课堂教学经验'],
+  todo4:['📖 Livro “O Reino”: <a href="https://livrooreino.wixsite.com/website" target="_blank" rel="noopener">livrooreino.wixsite.com</a>',
+         '📖 Book “O Reino”: <a href="https://livrooreino.wixsite.com/website" target="_blank" rel="noopener">livrooreino.wixsite.com</a>',
+         '📖 Libro “O Reino”: <a href="https://livrooreino.wixsite.com/website" target="_blank" rel="noopener">livrooreino.wixsite.com</a>',
+         '📖 著作《O Reino》（王国）：<a href="https://livrooreino.wixsite.com/website" target="_blank" rel="noopener">livrooreino.wixsite.com</a>'],
+  back:['← Voltar ao site','← Back to site','← Volver al sitio','← 返回网站'],
+  foot:['Contato:','Contact:','Contacto:','联系：']
+};
+const LKEY='prometeu.site.lang', TKEY='prometeu.site.theme';
+function setL(l){
+  if(!LANGS.includes(l))l='pt';
+  const i=LANGS.indexOf(l);
+  document.documentElement.lang=LANG_HTML[l];
+  document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  document.querySelectorAll('[data-i]').forEach(el=>{const v=I[el.getAttribute('data-i')];if(v&&v[i]!=null)el.innerHTML=v[i];});
+  try{localStorage.setItem(LKEY,l);}catch(e){}
+}
+function setTheme(t){
+  document.documentElement.className=(t==='P')?'':'t-'+t;
+  document.querySelectorAll('#themes .sw').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  try{localStorage.setItem(TKEY,t);}catch(e){}
+}
+document.querySelectorAll('#lang button').forEach(b=>b.onclick=()=>setL(b.dataset.l));
+document.querySelectorAll('#themes .sw').forEach(b=>b.onclick=()=>setTheme(b.dataset.t));
+(function(){
+  let l='pt',t='P';
+  try{l=localStorage.getItem(LKEY);}catch(e){}
+  if(!l){const n=(navigator.language||'pt');l=/^zh/i.test(n)?'zh':/^es/i.test(n)?'es':/^en/i.test(n)?'en':'pt';}
+  try{t=localStorage.getItem(TKEY)||'P';}catch(e){}
+  setTheme(t); setL(l);
+})();
+</script>
+</body>
+</html>
