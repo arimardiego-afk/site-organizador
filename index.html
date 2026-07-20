@@ -120,6 +120,10 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(-
 .phone{justify-self:center;width:274px;border-radius:36px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(127,127,127,.05),0 0 60px var(--gl);padding:13px 12px;position:relative;overflow:hidden}
 .phone::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:92px;height:6px;border-radius:6px;background:rgba(255,255,255,.14);z-index:2}
 .phone-vid{width:100%;display:block;border-radius:24px;background:#050b13;aspect-ratio:400/866;object-fit:cover}
+.phone-show{position:relative;width:100%;aspect-ratio:400/866;border-radius:24px;overflow:hidden;background:#050b13}
+.phone-show .ps-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease}
+.phone-show .ps-img.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.phone-show .ps-img{transition:none}}
 
 /* PHONE MOCKUP (cores fixas: representa a tela do app; só o destaque segue o tema) */
 .mock{justify-self:center;width:270px;height:552px;border-radius:34px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(34,211,238,.05),0 0 60px var(--gl);padding:14px 12px;position:relative;overflow:hidden}
@@ -290,7 +294,10 @@ footer{border-top:1px solid var(--brd2);padding:40px 0 60px;margin-top:30px}
     </div>
   </div>
   <div class="phone" aria-hidden="true">
-    <img id="heroShot" class="phone-vid" alt="" src="screenshots/pt-P-01-materias.jpg">
+    <div id="heroShow" class="phone-show">
+      <img class="ps-img on" alt="">
+      <img class="ps-img" alt="">
+    </div>
   </div>
 </header>
 
@@ -575,17 +582,32 @@ function shotLang(){return (curLang==='zh')?'zh':(curLang==='en')?'en':'pt';} //
 function updateShots(){
   const sl=shotLang();
   document.querySelectorAll('#shotsTrack img[data-shot]').forEach(img=>{img.src='screenshots/'+sl+'-'+curTheme+'-'+img.dataset.shot+'.jpg';});
-  const hero=document.getElementById('heroShot');
-  if(hero)hero.src='screenshots/'+sl+'-'+curTheme+'-01-materias.jpg';
+  heroReset();
 }
-function updateHeroVideo(){
-  const v=document.getElementById('heroVid'); if(!v)return;
-  const l=shotLang();
-  if(v.dataset.lang===l)return;
-  v.dataset.lang=l;
-  v.poster='media/hero-'+l+'.jpg';
-  v.src='media/hero-'+l+'.webm';
-  v.load(); const p=v.play(); if(p&&p.catch)p.catch(()=>{});
+/* Demonstração em movimento no celular do hero: passa pelas telas reais do app
+   NA COR DO TEMA atual e troca na hora quando o usuário muda de tema/idioma. */
+const HERO_SHOTS=['01-materias','02-series-horas','03-aulas','04-capitulos','05-formulario-video','06-menu'];
+let _hIdx=0,_hLayer=0,_hTimer=null;
+function _heroSrc(i){return 'screenshots/'+shotLang()+'-'+curTheme+'-'+HERO_SHOTS[i]+'.jpg';}
+function heroReset(){ // muda de tema/idioma: recarrega o quadro atual na cor nova
+  const box=document.getElementById('heroShow'); if(!box)return;
+  box.querySelectorAll('.ps-img')[_hLayer].src=_heroSrc(_hIdx);
+}
+function _heroGo(i){ // transição suave para o próximo quadro
+  const box=document.getElementById('heroShow'); if(!box)return;
+  const imgs=box.querySelectorAll('.ps-img'), cur=imgs[_hLayer], nxt=imgs[_hLayer^1];
+  const swap=()=>{nxt.classList.add('on');cur.classList.remove('on');_hLayer^=1;};
+  nxt.onload=swap; nxt.src=_heroSrc(i); if(nxt.complete)swap();
+}
+function heroPlay(){
+  const box=document.getElementById('heroShow'); if(!box)return;
+  const imgs=box.querySelectorAll('.ps-img');
+  _hIdx=0;_hLayer=0;
+  imgs[0].src=_heroSrc(0); imgs[0].classList.add('on'); imgs[1].classList.remove('on');
+  if(_hTimer)clearInterval(_hTimer);
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduce)return; // sem auto-avanço, mas continua trocando de tema
+  _hTimer=setInterval(()=>{_hIdx=(_hIdx+1)%HERO_SHOTS.length;_heroGo(_hIdx);},2600);
 }
 function setL(l){
   if(!LANGS.includes(l))l='pt';
@@ -630,7 +652,7 @@ buildMarquee();
   if(!l){const n=(navigator.language||'pt');l=/^zh/i.test(n)?'zh':/^es/i.test(n)?'es':/^en/i.test(n)?'en':'pt';}
   try{t=localStorage.getItem(TKEY)||'P';}catch(e){}
   try{seen=sessionStorage.getItem(SEENKEY);}catch(e){}  // 1x por sessão do navegador
-  applyTheme(t); setL(l);
+  applyTheme(t); setL(l); heroPlay();
   if(seen)return;
   /* ===== Animação de abertura: passeia pelos 5 modos e convida a escolher ===== */
   const th=document.getElementById('themes'), tip=document.getElementById('themeTip'), txt=document.getElementById('tipTxt');
