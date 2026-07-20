@@ -290,9 +290,7 @@ footer{border-top:1px solid var(--brd2);padding:40px 0 60px;margin-top:30px}
     </div>
   </div>
   <div class="phone" aria-hidden="true">
-    <video id="heroVid" class="phone-vid" autoplay muted loop playsinline preload="metadata" poster="media/hero-pt.jpg">
-      <source src="media/hero-pt.webm" type="video/webm">
-    </video>
+    <img id="heroShot" class="phone-vid" alt="" src="screenshots/pt-P-01-materias.jpg">
   </div>
 </header>
 
@@ -577,6 +575,8 @@ function shotLang(){return (curLang==='zh')?'zh':(curLang==='en')?'en':'pt';} //
 function updateShots(){
   const sl=shotLang();
   document.querySelectorAll('#shotsTrack img[data-shot]').forEach(img=>{img.src='screenshots/'+sl+'-'+curTheme+'-'+img.dataset.shot+'.jpg';});
+  const hero=document.getElementById('heroShot');
+  if(hero)hero.src='screenshots/'+sl+'-'+curTheme+'-01-materias.jpg';
 }
 function updateHeroVideo(){
   const v=document.getElementById('heroVid'); if(!v)return;
@@ -595,7 +595,7 @@ function setL(l){
   document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
   document.querySelectorAll('[data-i]').forEach(el=>{const v=I[el.getAttribute('data-i')];if(!v||v[i]==null)return;
     if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=v[i];else el.innerHTML=v[i];});
-  updateShots(); updateHeroVideo();
+  updateShots();
   try{localStorage.setItem(LKEY,l);}catch(e){}
 }
 function applyTheme(t){ // aplica sem salvar (usado pela animação de abertura)
