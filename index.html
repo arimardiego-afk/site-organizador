@@ -605,8 +605,8 @@ function heroPlay(){
   _hIdx=0;_hLayer=0;
   imgs[0].src=_heroSrc(0); imgs[0].classList.add('on'); imgs[1].classList.remove('on');
   if(_hTimer)clearInterval(_hTimer);
-  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(reduce)return; // sem auto-avanço, mas continua trocando de tema
+  // roda sempre (o usuário quer a demonstração em movimento); sob "movimento
+  // reduzido" o CSS já tira o fade e a troca vira um corte seco, mais suave.
   _hTimer=setInterval(()=>{_hIdx=(_hIdx+1)%HERO_SHOTS.length;_heroGo(_hIdx);},2600);
 }
 function setL(l){
