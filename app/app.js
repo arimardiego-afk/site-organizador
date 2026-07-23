@@ -576,7 +576,8 @@ function updPg(){
   const len=document.getElementById('vf-resumo').value.length;
   const pg=len===0?0:Math.max(1,Math.ceil(len/3000));
   const el=document.getElementById('vf-pg');
-  el.textContent=trf('≈ {p} pág. ({n}/9000)',{p:pg,n:len});
+  // só os caracteres: o "≈ N pág." já está no título da seção, logo acima
+  el.textContent=trf('{n}/9000 caracteres',{n:len});
   el.classList.toggle('warn',pg>=3);
   const rc=document.getElementById('resumo-count');
   if(rc)rc.textContent=len?trf('Resumo do vídeo (≈ {p} pág.)',{p:pg}):tr('Resumo do vídeo');
