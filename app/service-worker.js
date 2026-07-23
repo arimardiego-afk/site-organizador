@@ -4,13 +4,13 @@
    um hash do conteúdo — isso garante que toda publicação com mudança real
    gera um service-worker.js diferente (o navegador detecta sozinho) e URLs
    novas para os arquivos versionados (o cache HTTP nunca serve versão velha). */
-const CACHE = 'prometeu-834874710e';
+const CACHE = 'prometeu-a78c8cbfea';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=834874710e',
-  './app.js?v=834874710e',
-  './i18n.js?v=834874710e',
+  './styles.css?v=a78c8cbfea',
+  './app.js?v=a78c8cbfea',
+  './i18n.js?v=a78c8cbfea',
   './privacidade.html',
   './termos.html',
   './manifest.json',

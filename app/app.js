@@ -20,6 +20,7 @@ const ICONS={
 'ti-copy':'<path d="M8 8m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z"/><path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"/>',
 'ti-x':'<path d="M18 6l-12 12"/><path d="M6 6l12 12"/>',
 'ti-chevron-down':'<path d="M6 9l6 6l6 -6"/>',
+'ti-chevron-up':'<path d="M6 15l6 -6l6 6"/>',
 'ti-report':'<path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697"/><path d="M18 12v-5a2 2 0 0 0 -2 -2h-2"/><path d="M8 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"/><path d="M8 11h4"/><path d="M8 15h3"/><path d="M16.5 17.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0"/><path d="M18.5 19.5l2.5 2.5"/>',
 'ti-alert-triangle':'<path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/>',
 'ti-check':'<path d="M5 12l5 5l10 -10"/>',
@@ -71,7 +72,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.0', APP_DATE='julho de 2026';
+const APP_VERSION='3.1', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -208,8 +209,10 @@ function toggleTheme(){
   saveTheme();
 }
 // dir='back' faz a tela entrar pela esquerda (animação scrBack no styles.css)
-function showScreen(id,dir){document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.remove('nav-back');});
-  const el=document.getElementById(id);el.classList.toggle('nav-back',dir==='back');el.classList.add('active');}
+function showScreen(id,dir){if(window.mvSair)mvSair(); // trocar de tela encerra o modo mover
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.remove('nav-back');});
+  const el=document.getElementById(id);el.classList.toggle('nav-back',dir==='back');el.classList.add('active');
+  if(window.posicionarUndo)posicionarUndo();}
 function goBack(to){if(document.getElementById('s-vid').classList.contains('active'))limparDraft();closeModal();showScreen(to,'back');if(to==='s-main')renderDiscs();else if(to==='s-series')renderSeries();else if(to==='s-disc')renderAulas();else if(to==='s-aula')renderCaps();}
 
 let curMat=null,MATS=[];
@@ -234,7 +237,7 @@ function renderDiscs(){ // TELA 1: apenas as matérias
     const ds=groups[m];
     const nAulas=ds.reduce((s,d)=>s+d.aulas.length,0);
     return `
-    <div class="card ${esc(i)}"><div class="disc-row">
+    <div class="card ${esc(i)}" data-mv="mat" data-mvk="${escH(m)}"><div class="disc-row">
       <div class="disc-accent"></div>
       <div class="disc-body" onclick="openMat(${i})">
         <div class="disc-av">${escH(m.slice(0,3))}</div>
@@ -297,7 +300,7 @@ function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas n
       </div>`).join(''):'<div class="tree-empty">Sem aulas ainda</div>';
     const isOpen=openSeries.has(d.id);
     return `
-    <div class="card ${esc(i)}">
+    <div class="card ${esc(i)}" data-mv="serie" data-mvk="${d.id}">
       <div class="disc-row">
         <div class="disc-accent"></div>
         <div class="disc-body" onclick="openDisc(${d.id})">
@@ -407,7 +410,7 @@ function renderAulas(){
   if(!disc.aulas.length){el.innerHTML='<div class="empty"><i class="ti ti-video-off" aria-hidden="true"></i><p>Nenhuma aula.<br>Toque em <b>Nova aula</b>.</p></div>';return;}
   const maxDur=Math.max(1,...disc.aulas.map(aulaDurSeg));
   el.innerHTML=disc.aulas.map((a,i)=>`
-    <div class="card ${esc(i)}"><div class="aula-row">
+    <div class="card ${esc(i)}${aulaPend(a)===0&&aulaMinistrados(a)>0?' ok-min':''}" data-mv="aula" data-mvk="${a.id}"><div class="aula-row">
       <div class="aula-nc" onclick="openAula(${a.id})" aria-label="Abrir aula ${String(a.numero).padStart(2,'0')}"><div class="num-c">A${String(a.numero).padStart(2,'0')}</div></div>
       <div class="aula-body" onclick="openAula(${a.id})">
         <div class="at">${escH(a.titulo)}</div>
@@ -495,7 +498,7 @@ function renderCaps(){
   el.innerHTML=aula.caps.map((cap,ci)=>{
     const durSeg=capDurSeg(cap);
     const vidsHtml=cap.videos.map((vid,vi2)=>`
-      <div class="vid-row">
+      <div class="vid-row" data-mv="vid" data-mvk="${vid.id}" data-mvc="${cap.id}">
         <div class="vid-badge"><div class="vid-num">V${vi2+1}</div></div>
         <div class="vid-info">
           <div class="vid-nome">${escH(vid.nome||'Vídeo '+(vi2+1))}</div>
@@ -511,7 +514,7 @@ function renderCaps(){
       </div>`).join('');
     const pend=!cap.apresentado;
     return `
-    <div class="cap-card${pend?' pend':''} ${esc(ci)}" id="cc-${cap.id}">
+    <div class="cap-card${pend?' pend':''}${!pend&&capTem(cap)?' ok-min':''} ${esc(ci)}" id="cc-${cap.id}" data-mv="cap" data-mvk="${cap.id}">
       <div class="cap-header">
         <div class="cap-accent"></div>
         <div class="cap-hinfo">
@@ -653,7 +656,8 @@ function goToFormVid(capId,vidId){
   document.getElementById('vf-spin').style.display='none';
   if(vid)autoFetchDurSeVazio(vid,vidId);
   pushNav();showScreen('s-vid');
-  setTimeout(()=>document.getElementById('vf-nome').focus(),80);
+  // Sem foco automático de propósito: na maioria das vezes o professor só vai
+  // COLAR o link, e o teclado subindo sozinho tapava metade do formulário.
 }
 
 /* ===== Resumo: contador de páginas (≈3.000 caracteres/página A4) ===== */
@@ -913,6 +917,144 @@ function expPDF(){
   setTimeout(()=>w.print(),350); // na caixa de impressão, escolha "Salvar como PDF"
 }
 
+/* ===== Reordenar blocos (segurar o bloco → modo mover) =====
+   Segurar o dedo (ou a caneta) ~0,5 s em cima de um cartão acende o "modo
+   mover": o cartão fica destacado e aparecem ▲ ▼ e Concluir por cima dele.
+   Funciona nos 5 níveis — cada cartão carrega data-mv (o tipo) e data-mvk
+   (a chave); o vídeo carrega também data-mvc (o capítulo dele). Depois de
+   mover, a tela é redesenhada e o cartão é reencontrado por esse par, e não
+   por posição (a posição mudou, é justamente o que a gente acabou de fazer). */
+const MV_TIPOS=['mat','serie','aula','cap','vid'];
+let mvAlvo=null,mvTimer=null,mvP0=null,mvSkipAte=0;
+function mvCard(){
+  if(!mvAlvo)return null;
+  const els=document.querySelectorAll('[data-mv="'+mvAlvo.tipo+'"]');
+  for(const el of els){
+    if(el.dataset.mvk!==mvAlvo.chave)continue;
+    if(mvAlvo.capId&&el.dataset.mvc!==mvAlvo.capId)continue;
+    return el;
+  }
+  return null;
+}
+function mvLimpar(){
+  document.querySelectorAll('.mv-on').forEach(c=>{
+    c.classList.remove('mv-on');
+    const b=c.querySelector('.mv-bar');if(b)b.remove();
+  });
+}
+function mvPintar(){
+  mvLimpar();
+  const card=mvCard();if(!card)return;
+  card.classList.add('mv-on');
+  const bar=document.createElement('div');
+  bar.className='mv-bar';
+  bar.innerHTML='<div class="mv-row">'+
+    `<button class="mv-b" onclick="mvMover(-1)" aria-label="${tr('Mover para cima')}"><i class="ti ti-chevron-up" aria-hidden="true"></i></button>`+
+    `<button class="mv-b" onclick="mvMover(1)" aria-label="${tr('Mover para baixo')}"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>`+
+    `<button class="mv-b ok" onclick="mvSair()"><i class="ti ti-check" aria-hidden="true"></i>${tr('Concluir')}</button>`+
+    '</div>';
+  card.appendChild(bar);
+  paintIcons();
+}
+function mvEntrar(el){
+  const tipo=el.dataset.mv;
+  if(MV_TIPOS.indexOf(tipo)<0)return;
+  mvAlvo={tipo,chave:el.dataset.mvk,capId:el.dataset.mvc||null};
+  if(navigator.vibrate){try{navigator.vibrate(15);}catch(e){}} // aviso tátil no tablet
+  mvPintar();mvVerBotoes();
+}
+/* os ▲ ▼ ficam no ALTO do cartão; se o topo dele estiver escondido (atrás da
+   barra de título ou abaixo da dobra), traz o cartão para um lugar visível */
+function mvVerBotoes(){
+  const c=mvCard();if(!c)return;
+  const t=c.getBoundingClientRect().top;
+  if(t<64||t>window.innerHeight-90)window.scrollBy({top:t-84,behavior:'smooth'});
+}
+function mvSair(){
+  if(!mvAlvo)return;
+  mvAlvo=null;mvLimpar();
+}
+// pisca o cartão quando já é o primeiro (ou o último) da lista
+function mvFimDaLista(){
+  const c=mvCard();if(!c)return;
+  c.classList.add('mv-nope');setTimeout(()=>c.classList.remove('mv-nope'),360);
+}
+function mvSwap(arr,i,dir){
+  const j=i+dir;
+  if(i<0||j<0||j>=arr.length)return false;
+  const [x]=arr.splice(i,1);arr.splice(j,0,x);return true;
+}
+function mvMover(dir){
+  if(!mvAlvo)return;
+  const f={mat:mvMoverMat,serie:mvMoverSerie,aula:mvMoverAula,cap:mvMoverCap,vid:mvMoverVid}[mvAlvo.tipo];
+  if(!f||!f(dir)){mvFimDaLista();return;}
+  saveDB();
+  rerenderAtual();
+  mvPintar();mvVerBotoes();
+}
+function mvMoverMat(dir){
+  // matéria não é um registro: é um grupo de db.disciplinas com o mesmo nome.
+  // Mover = reordenar os grupos e remontar a lista na ordem nova.
+  const ordem=[],grupos={};
+  db.disciplinas.forEach(d=>{const k=matKey(d);if(!grupos[k]){grupos[k]=[];ordem.push(k);}grupos[k].push(d);});
+  if(!mvSwap(ordem,ordem.indexOf(mvAlvo.chave),dir))return false;
+  db.disciplinas=ordem.reduce((acc,k)=>acc.concat(grupos[k]),[]);
+  return true;
+}
+function mvMoverSerie(dir){
+  // a série só troca de lugar com a vizinha DA MESMA matéria; as outras
+  // matérias não podem sair do lugar, então trocamos as duas posições globais
+  const pos=[];db.disciplinas.forEach((d,ix)=>{if(matKey(d)===curMat)pos.push(ix);});
+  const i=pos.findIndex(ix=>String(db.disciplinas[ix].id)===mvAlvo.chave),j=i+dir;
+  if(i<0||j<0||j>=pos.length)return false;
+  const a=pos[i],b=pos[j],tmp=db.disciplinas[a];
+  db.disciplinas[a]=db.disciplinas[b];db.disciplinas[b]=tmp;
+  return true;
+}
+function mvMoverAula(dir){
+  const disc=getDisc(curDiscId);if(!disc)return false;
+  if(!mvSwap(disc.aulas,disc.aulas.findIndex(a=>String(a.id)===mvAlvo.chave),dir))return false;
+  disc.aulas.forEach((a,i)=>a.numero=i+1); // a numeração acompanha a ordem
+  return true;
+}
+function mvMoverCap(dir){
+  const aula=getAula(getDisc(curDiscId),curAulaId);if(!aula)return false;
+  return mvSwap(aula.caps,aula.caps.findIndex(c=>String(c.id)===mvAlvo.chave),dir);
+}
+function mvMoverVid(dir){
+  const aula=getAula(getDisc(curDiscId),curAulaId);if(!aula)return false;
+  const cap=aula.caps.find(c=>String(c.id)===mvAlvo.capId);if(!cap)return false;
+  return mvSwap(cap.videos,cap.videos.findIndex(v=>String(v.id)===mvAlvo.chave),dir);
+}
+/* Detecção da pressão longa: 520 ms parado (tolerância de 12 px, senão rolar a
+   tela com o dedo em cima de um cartão viraria "mover"). */
+function mvCancelaTimer(){if(mvTimer){clearTimeout(mvTimer);mvTimer=null;}mvP0=null;}
+document.addEventListener('pointerdown',e=>{
+  mvCancelaTimer();
+  if(e.button)return; // só o botão principal / o toque
+  if(mvAlvo)return;   // já está no modo mover
+  const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('button,input,textarea,select,a,.mv-bar'))return; // botão é botão
+  const alvo=t.closest('[data-mv]');if(!alvo)return;
+  mvP0={x:e.clientX,y:e.clientY};
+  mvTimer=setTimeout(()=>{
+    mvTimer=null;
+    mvSkipAte=Date.now()+800; // engole o clique que vem junto com essa pressão
+    mvEntrar(alvo);
+  },520);
+},true);
+document.addEventListener('pointermove',e=>{
+  if(!mvTimer||!mvP0)return;
+  if(Math.abs(e.clientX-mvP0.x)>12||Math.abs(e.clientY-mvP0.y)>12)mvCancelaTimer();
+},true);
+['pointerup','pointercancel','scroll','wheel'].forEach(ev=>document.addEventListener(ev,mvCancelaTimer,true));
+document.addEventListener('click',e=>{
+  if(mvSkipAte&&Date.now()<mvSkipAte){mvSkipAte=0;e.stopPropagation();e.preventDefault();return;}
+  if(!mvAlvo)return;
+  if(e.target.closest&&e.target.closest('.mv-bar'))return; // ▲ ▼ e Concluir funcionam
+  mvSair();e.stopPropagation();e.preventDefault(); // tocar fora só encerra o modo
+},true);
+
 /* ===== Toast de notificação ===== */
 function showToast(html,ms){
   const zone=document.getElementById('toast-zone');
@@ -927,21 +1069,44 @@ function showToast(html,ms){
 }
 
 /* ===== Desfazer exclusão (todas as camadas + anos letivos) =====
-   Guarda só a ÚLTIMA exclusão, por 8 segundos — é o que se espera de um
-   "desfazer" simples. Enquanto o prazo corre, a limpeza de anexos órfãos
-   fica adiada (agendarLimpeza(9000)), senão o arquivo do vídeo excluído
-   sumiria do IndexedDB antes de o professor apertar Desfazer. */
+   Guarda só a ÚLTIMA exclusão e mostra a barra fixa no alto do app, logo
+   abaixo da barra de título. A barra NÃO some sozinha: fica até o professor
+   desfazer, fechar no X, ou excluir outra coisa (o aviso de 8 s passava
+   despercebido no tablet). Enquanto ela estiver de pé o sweepOrphans()
+   preserva os anexos do que foi excluído — ver a linha do undoAcao.fids em
+   sweepOrphans(). */
 let undoAcao=null;
+function undoBar(){return document.getElementById('undo-bar');}
+/* A faixa é UMA só, mas cada tela tem a sua barra de título. Por isso ela é
+   MUDADA DE LUGAR: entra sempre logo depois da barra de título da tela aberta.
+   (Deixá-la solta no topo do #root empurrava e cobria o título e o botão ☰.) */
+function posicionarUndo(){
+  const bar=undoBar();if(!bar||bar.hidden)return;
+  const tela=document.querySelector('.screen.active');if(!tela)return;
+  const tb=tela.querySelector('.topbar');if(!tb)return;
+  if(bar.previousElementSibling!==tb)tb.insertAdjacentElement('afterend',bar);
+}
 function armarUndo(msg,fids,restaurar){
-  const meu={restaurar,fids:fids||[]};
-  undoAcao=meu;
-  setTimeout(()=>{if(undoAcao===meu)undoAcao=null;},8300);
-  showToast(`${msg} <button class="toast-undo" onclick="desfazerExclusao()"><i class="ti ti-undo" aria-hidden="true"></i>${tr('Desfazer')}</button>`,8000);
-  agendarLimpeza(9000);
+  undoAcao={restaurar,fids:fids||[]};
+  const bar=undoBar();
+  if(bar){
+    bar.innerHTML=`<i class="ti ti-trash" aria-hidden="true"></i>`+
+      `<div class="ub-txt">${msg}</div>`+
+      `<button class="ub-undo" onclick="desfazerExclusao()"><i class="ti ti-undo" aria-hidden="true"></i>${tr('Desfazer')}</button>`+
+      `<button class="ub-x" onclick="fecharUndo()" aria-label="${tr('Fechar')}"><i class="ti ti-x" aria-hidden="true"></i></button>`;
+    bar.hidden=false;posicionarUndo();paintIcons();
+  }
+  agendarLimpeza(1500);
+}
+function fecharUndo(){
+  undoAcao=null;
+  const bar=undoBar();if(bar){bar.hidden=true;bar.innerHTML='';}
+  agendarLimpeza();
 }
 function desfazerExclusao(){
-  if(!undoAcao){showToast(tr('O prazo para desfazer já passou.'),3000);return;}
+  if(!undoAcao){fecharUndo();return;}
   const a=undoAcao;undoAcao=null;
+  const bar=undoBar();if(bar){bar.hidden=true;bar.innerHTML='';}
   a.restaurar();
   rerenderAtual();
   agendarLimpeza();

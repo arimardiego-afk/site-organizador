@@ -792,3 +792,117 @@ body{min-height:100dvh}
   box-shadow:none;text-shadow:none;font-weight:500;margin-bottom:10px}
 .fab.fab-sec:hover{background:rgba(var(--grgb),.12)}
 .fab.fab-sec i{background:rgba(var(--grgb),.14);box-shadow:none}
+
+/* =====================================================================
+   POEIRA LUMINOSA NO FUNDO (só no tema Prometeu)
+   ---------------------------------------------------------------------
+   Pontinhos subindo devagar atrás das telas. Servem para dar profundidade:
+   os cartões de vidro passam a flutuar sobre algo, em vez de sobre um
+   fundo chapado. São 18 <i> estáticos no index.html — nada de JS, nada de
+   imagem, nada de rede. Cada um traz o seu tamanho/tempo em variáveis
+   inline (--ps, --pd, --pl), então todos usam a MESMA regra aqui.
+   ===================================================================== */
+#bg-particles{display:none;position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#bg-particles i{position:absolute;bottom:-8px;width:var(--ps);height:var(--ps);
+  border-radius:50%;background:rgba(var(--gl),.5);
+  box-shadow:0 0 6px rgba(var(--grgb),.75);filter:blur(.4px);opacity:0}
+/* as telas ficam POR CIMA da poeira (sem isto o fundo cobriria os cartões).
+   ⚠️ NÃO incluir .topbar aqui: ela é sticky (topo grudado) e um "position"
+   escrito depois a derrubaria — a barra de título deixava de acompanhar. */
+.screen{position:relative;z-index:1}
+@media (prefers-reduced-motion:no-preference){
+  .P #bg-particles{display:block}
+  #bg-particles i{animation:bgFloat var(--pd) linear infinite;animation-delay:var(--pl)}
+  @keyframes bgFloat{
+    0%{transform:translateY(0);opacity:0}
+    10%{opacity:.85}
+    85%{opacity:.55}
+    100%{transform:translateY(-102vh);opacity:0}
+  }
+}
+
+/* =====================================================================
+   FAIXA "DESFAZER EXCLUSÃO"
+   ---------------------------------------------------------------------
+   Presa logo abaixo da barra de título e SEM prazo: o aviso antigo sumia
+   em 8 s e no tablet quase nunca dava tempo de ler, quanto mais de agir.
+   Sai quando o professor desfaz, fecha no X, ou exclui outra coisa.
+   ===================================================================== */
+/* z-index abaixo do 50 da barra de título: a faixa entra DEPOIS dela no
+   corpo da tela e, ao rolar, gruda embaixo (top:52px = altura da barra). */
+.undo-bar{position:sticky;top:52px;z-index:45;display:flex;align-items:center;gap:9px;
+  padding:9px 10px 9px 12px;font-size:12.5px;line-height:1.3;
+  background:var(--card);color:var(--txt);
+  border-bottom:1px solid rgba(var(--grgb),.45);
+  box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.undo-bar[hidden]{display:none}
+.undo-bar>i{color:var(--acc);font-size:16px;flex-shrink:0}
+.ub-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ub-txt b{color:var(--acc)}
+/* --acc é TEXTO de destaque; --bar é fundo e ficaria ilegível no escuro */
+.ub-undo{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;
+  background:none;border:1px solid var(--acc);border-radius:8px;
+  color:var(--acc);font:inherit;font-weight:700;padding:7px 13px;cursor:pointer}
+.ub-undo:hover{background:rgba(var(--grgb),.14)}
+.ub-x{flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;border-radius:50%;color:var(--txt2);font-size:16px;cursor:pointer}
+.ub-x:hover{background:rgba(var(--grgb),.12);color:var(--acc)}
+.P .undo-bar{box-shadow:0 0 18px rgba(var(--grgb),.35)}
+.D .undo-bar{box-shadow:0 0 14px rgba(255,255,255,.22)}
+@media (prefers-reduced-motion:no-preference){
+  .undo-bar{animation:ubIn .26s var(--g3-ease)}
+  @keyframes ubIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+}
+
+/* =====================================================================
+   MODO MOVER (segurar o bloco para reorganizar)
+   ---------------------------------------------------------------------
+   Segurar ~0,5 s em cima de um cartão acende este modo. A capa .mv-bar
+   cobre o cartão inteiro de propósito: assim nenhum toque escapa para os
+   botões de baixo enquanto o professor está reordenando.
+   ===================================================================== */
+[data-mv]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* ...menos onde ele realmente escreve (observações do capítulo) */
+[data-mv] textarea,[data-mv] input{-webkit-user-select:text;user-select:text}
+.mv-on{position:relative;z-index:3;outline:2px solid var(--acc);outline-offset:2px}
+.mv-bar{position:absolute;inset:0;z-index:12;border-radius:inherit;
+  display:flex;align-items:flex-start;justify-content:center;
+  background:rgba(0,0,0,.42);backdrop-filter:blur(1px)}
+.L .mv-bar{background:rgba(255,255,255,.55)}
+.mv-row{display:flex;align-items:center;gap:8px;padding:8px}
+.mv-b{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-width:46px;height:40px;padding:0 12px;cursor:pointer;
+  background:var(--card);border:1.5px solid var(--acc);border-radius:10px;
+  color:var(--acc);font:inherit;font-size:13px;font-weight:700}
+.mv-b i{font-size:19px}
+.mv-b:hover{background:rgba(var(--grgb),.16)}
+.mv-b.ok{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+.mv-b.ok:hover{filter:brightness(1.12)}
+@media (prefers-reduced-motion:no-preference){
+  .mv-bar{animation:mvIn .18s ease}
+  @keyframes mvIn{from{opacity:0}to{opacity:1}}
+  /* já é o primeiro (ou o último) da lista: o cartão balança e não sai do lugar */
+  .mv-nope{animation:mvNope .34s ease}
+  @keyframes mvNope{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+}
+
+/* =====================================================================
+   CANETA POR CIMA DO BLOCO — um tico mais de brilho
+   ---------------------------------------------------------------------
+   Só em aparelho com ponteiro de verdade (caneta/mouse): no dedo o
+   :hover gruda depois do toque e o cartão ficaria aceso à toa.
+   ===================================================================== */
+@media (hover:hover) and (pointer:fine){
+  .card:hover,.cap-card:hover{filter:brightness(1.12)}
+  .L .card:hover,.L .cap-card:hover{filter:brightness(1.03)} /* no claro o branco estoura */
+  /* clarear pouco resolve em cartão escuro: quem acende de verdade é o halo
+     (--g3-halo entra na sombra do :hover já multiplicado por 1,6) */
+  .P .card:hover,.P .cap-card:hover{--g3-halo:.38}
+  .D .card:hover,.D .cap-card:hover{--g3-halo:.30}
+  .L .card:hover,.L .cap-card:hover{--g3-halo:.22}
+}
+
+/* aula já ministrada (tema Prometeu): sem varredura piscando.
+   O que ficou pronto não precisa mais chamar a atenção — a animação fica
+   para o que ainda falta ministrar. */
+.P .card.ok-min .scan-bar::after{display:none}

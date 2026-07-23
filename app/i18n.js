@@ -133,6 +133,7 @@ const I18N={
 'en':{
 'Organizador de Aulas':'Lesson Organizer',
 'Abrir menu':'Open menu','Voltar':'Back','Fechar menu':'Close menu','Fechar':'Close',
+'Mover para cima':'Move up','Mover para baixo':'Move down','Concluir':'Done',
 'Cancelar':'Cancel','Salvar':'Save','Salvar vídeo':'Save video','Editar':'Edit','Remover':'Delete',
 'Tutorial':'Tutorial','Atualização':'Updates','Versão':'Version','Arquivo':'File','Ajuda':'Help',
 'Idioma':'Language','Privacidade':'Privacy','Termos de uso':'Terms of use','Modo demonstração':'Demo mode',
@@ -384,6 +385,7 @@ const I18N={
 'es':{
 'Organizador de Aulas':'Organizador de Clases',
 'Abrir menu':'Abrir menú','Voltar':'Atrás','Fechar menu':'Cerrar menú','Fechar':'Cerrar',
+'Mover para cima':'Subir','Mover para baixo':'Bajar','Concluir':'Listo',
 'Cancelar':'Cancelar','Salvar':'Guardar','Salvar vídeo':'Guardar vídeo','Editar':'Editar','Remover':'Eliminar',
 'Tutorial':'Tutorial','Atualização':'Actualización','Versão':'Versión','Arquivo':'Archivo','Ajuda':'Ayuda',
 'Idioma':'Idioma','Privacidade':'Privacidad','Termos de uso':'Términos de uso','Modo demonstração':'Modo demostración',
@@ -586,6 +588,7 @@ const I18N={
 'zh':{
 'Organizador de Aulas':'课程管理器',
 'Abrir menu':'打开菜单','Voltar':'返回','Fechar menu':'关闭菜单','Fechar':'关闭',
+'Mover para cima':'上移','Mover para baixo':'下移','Concluir':'完成',
 'Cancelar':'取消','Salvar':'保存','Salvar vídeo':'保存视频','Editar':'编辑','Remover':'删除',
 'Tutorial':'使用教程','Atualização':'更新','Versão':'版本','Arquivo':'文件','Ajuda':'帮助',
 'Idioma':'语言','Privacidade':'隐私','Termos de uso':'使用条款','Modo demonstração':'演示模式',
