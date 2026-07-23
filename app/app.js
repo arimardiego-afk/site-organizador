@@ -95,7 +95,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.2', APP_DATE='julho de 2026';
+const APP_VERSION='3.3', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -402,7 +402,11 @@ function colarSerie(){
           materiais:(v.materiais||[]).map(m=>({...m})),
           arquivos:(v.arquivos||[]).map(f=>({...f}))}))}))}))};
   db.disciplinas.push(nova);
+  // colou: a área de transferência se esvazia e o botão "Colar" some (antes ele
+  // ficava para sempre na tela, convidando a colar a mesma série de novo)
+  try{localStorage.removeItem(CLIP_KEY);}catch(e){}
   renderSeries();
+  refreshColarBtn();
   showToast(trf('Série <b>{s}</b> colada em {m}.',{s:escH(nova.turma),m:escH(curMat||'')}),4000);
 }
 function openDisc(id){pushNav();curDiscId=id;renderAulas();showScreen('s-disc');}
@@ -940,80 +944,112 @@ function expPDF(){
   setTimeout(()=>w.print(),350); // na caixa de impressão, escolha "Salvar como PDF"
 }
 
-/* ===== Reordenar blocos (segurar o bloco → modo mover) =====
-   Segurar o dedo (ou a caneta) ~0,5 s em cima de um cartão acende o "modo
-   mover": o cartão fica destacado e aparecem ▲ ▼ e Concluir por cima dele.
+/* ===== Reordenar blocos: SEGURAR E ARRASTAR (sem botão nenhum) =====
+   Segurar o dedo (ou a caneta) ~0,5 s em cima de um cartão e, SEM SOLTAR,
+   arrastar para cima ou para baixo: o cartão acompanha o dedo, os vizinhos
+   deslizam para abrir espaço e, ao soltar, a ordem nova é salva.
    Funciona nos 5 níveis — cada cartão carrega data-mv (o tipo) e data-mvk
-   (a chave); o vídeo carrega também data-mvc (o capítulo dele). Depois de
-   mover, a tela é redesenhada e o cartão é reencontrado por esse par, e não
-   por posição (a posição mudou, é justamente o que a gente acabou de fazer). */
+   (a chave); o vídeo carrega também data-mvc (o capítulo dele).
+   A troca no banco só acontece no SOLTAR: durante o arrasto a tela não é
+   redesenhada, então o dedo nunca perde o cartão que está segurando. */
 const MV_TIPOS=['mat','serie','aula','cap','vid'];
-let mvAlvo=null,mvTimer=null,mvP0=null,mvSkipAte=0;
-function mvCard(){
-  if(!mvAlvo)return null;
-  const els=document.querySelectorAll('[data-mv="'+mvAlvo.tipo+'"]');
-  for(const el of els){
-    if(el.dataset.mvk!==mvAlvo.chave)continue;
-    if(mvAlvo.capId&&el.dataset.mvc!==mvAlvo.capId)continue;
-    return el;
-  }
-  return null;
-}
-function mvLimpar(){
-  document.querySelectorAll('.mv-on').forEach(c=>{
-    c.classList.remove('mv-on');
-    const b=c.querySelector('.mv-bar');if(b)b.remove();
+let mvAlvo=null,mvTimer=null,mvP0=null,mvSkipAte=0,mvD=null,mvRolar=null;
+/* nos temas Prometeu o cartão mora dentro do wrapper 3D (.g3box); quem tem de
+   se mexer é a caixa inteira, senão a espessura fica para trás */
+function mvBloco(el){return el.closest('.g3box')||el;}
+/* vizinhos = os irmãos DIRETOS da mesma lista (e, no vídeo, do mesmo capítulo).
+   O cartão pode estar duas camadas abaixo do irmão (.g3box > .g3in > .card),
+   por isso a busca é por descendente e não só pelo filho direto; o primeiro
+   [data-mv] de dentro é sempre o cartão do próprio bloco (o vídeo só aparece
+   depois, dentro do capítulo). */
+function mvIrmaos(bloco,tipo,capId){
+  return Array.prototype.filter.call(bloco.parentElement.children,ch=>{
+    const c=ch.matches('[data-mv]')?ch:ch.querySelector('[data-mv]');
+    return !!c&&c.dataset.mv===tipo&&(!capId||c.dataset.mvc===capId);
   });
 }
-function mvPintar(){
-  mvLimpar();
-  const card=mvCard();if(!card)return;
-  card.classList.add('mv-on');
-  const bar=document.createElement('div');
-  bar.className='mv-bar';
-  bar.innerHTML='<div class="mv-row">'+
-    `<button class="mv-b" onclick="mvMover(-1)" aria-label="${tr('Mover para cima')}"><i class="ti ti-chevron-up" aria-hidden="true"></i></button>`+
-    `<button class="mv-b" onclick="mvMover(1)" aria-label="${tr('Mover para baixo')}"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>`+
-    `<button class="mv-b ok" onclick="mvSair()"><i class="ti ti-check" aria-hidden="true"></i>${tr('Concluir')}</button>`+
-    '</div>';
-  card.appendChild(bar);
-  paintIcons();
-}
-function mvEntrar(el){
+function mvIniciar(el,p0){
   const tipo=el.dataset.mv;
-  if(MV_TIPOS.indexOf(tipo)<0)return;
-  mvAlvo={tipo,chave:el.dataset.mvk,capId:el.dataset.mvc||null};
+  if(MV_TIPOS.indexOf(tipo)<0)return false;
+  const bloco=mvBloco(el),capId=el.dataset.mvc||null;
+  const irmaos=mvIrmaos(bloco,tipo,capId);
+  const i0=irmaos.indexOf(bloco);
+  if(i0<0||irmaos.length<2)return false; // sozinho na lista: não há para onde ir
+  // "passo" de cada vizinho = a altura dele mais o espaço entre um cartão e outro
+  const cx=irmaos.map(b=>b.getBoundingClientRect());
+  const folga=cx.length>1?Math.max(0,cx[1].top-cx[0].bottom):0;
+  mvAlvo={tipo,chave:el.dataset.mvk,capId};
+  mvD={bloco,carta:el,irmaos,passos:cx.map(r=>r.height+folga),
+       i0,i:i0,dy:0,y0:p0.y,sc0:p0.sc,ptr:p0.id,vel:0};
+  irmaos.forEach(b=>b.classList.add('mv-slot'));
+  bloco.classList.add('mv-drag');el.classList.add('mv-pego');
+  document.body.classList.add('mv-arrastando');
   if(navigator.vibrate){try{navigator.vibrate(15);}catch(e){}} // aviso tátil no tablet
-  mvPintar();mvVerBotoes();
+  mvDesenhar();
+  return true;
 }
-/* os ▲ ▼ ficam no ALTO do cartão; se o topo dele estiver escondido (atrás da
-   barra de título ou abaixo da dobra), traz o cartão para um lugar visível */
-function mvVerBotoes(){
-  const c=mvCard();if(!c)return;
-  const t=c.getBoundingClientRect().top;
-  if(t<64||t>window.innerHeight-90)window.scrollBy({top:t-84,behavior:'smooth'});
+// para que posição o cartão iria se o dedo soltasse agora
+function mvIndiceAlvo(dy){
+  const {irmaos,passos,i0}=mvD;let j=i0,acc=0;
+  if(dy>0){while(j<irmaos.length-1&&dy>acc+passos[j+1]/2){acc+=passos[j+1];j++;}}
+  else if(dy<0){while(j>0&&-dy>acc+passos[j-1]/2){acc+=passos[j-1];j--;}}
+  return j;
 }
-function mvSair(){
-  if(!mvAlvo)return;
-  mvAlvo=null;mvLimpar();
+// o cartão segue o dedo; os vizinhos entre a origem e o destino abrem espaço
+function mvDesenhar(){
+  const {bloco,irmaos,passos,i0,i,dy}=mvD,h=passos[i0];
+  bloco.style.transform='translate3d(0,'+dy+'px,0) scale(1.03)';
+  irmaos.forEach((b,k)=>{
+    if(k===i0)return;
+    const d=(i>i0&&k>i0&&k<=i)?-h:(i<i0&&k>=i&&k<i0)?h:0;
+    b.style.transform=d?'translate3d(0,'+d+'px,0)':'';
+  });
 }
-// pisca o cartão quando já é o primeiro (ou o último) da lista
-function mvFimDaLista(){
-  const c=mvCard();if(!c)return;
-  c.classList.add('mv-nope');setTimeout(()=>c.classList.remove('mv-nope'),360);
+function mvArrastar(cy){
+  if(!mvD)return;
+  // soma a rolagem da página: se ela andou, o cartão tem de andar junto
+  mvD.dy=(cy-mvD.y0)+(window.scrollY-mvD.sc0);
+  mvD.i=mvIndiceAlvo(mvD.dy);
+  mvDesenhar();
+  mvAutoRolar(cy);
 }
+/* dedo encostado na beirada da tela: a página rola sozinha, senão numa lista
+   longa não daria para levar o cartão até o fim sem soltar */
+function mvAutoRolar(cy){
+  const zona=90,max=14,alt=window.innerHeight;
+  mvD.vel=cy<zona?-max*(zona-cy)/zona:cy>alt-zona?max*(cy-(alt-zona))/zona:0;
+  if(mvD.vel&&!mvRolar)mvRolar=setInterval(()=>{
+    if(!mvD||!mvD.vel){clearInterval(mvRolar);mvRolar=null;return;}
+    const antes=window.scrollY;window.scrollBy(0,mvD.vel);
+    const d=window.scrollY-antes;
+    if(d){mvD.dy+=d;mvD.i=mvIndiceAlvo(mvD.dy);mvDesenhar();}
+  },16);
+}
+// soltou: tira as marcas da tela e grava a ordem nova (se mudou de lugar)
+function mvSoltar(){
+  if(!mvD)return;
+  const {bloco,carta,irmaos,i0,i}=mvD,alvo=mvAlvo;
+  mvD=null;mvSkipAte=Date.now()+400; // o clique que vem no soltar não abre o cartão
+  if(mvRolar){clearInterval(mvRolar);mvRolar=null;}
+  irmaos.forEach(b=>{b.classList.remove('mv-slot');b.style.transform='';});
+  bloco.classList.remove('mv-drag');carta.classList.remove('mv-pego');
+  document.body.classList.remove('mv-arrastando');
+  if(i===i0||!alvo){mvAlvo=null;return;}
+  /* as funções abaixo movem UMA casa por vez e reencontram o cartão pela chave
+     (nunca pela posição, que é justamente o que muda); repetir |i-i0| vezes
+     leva o cartão até o lugar onde o dedo o largou */
+  const f={mat:mvMoverMat,serie:mvMoverSerie,aula:mvMoverAula,cap:mvMoverCap,vid:mvMoverVid}[alvo.tipo];
+  const dir=i>i0?1:-1;let ok=false;
+  for(let k=Math.abs(i-i0);k>0&&f;k--){if(!f(dir))break;ok=true;}
+  mvAlvo=null;
+  if(ok){saveDB();rerenderAtual();}
+}
+// cancelar (trocar de tela, o navegador interromper o toque): volta tudo ao lugar
+function mvSair(){if(!mvD)return;mvD.i=mvD.i0;mvSoltar();}
 function mvSwap(arr,i,dir){
   const j=i+dir;
   if(i<0||j<0||j>=arr.length)return false;
   const [x]=arr.splice(i,1);arr.splice(j,0,x);return true;
-}
-function mvMover(dir){
-  if(!mvAlvo)return;
-  const f={mat:mvMoverMat,serie:mvMoverSerie,aula:mvMoverAula,cap:mvMoverCap,vid:mvMoverVid}[mvAlvo.tipo];
-  if(!f||!f(dir)){mvFimDaLista();return;}
-  saveDB();
-  rerenderAtual();
-  mvPintar();mvVerBotoes();
 }
 function mvMoverMat(dir){
   // matéria não é um registro: é um grupo de db.disciplinas com o mesmo nome.
@@ -1050,32 +1086,37 @@ function mvMoverVid(dir){
   return mvSwap(cap.videos,cap.videos.findIndex(v=>String(v.id)===mvAlvo.chave),dir);
 }
 /* Detecção da pressão longa: 520 ms parado (tolerância de 12 px, senão rolar a
-   tela com o dedo em cima de um cartão viraria "mover"). */
-function mvCancelaTimer(){if(mvTimer){clearTimeout(mvTimer);mvTimer=null;}mvP0=null;}
+   tela com o dedo em cima de um cartão viraria "arrastar"). */
+function mvCancelaTimer(){if(mvTimer){clearTimeout(mvTimer);mvTimer=null;}if(!mvD)mvP0=null;}
 document.addEventListener('pointerdown',e=>{
+  if(mvD)return;      // já está arrastando: o segundo dedo não faz nada
   mvCancelaTimer();
   if(e.button)return; // só o botão principal / o toque
-  if(mvAlvo)return;   // já está no modo mover
   const t=e.target;if(!t||!t.closest)return;
-  if(t.closest('button,input,textarea,select,a,.mv-bar'))return; // botão é botão
+  if(t.closest('button,input,textarea,select,a'))return; // botão é botão
   const alvo=t.closest('[data-mv]');if(!alvo)return;
-  mvP0={x:e.clientX,y:e.clientY};
+  const p0={x:e.clientX,y:e.clientY,id:e.pointerId,sc:window.scrollY};
+  mvP0=p0;
   mvTimer=setTimeout(()=>{
     mvTimer=null;
-    mvSkipAte=Date.now()+800; // engole o clique que vem junto com essa pressão
-    mvEntrar(alvo);
+    if(!mvIniciar(alvo,p0))return;
+    mvSkipAte=Date.now()+900; // engole o clique que vem junto com essa pressão
+    try{alvo.setPointerCapture(p0.id);}catch(err){} // o cartão não escapa do dedo
   },520);
 },true);
 document.addEventListener('pointermove',e=>{
+  if(mvD){if(e.pointerId===mvD.ptr)mvArrastar(e.clientY);return;}
   if(!mvTimer||!mvP0)return;
   if(Math.abs(e.clientX-mvP0.x)>12||Math.abs(e.clientY-mvP0.y)>12)mvCancelaTimer();
 },true);
-['pointerup','pointercancel','scroll','wheel'].forEach(ev=>document.addEventListener(ev,mvCancelaTimer,true));
+// enquanto arrasta, o dedo carrega o cartão — não rola a página
+document.addEventListener('touchmove',e=>{if(mvD)e.preventDefault();},{passive:false});
+document.addEventListener('pointerup',()=>{mvCancelaTimer();mvSoltar();},true);
+document.addEventListener('pointercancel',()=>{mvCancelaTimer();mvSair();},true);
+['scroll','wheel'].forEach(ev=>document.addEventListener(ev,()=>{if(!mvD)mvCancelaTimer();},true));
 document.addEventListener('click',e=>{
-  if(mvSkipAte&&Date.now()<mvSkipAte){mvSkipAte=0;e.stopPropagation();e.preventDefault();return;}
-  if(!mvAlvo)return;
-  if(e.target.closest&&e.target.closest('.mv-bar'))return; // ▲ ▼ e Concluir funcionam
-  mvSair();e.stopPropagation();e.preventDefault(); // tocar fora só encerra o modo
+  // o clique que nasce junto com a pressão longa não pode abrir o cartão
+  if(mvSkipAte&&Date.now()<mvSkipAte){mvSkipAte=0;e.stopPropagation();e.preventDefault();}
 },true);
 
 /* ===== Toast de notificação ===== */

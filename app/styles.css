@@ -855,35 +855,26 @@ body{min-height:100dvh}
 }
 
 /* =====================================================================
-   MODO MOVER (segurar o bloco para reorganizar)
+   REORDENAR BLOCOS (segurar e arrastar)
    ---------------------------------------------------------------------
-   Segurar ~0,5 s em cima de um cartão acende este modo. A capa .mv-bar
-   cobre o cartão inteiro de propósito: assim nenhum toque escapa para os
-   botões de baixo enquanto o professor está reordenando.
+   Segurar ~0,5 s em cima de um cartão e, sem soltar, arrastar. Não há
+   botão nenhum: o cartão pego sobe por cima dos outros (.mv-drag no bloco,
+   .mv-pego no cartão) e os vizinhos deslizam para abrir espaço (.mv-slot).
+   Ao soltar, a ordem nova é salva.
    ===================================================================== */
 [data-mv]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 /* ...menos onde ele realmente escreve (observações do capítulo) */
 [data-mv] textarea,[data-mv] input{-webkit-user-select:text;user-select:text}
-.mv-on{position:relative;z-index:3;outline:2px solid var(--acc);outline-offset:2px}
-.mv-bar{position:absolute;inset:0;z-index:12;border-radius:inherit;
-  display:flex;align-items:flex-start;justify-content:center;
-  background:rgba(0,0,0,.42);backdrop-filter:blur(1px)}
-.L .mv-bar{background:rgba(255,255,255,.55)}
-.mv-row{display:flex;align-items:center;gap:8px;padding:8px}
-.mv-b{display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  min-width:46px;height:40px;padding:0 12px;cursor:pointer;
-  background:var(--card);border:1.5px solid var(--acc);border-radius:10px;
-  color:var(--acc);font:inherit;font-size:13px;font-weight:700}
-.mv-b i{font-size:19px}
-.mv-b:hover{background:rgba(var(--grgb),.16)}
-.mv-b.ok{background:var(--acc);color:var(--bg);border-color:var(--acc)}
-.mv-b.ok:hover{filter:brightness(1.12)}
+/* enquanto arrasta: nada de seleção de texto e a mão fechada no cursor */
+body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
+.mv-drag{position:relative;z-index:30;will-change:transform}
+/* o cartão pego fica marcado; e nada dentro dele responde ao toque, porque o
+   dedo está ocupado carregando o bloco */
+.mv-pego{outline:2px solid var(--acc);outline-offset:3px}
+.mv-pego *{pointer-events:none}
 @media (prefers-reduced-motion:no-preference){
-  .mv-bar{animation:mvIn .18s ease}
-  @keyframes mvIn{from{opacity:0}to{opacity:1}}
-  /* já é o primeiro (ou o último) da lista: o cartão balança e não sai do lugar */
-  .mv-nope{animation:mvNope .34s ease}
-  @keyframes mvNope{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  /* só os vizinhos deslizam; o cartão pego acompanha o dedo sem atraso nenhum */
+  .mv-slot:not(.mv-drag){transition:transform .18s ease}
 }
 
 /* =====================================================================
@@ -919,10 +910,15 @@ body{min-height:100dvh}
    Nenhuma cor à mão: tudo sai de --gl / --grgb, então PR e PB seguem juntos.
    ===================================================================== */
 .P{
-  --g3c-depth:34px;    /* espessura da caixa (a lateral) */
+  --g3c-depth:40px;    /* espessura da caixa (a lateral) */
   --g3c-radius:26px;   /* arredondamento */
-  --g3c-ry:10deg;      /* quanto a caixa está virada */
-  --g3c-persp:1100px;  /* distância do olho: quanto menor, mais 3D */
+  /* em repouso o bloco fica quase reto: só o lado direito recua um tico.
+     A espessura continua aparecendo porque a perspectiva ficou mais curta
+     (900px) e a caixa mais funda (40px) — some o giro, entra a profundidade */
+  --g3c-ry:5deg;
+  --g3c-sway:9deg;     /* o BALANÇO: quanto ela vira a mais sob o dedo/mouse */
+  --g3c-tiltx:4deg;    /* e quanto deita para trás no mesmo movimento */
+  --g3c-persp:900px;   /* distância do olho: quanto menor, mais 3D */
   --g3c-glow:46px;     /* raio do halo */
   --g3c-a:.30;         /* quanto de cor entra no vidro */
 }
@@ -1011,8 +1007,17 @@ body{min-height:100dvh}
 }
 
 @media (prefers-reduced-motion:no-preference){
-  .P .g3in{transition:transform .5s var(--g3-ease)}
-  .P .g3in:hover{transform:rotateY(calc(var(--g3c-ry) + 3deg)) rotateX(-3deg)}
+  /* O BALANÇO. A volta é longa e macia; a ida passa um tico do ponto final
+     (o 2º número do cubic-bezier acima de 1) e recua — é essa passadinha que
+     dá a impressão de peso, de bloco de vidro que balança, e não de imagem
+     que gira. Quem balança é o wrapper: o cartão e a espessura vão juntos. */
+  .P .g3in{transition:transform .62s cubic-bezier(.22,1,.28,1)}
+  /* no tablet não existe "mouse por cima": o balanço acontece enquanto o dedo
+     está encostado no bloco */
+  .P .g3in:active{
+    transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
+    transition:transform .42s cubic-bezier(.18,1.35,.3,1);
+  }
   /* a inclinação agora é do wrapper; o cartão só acende */
   .P .g3in>.card:hover,.P .g3in>.cap-card:hover{
     transform:none;
@@ -1025,5 +1030,13 @@ body{min-height:100dvh}
       inset 0 0 36px rgba(var(--gl),.20),
       /* raio maior que a placa: o véu de luz cobre tudo por igual, sem emenda */
       inset 0 0 0 999px rgba(var(--gl),.055);
+  }
+}
+/* o balanço com o mouse fica só onde existe ponteiro de verdade: no dedo o
+   :hover gruda depois do toque e o bloco ficaria virado à toa */
+@media (prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine){
+  .P .g3in:hover{
+    transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
+    transition:transform .55s cubic-bezier(.18,1.3,.3,1);
   }
 }
