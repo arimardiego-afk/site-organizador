@@ -906,3 +906,124 @@ body{min-height:100dvh}
    O que ficou pronto não precisa mais chamar a atenção — a animação fica
    para o que ainda falta ministrar. */
 .P .card.ok-min .scan-bar::after{display:none}
+
+/* =====================================================================
+   CAIXA DE VIDRO — só nos temas Prometeu (P, P PR, P PB)
+   ---------------------------------------------------------------------
+   Substitui a "parede" de box-shadow escalonado (bloco VIDRO 3D) por uma
+   CAIXA de verdade: o cartão é a face da frente e as faces irmãs (.f3) são
+   a espessura, giradas em 3D dentro de um wrapper com perspectiva.
+   O wrapper é criado por JS (envolve3D(), em app.js), porque .card tem
+   overflow:hidden e overflow:hidden mata o preserve-3d do próprio elemento.
+   Temas claro (L) e escuro (D) NÃO entram aqui — continuam como estavam.
+   Nenhuma cor à mão: tudo sai de --gl / --grgb, então PR e PB seguem juntos.
+   ===================================================================== */
+.P{
+  --g3c-depth:34px;    /* espessura da caixa (a lateral) */
+  --g3c-radius:26px;   /* arredondamento */
+  --g3c-ry:10deg;      /* quanto a caixa está virada */
+  --g3c-persp:1100px;  /* distância do olho: quanto menor, mais 3D */
+  --g3c-glow:46px;     /* raio do halo */
+  --g3c-a:.30;         /* quanto de cor entra no vidro */
+}
+.P .g3box{perspective:var(--g3c-persp);perspective-origin:50% 35%}
+/* o giro sai da BORDA ESQUERDA: girando pelo centro, o lado esquerdo vinha
+   para a frente, crescia e saía da margem — o ícone da matéria encostava na
+   beirada da tela. Pela esquerda, quem se afasta é o lado direito, que é
+   justamente onde a espessura tem de aparecer. */
+.P .g3in{position:relative;transform-style:preserve-3d;
+  transform:rotateY(var(--g3c-ry));transform-origin:left center}
+
+/* a face da frente é o próprio cartão */
+.P .g3in>.card,.P .g3in>.cap-card{
+  position:relative;z-index:2;transform:none;
+  border-radius:var(--g3c-radius);
+  border:var(--g3-bw) solid rgba(var(--gl),.72);
+  background:
+    linear-gradient(180deg,
+      rgba(var(--gl),.18) 0%,
+      rgba(var(--grgb),var(--g3c-a)) 45%,
+      rgba(0,0,0,.34) 100%),
+    /* reflexo: no modelo a placa é alta e a listra desce em pé. Aqui o cartão
+       é largo e baixo — a 175° a listra deitava e virava um borrão de ponta a
+       ponta, então ela vem inclinada e curta, como no vidro antigo do app */
+    linear-gradient(104deg,transparent 34%,
+      rgba(var(--gl),.07) 44%,rgba(var(--gl),.11) 48%,
+      rgba(var(--gl),.05) 53%,transparent 62%),
+    var(--card);
+  box-shadow:
+    0 0 var(--g3c-glow) rgba(var(--grgb),.35),
+    0 0 calc(var(--g3c-glow) * 2) rgba(var(--grgb),.12),
+    0 10px 26px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(var(--gl),.28),
+    inset 0 0 28px rgba(var(--gl),.14);
+}
+/* o vidro clareia o fundo: sem isso a legenda e os botões somem dentro dele */
+.P .g3in>.card,.P .g3in>.cap-card{
+  --txt2:rgba(var(--gl),.90);
+  --txt3:rgba(var(--gl),.62);
+}
+.P .g3in>.card .iBtn,.P .g3in>.cap-card .iBtn{color:rgba(var(--gl),.92)}
+.P .g3in>.card .iBtn:hover,.P .g3in>.cap-card .iBtn:hover{background:rgba(0,0,0,.22)}
+
+/* brilho de borda (Fresnel) e fio interno, herdados do modelo */
+.P .g3in>.card::before,.P .g3in>.cap-card::before{
+  z-index:3;opacity:.7;
+  background:radial-gradient(ellipse at 50% 40%,
+    transparent 40%,rgba(var(--gl),.05) 60%,
+    rgba(var(--gl),.14) 80%,rgba(var(--gl),.22) 100%);
+}
+.P .g3in>.card::after,.P .g3in>.cap-card::after{
+  inset:3px;z-index:4;border:1px solid rgba(var(--gl),.16);
+  border-radius:calc(var(--g3c-radius) - 3px);
+  box-shadow:inset 0 0 18px rgba(var(--gl),.10);opacity:.5;
+}
+
+/* o hover das áreas clicáveis de dentro (.disc-body, .aula-body, .tree-aula)
+   pinta --card2, que é uma cor SÓLIDA: dentro do vidro ela tapava a placa e o
+   cartão sob o cursor ficava mais ESCURO que os vizinhos — o contrário do que
+   o mouse tem de dizer. E como essa área não chega aos botões da direita,
+   deixava um degrau visível no meio da placa. Aqui ela não pinta nada: quem
+   acende é a placa inteira, de uma vez (ver o :hover mais abaixo). */
+.P .g3in>.card .disc-body:hover,
+.P .g3in>.card .aula-body:hover,
+.P .g3in>.card .tree-aula:hover,
+.P .g3in>.cap-card .disc-body:hover,
+.P .g3in>.cap-card .aula-body:hover{background:transparent}
+
+/* a espessura: com a caixa virada só para a direita, bastam a face direita
+   e o fundo — top/bottom ficariam de canto para o olho e só pesariam */
+.P .f3{position:absolute;pointer-events:none}
+.P .f3.right{
+  top:0;right:0;height:100%;width:var(--g3c-depth);
+  transform-origin:100% 50%;transform:rotateY(-90deg);
+  border-radius:0 var(--g3c-radius) var(--g3c-radius) 0;
+  background:linear-gradient(90deg,
+    rgba(var(--gl),.42) 0%,rgba(var(--grgb),.34) 55%,rgba(0,0,0,.62) 100%);
+  border:var(--g3-bw) solid rgba(var(--grgb),.55);
+  border-left:1px solid rgba(var(--gl),.40);
+}
+.P .f3.back{
+  inset:0;transform:translateZ(calc(-1 * var(--g3c-depth)));
+  border-radius:var(--g3c-radius);
+  background:rgba(0,0,0,.55);
+  border:var(--g3-bw) solid rgba(var(--grgb),.20);
+}
+
+@media (prefers-reduced-motion:no-preference){
+  .P .g3in{transition:transform .5s var(--g3-ease)}
+  .P .g3in:hover{transform:rotateY(calc(var(--g3c-ry) + 3deg)) rotateX(-3deg)}
+  /* a inclinação agora é do wrapper; o cartão só acende */
+  .P .g3in>.card:hover,.P .g3in>.cap-card:hover{
+    transform:none;
+    border-color:rgba(var(--gl),.95);
+    box-shadow:
+      0 0 calc(var(--g3c-glow) * 1.4) rgba(var(--grgb),.50),
+      0 0 calc(var(--g3c-glow) * 2.5) rgba(var(--grgb),.20),
+      0 14px 30px rgba(0,0,0,.34),
+      inset 0 1px 0 rgba(var(--gl),.38),
+      inset 0 0 36px rgba(var(--gl),.20),
+      /* raio maior que a placa: o véu de luz cobre tudo por igual, sem emenda */
+      inset 0 0 0 999px rgba(var(--gl),.055);
+  }
+}

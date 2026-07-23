@@ -57,7 +57,30 @@ function paintIcons(){
     if(inner){el.innerHTML=`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;el.setAttribute('data-ic',cls);}
   });
 }
-new MutationObserver(()=>{paintIcons();if(window.scheduleTranslate)scheduleTranslate();}).observe(document.documentElement,{childList:true,subtree:true});
+/* --- caixa de vidro 3D (aparece só nos temas Prometeu) ---
+   O cartão tem overflow:hidden, e overflow:hidden anula o preserve-3d do
+   próprio elemento — então a caixa é montada EM VOLTA dele: um wrapper com a
+   perspectiva (.g3box), um miolo que gira (.g3in) e as faces irmãs (.f3), que
+   fazem a espessura. Nos temas claro e escuro o wrapper fica sem estilo
+   nenhum, e a aparência deles não muda. É idempotente e roda no mesmo
+   MutationObserver que pinta os ícones. */
+function envolve3D(){
+  document.querySelectorAll('.card,.cap-card').forEach(card=>{
+    const pai=card.parentElement;
+    if(!pai||pai.classList.contains('g3in'))return;
+    const box=document.createElement('div');box.className='g3box';
+    const inn=document.createElement('div');inn.className='g3in';
+    /* o degrau da escada é margem DO CARTÃO; tem de subir para o wrapper,
+       senão as faces ficam mais largas que o cartão e sobra moldura vazia */
+    [...card.classList].filter(c=>c.indexOf('esc-')===0).forEach(c=>{
+      box.classList.add(c);card.classList.remove(c);
+    });
+    pai.insertBefore(box,card);
+    inn.appendChild(card);box.appendChild(inn);
+    inn.insertAdjacentHTML('beforeend','<div class="f3 back"></div><div class="f3 right"></div>');
+  });
+}
+new MutationObserver(()=>{paintIcons();envolve3D();if(window.scheduleTranslate)scheduleTranslate();}).observe(document.documentElement,{childList:true,subtree:true});
 
 const CPS=['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8','CP9','CP10','CP11'];
 let themeIdx=0,_mcb=null,vidTimer=null,curDiscId=null,curAulaId=null,curCapId=null,editVidId=null,demoOn=false;
@@ -72,7 +95,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.1', APP_DATE='julho de 2026';
+const APP_VERSION='3.2', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
