@@ -44,7 +44,9 @@ const ICONS={
 'ti-key':'<path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.977a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.977a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z"/><path d="M15 9h.01"/>',
 'ti-mail':'<path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/><path d="M3 7l9 6l9 -6"/>',
 'ti-music':'<path d="M3 17a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M13 17a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M9 17v-13h10v13"/><path d="M9 8h10"/>',
-'ti-camera':'<path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>'
+'ti-camera':'<path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>',
+'ti-clipboard':'<path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/>',
+'ti-undo':'<path d="M9 14l-4 -4l4 -4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/>'
 };
 function paintIcons(){
   document.querySelectorAll('i.ti').forEach(el=>{
@@ -69,7 +71,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='2.9', APP_DATE='julho de 2026';
+const APP_VERSION='3.0', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -205,10 +207,15 @@ function toggleTheme(){
   applyThemeUI(THEMES[themeIdx]);
   saveTheme();
 }
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function goBack(to){if(document.getElementById('s-vid').classList.contains('active'))limparDraft();closeModal();showScreen(to);if(to==='s-main')renderDiscs();else if(to==='s-series')renderSeries();else if(to==='s-disc')renderAulas();else if(to==='s-aula')renderCaps();}
+// dir='back' faz a tela entrar pela esquerda (animação scrBack no styles.css)
+function showScreen(id,dir){document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.remove('nav-back');});
+  const el=document.getElementById(id);el.classList.toggle('nav-back',dir==='back');el.classList.add('active');}
+function goBack(to){if(document.getElementById('s-vid').classList.contains('active'))limparDraft();closeModal();showScreen(to,'back');if(to==='s-main')renderDiscs();else if(to==='s-series')renderSeries();else if(to==='s-disc')renderAulas();else if(to==='s-aula')renderCaps();}
 
 let curMat=null,MATS=[];
+// escada hierárquica: cada item da lista recua um degrau a mais (teto de 4,
+// senão numa série com 16 aulas o último cartão ficaria fino demais)
+function esc(i){return 'esc-'+Math.min(i,4);}
 function discPend(d){return d.aulas.reduce((s,a)=>s+aulaPend(a),0);}
 function matKey(d){return (d.nome||'—').toUpperCase();}
 function matDiscs(mat){return db.disciplinas.filter(d=>matKey(d)===mat);}
@@ -227,7 +234,7 @@ function renderDiscs(){ // TELA 1: apenas as matérias
     const ds=groups[m];
     const nAulas=ds.reduce((s,d)=>s+d.aulas.length,0);
     return `
-    <div class="card"><div class="disc-row">
+    <div class="card ${esc(i)}"><div class="disc-row">
       <div class="disc-accent"></div>
       <div class="disc-body" onclick="openMat(${i})">
         <div class="disc-av">${escH(m.slice(0,3))}</div>
@@ -258,7 +265,11 @@ function renameMat(i){
 function removeMat(i){
   const m=MATS[i];const n=matDiscs(m).length;
   if(!confirm(trf('Remover a matéria "{m}" e sua(s) {n} série(s)?',{m,n})))return;
-  db.disciplinas=db.disciplinas.filter(d=>matKey(d)!==m);renderDiscs();agendarLimpeza();
+  // guarda cada série removida COM a posição, para o Desfazer devolver na ordem
+  const salvos=[];db.disciplinas.forEach((d,ix)=>{if(matKey(d)===m)salvos.push({ix,d});});
+  db.disciplinas=db.disciplinas.filter(d=>matKey(d)!==m);renderDiscs();
+  armarUndo(trf('Matéria <b>{m}</b> excluída.',{m:escH(m)}),fidsDe(salvos.map(s=>s.d)),
+    ()=>{salvos.forEach(s=>db.disciplinas.splice(s.ix,0,s.d));});
 }
 
 const openSeries=new Set(); // séries com a árvore de aulas expandida (estado da sessão)
@@ -275,9 +286,10 @@ function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas n
   document.getElementById('mat-ttl').textContent=curMat||'';
   const el=document.getElementById('list-series');
   const ds=matDiscs(curMat);
+  refreshColarBtn(); // antes do return de lista vazia: colar numa matéria sem séries é o caso mais útil
   if(!ds.length){el.innerHTML='<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><p>Nenhuma série/ano.<br>Toque em <b>Nova série/ano</b>.</p></div>';return;}
   const maxDur=Math.max(1,...ds.map(discDurSeg));
-  el.innerHTML=ds.map(d=>{
+  el.innerHTML=ds.map((d,i)=>{
     const aulasHtml=d.aulas.length?d.aulas.map(a=>`
       <div class="tree-aula" onclick="curDiscId=${d.id};openAula(${a.id})">
         <div class="ta-line"><b>Aula ${String(a.numero).padStart(2,'0')}</b><span>${escH(a.titulo)}</span>${aulaPend(a)>0?`<span class="ta-pend">● ${aulaPend(a)}</span>`:''}<span class="ta-dur">${fmtS(aulaDurSeg(a))}</span></div>
@@ -285,7 +297,7 @@ function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas n
       </div>`).join(''):'<div class="tree-empty">Sem aulas ainda</div>';
     const isOpen=openSeries.has(d.id);
     return `
-    <div class="card">
+    <div class="card ${esc(i)}">
       <div class="disc-row">
         <div class="disc-accent"></div>
         <div class="disc-body" onclick="openDisc(${d.id})">
@@ -304,6 +316,7 @@ function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas n
         </div>
         <div class="side-btns">
           <button class="iBtn" onclick="openRelatorio(${d.id})" aria-label="Relatório da série"><i class="ti ti-report" aria-hidden="true"></i></button>
+          <button class="iBtn" onclick="copiarSerie(${d.id})" aria-label="Copiar série"><i class="ti ti-copy" aria-hidden="true"></i></button>
           <button class="iBtn edt" onclick="openEditDisc(${d.id})" aria-label="Editar"><i class="ti ti-edit" aria-hidden="true"></i></button>
           <button class="iBtn del" onclick="removeDisc(${d.id})" aria-label="Remover"><i class="ti ti-trash" aria-hidden="true"></i></button>
         </div>
@@ -324,6 +337,48 @@ function openAddSerie(){
     db.disciplinas.push({id:nid(),nome:curMat,turma,capitulo:vi('md-c'),aulas:[]});closeModal();renderSeries();
   });
 }
+/* ===== Copiar e colar uma série inteira (com aulas, capítulos e vídeos) =====
+   A "área de transferência" fica no localStorage: sobrevive a fechar o app e
+   permite colar numa matéria diferente — ou até em outro ano letivo. */
+const CLIP_KEY='prometeu.clip.serie.v1';
+function lerClip(){try{return JSON.parse(localStorage.getItem(CLIP_KEY)||'null');}catch(e){return null;}}
+// gerador de id que nunca repete um id já usado no banco (nid() sozinho pode
+// repetir quando dezenas de ids nascem no mesmo milissegundo)
+function geradorId(){
+  const usados=new Set();
+  db.disciplinas.forEach(d=>{usados.add(d.id);(d.aulas||[]).forEach(a=>{usados.add(a.id);(a.caps||[]).forEach(c=>{usados.add(c.id);(c.videos||[]).forEach(v=>usados.add(v.id));});});});
+  return()=>{let n;do{n=nid();}while(usados.has(n));usados.add(n);return n;};
+}
+function copiarSerie(id){
+  const d=getDisc(id);if(!d)return;
+  try{localStorage.setItem(CLIP_KEY,JSON.stringify({turma:d.turma,capitulo:d.capitulo,aulas:d.aulas}));}
+  catch(e){alert(tr('Não foi possível copiar: a memória do navegador está cheia.'));return;}
+  refreshColarBtn();
+  showToast(trf('Série <b>{s}</b> copiada. Abra a matéria de destino e toque em <b>Colar</b>.',{s:escH(d.turma||'')}),6000);
+}
+// mostra/esconde o botão Colar e escreve nele o nome da série copiada
+function refreshColarBtn(){
+  const b=document.getElementById('fab-colar');if(!b)return;
+  const c=lerClip();
+  b.hidden=!c;
+  if(c)document.getElementById('fab-colar-lbl').textContent=trf('Colar {s}',{s:c.turma||tr('série')});
+}
+function colarSerie(){
+  if(!exigirAtivacao())return;
+  const c=lerClip();if(!c){showToast(tr('Nada foi copiado ainda.'),3000);return;}
+  const novoId=geradorId();
+  // ids novos em todos os níveis; os fid dos anexos são MANTIDOS de propósito —
+  // o blob no IndexedDB é o mesmo arquivo, compartilhado (igual ao duplicar projeto)
+  const nova={id:novoId(),nome:curMat,turma:c.turma||'',capitulo:c.capitulo||'',
+    aulas:(c.aulas||[]).map(a=>({id:novoId(),numero:a.numero,titulo:a.titulo||'',
+      caps:(a.caps||[]).map(cp=>({id:novoId(),num:cp.num||'',nome:cp.nome||'',apresentado:!!cp.apresentado,obs:cp.obs||'',
+        videos:(cp.videos||[]).map(v=>({...v,id:novoId(),
+          materiais:(v.materiais||[]).map(m=>({...m})),
+          arquivos:(v.arquivos||[]).map(f=>({...f}))}))}))}))};
+  db.disciplinas.push(nova);
+  renderSeries();
+  showToast(trf('Série <b>{s}</b> colada em {m}.',{s:escH(nova.turma),m:escH(curMat||'')}),4000);
+}
 function openDisc(id){pushNav();curDiscId=id;renderAulas();showScreen('s-disc');}
 function openAddDisc(){if(!exigirAtivacao())return;openModal(tr('Nova matéria'),[{id:'md-n',lbl:'Nome da matéria',ph:'Ex: HISTÓRIA'},{id:'md-t',lbl:'Série/Ano',ph:'Ex: 6° ANO'},{id:'md-c',lbl:'Capítulo / unidade',ph:'Ex: Cap. 01 — Brasil Colônia'}],()=>{
   const nome=vi('md-n');if(!nome){alert(tr('Informe o nome.'));return;}
@@ -335,7 +390,13 @@ function openEditDisc(id){const d=getDisc(id);openModal(tr('Editar série/ano'),
   if(curDiscId===id)renderAulas();
 });}
 function editCurDisc(){openEditDisc(curDiscId);}
-function removeDisc(id){if(!confirm(tr('Remover esta série/ano e todas as suas aulas?')))return;db.disciplinas=db.disciplinas.filter(d=>d.id!==id);renderSeries();agendarLimpeza();}
+function removeDisc(id){
+  if(!confirm(tr('Remover esta série/ano e todas as suas aulas?')))return;
+  const ix=db.disciplinas.findIndex(d=>d.id===id);if(ix<0)return;
+  const d=db.disciplinas[ix];
+  db.disciplinas.splice(ix,1);renderSeries();
+  armarUndo(trf('Série <b>{s}</b> excluída.',{s:escH(d.turma||'')}),fidsDe([d]),()=>{db.disciplinas.splice(ix,0,d);});
+}
 
 function renderAulas(){
   saveDB();
@@ -345,8 +406,8 @@ function renderAulas(){
   const el=document.getElementById('list-aulas');
   if(!disc.aulas.length){el.innerHTML='<div class="empty"><i class="ti ti-video-off" aria-hidden="true"></i><p>Nenhuma aula.<br>Toque em <b>Nova aula</b>.</p></div>';return;}
   const maxDur=Math.max(1,...disc.aulas.map(aulaDurSeg));
-  el.innerHTML=disc.aulas.map(a=>`
-    <div class="card"><div class="aula-row">
+  el.innerHTML=disc.aulas.map((a,i)=>`
+    <div class="card ${esc(i)}"><div class="aula-row">
       <div class="aula-nc" onclick="openAula(${a.id})" aria-label="Abrir aula ${String(a.numero).padStart(2,'0')}"><div class="num-c">A${String(a.numero).padStart(2,'0')}</div></div>
       <div class="aula-body" onclick="openAula(${a.id})">
         <div class="at">${escH(a.titulo)}</div>
@@ -375,7 +436,15 @@ function openEditAula(id){const disc=getDisc(curDiscId);const aula=getAula(disc,
     aula.titulo=vi('ma-t')||aula.titulo;closeModal();renderAulas();if(curAulaId===id)renderCaps();
   });}
 function editCurAula(){openEditAula(curAulaId);}
-function removeAula(id){const disc=getDisc(curDiscId);if(!confirm(tr('Remover esta aula?')))return;disc.aulas=disc.aulas.filter(a=>a.id!==id);disc.aulas.forEach((a,i)=>a.numero=i+1);renderAulas();agendarLimpeza();}
+function removeAula(id){
+  const disc=getDisc(curDiscId);if(!confirm(tr('Remover esta aula?')))return;
+  const ix=disc.aulas.findIndex(a=>a.id===id);if(ix<0)return;
+  const aula=disc.aulas[ix];
+  const nums=disc.aulas.map(a=>({a,n:a.numero})); // a renumeração também tem de voltar no Desfazer
+  disc.aulas.splice(ix,1);disc.aulas.forEach((a,i)=>a.numero=i+1);renderAulas();
+  armarUndo(trf('Aula <b>{t}</b> excluída.',{t:escH(aula.titulo||'')}),fidsDe([{aulas:[aula]}]),
+    ()=>{disc.aulas.splice(ix,0,aula);nums.forEach(x=>x.a.numero=x.n);});
+}
 
 const openCaps=new Set(); // capítulos com a lista de vídeos expandida (estado da sessão)
 function toggleCap(id){
@@ -423,7 +492,7 @@ function renderCaps(){
   }).join('');
   const el=document.getElementById('list-caps');
   if(!aula.caps.length){el.innerHTML='<div class="empty"><i class="ti ti-player-play" aria-hidden="true"></i><p>Nenhum capítulo ainda.<br>Toque em <b>Novo capítulo</b>.</p></div>';return;}
-  el.innerHTML=aula.caps.map(cap=>{
+  el.innerHTML=aula.caps.map((cap,ci)=>{
     const durSeg=capDurSeg(cap);
     const vidsHtml=cap.videos.map((vid,vi2)=>`
       <div class="vid-row">
@@ -442,7 +511,7 @@ function renderCaps(){
       </div>`).join('');
     const pend=!cap.apresentado;
     return `
-    <div class="cap-card${pend?' pend':''}" id="cc-${cap.id}">
+    <div class="cap-card${pend?' pend':''} ${esc(ci)}" id="cc-${cap.id}">
       <div class="cap-header">
         <div class="cap-accent"></div>
         <div class="cap-hinfo">
@@ -514,7 +583,15 @@ function openEditCap(capId){const disc=getDisc(curDiscId);const aula=getAula(dis
   openModal(tr('Editar capítulo'),[{id:'cf-num',lbl:'Número / identificador',val:cap.num},{id:'cf-nome',lbl:'Nome do capítulo',val:cap.nome}],()=>{
     cap.num=vi('cf-num');cap.nome=vi('cf-nome')||cap.nome;closeModal();renderCaps();
   });}
-function removeCap(capId){const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);if(!confirm(tr('Remover este capítulo e todos os seus vídeos?')))return;aula.caps=aula.caps.filter(c=>c.id!==capId);renderCaps();agendarLimpeza();}
+function removeCap(capId){
+  const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);
+  if(!confirm(tr('Remover este capítulo e todos os seus vídeos?')))return;
+  const ix=aula.caps.findIndex(c=>c.id===capId);if(ix<0)return;
+  const cap=aula.caps[ix];
+  aula.caps.splice(ix,1);renderCaps();
+  armarUndo(trf('Capítulo <b>{c}</b> excluído.',{c:escH(cap.nome||cap.num||'')}),fidsDe([{aulas:[{caps:[cap]}]}]),
+    ()=>{aula.caps.splice(ix,0,cap);});
+}
 function toggleApresentado(capId){
   const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);const cap=getCap(aula,capId);
   if(!cap)return;
@@ -537,7 +614,15 @@ function ytSearchForm(){
   if(!n){alert(tr('Preencha o nome do vídeo primeiro.'));return;}
   window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(n),'_blank');
 }
-function removeVid(capId,vidId){const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);const cap=getCap(aula,capId);if(!confirm(tr('Remover este vídeo?')))return;cap.videos=cap.videos.filter(v=>v.id!==vidId);renderCaps();agendarLimpeza();}
+function removeVid(capId,vidId){
+  const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);const cap=getCap(aula,capId);
+  if(!confirm(tr('Remover este vídeo?')))return;
+  const ix=cap.videos.findIndex(v=>v.id===vidId);if(ix<0)return;
+  const v=cap.videos[ix];
+  cap.videos.splice(ix,1);renderCaps();
+  armarUndo(trf('Vídeo <b>{v}</b> excluído.',{v:escH(v.nome||'')}),(v.arquivos||[]).map(x=>x.fid),
+    ()=>{cap.videos.splice(ix,0,v);});
+}
 
 let formMats=[];
 function goToFormVid(capId,vidId){
@@ -653,11 +738,14 @@ async function sweepOrphans(){ // apaga do IndexedDB arquivos que nenhum projeto
   });
   formArqs.forEach(a=>usados.add(a.fid)); // protege anexos de um formulário ainda aberto
   try{const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');((d&&d.arqs)||[]).forEach(a=>usados.add(a.fid));}catch(e){} // e do rascunho guardado
+  coleta({disciplinas:[{aulas:(lerClip()||{}).aulas||[]}]}); // e da série copiada (colar depois de excluir a original)
+  if(undoAcao&&undoAcao.fids)undoAcao.fids.forEach(f=>usados.add(f)); // e do que ainda dá para desfazer
   const keys=await fKeys();
   await fDel(keys.filter(k=>!usados.has(k)));
 }
 let _sweepT=null;
-function agendarLimpeza(){clearTimeout(_sweepT);_sweepT=setTimeout(()=>sweepOrphans().catch(()=>{}),800);}
+// ms maior nas exclusões com Desfazer: o blob tem de sobreviver até o aviso sumir
+function agendarLimpeza(ms){clearTimeout(_sweepT);_sweepT=setTimeout(()=>sweepOrphans().catch(()=>{}),ms||800);}
 function pickArq(){
   if(formArqs.length>=ARQ_MAX){alert(trf('Limite de {n} documentos por vídeo.',{n:ARQ_MAX}));return;}
   document.getElementById('vf-file').click();
@@ -836,6 +924,40 @@ function showToast(html,ms){
   let gone=false;
   function dismiss(){if(gone)return;gone=true;t.classList.add('out');setTimeout(()=>t.remove(),320);}
   setTimeout(dismiss,ms||6000);
+}
+
+/* ===== Desfazer exclusão (todas as camadas + anos letivos) =====
+   Guarda só a ÚLTIMA exclusão, por 8 segundos — é o que se espera de um
+   "desfazer" simples. Enquanto o prazo corre, a limpeza de anexos órfãos
+   fica adiada (agendarLimpeza(9000)), senão o arquivo do vídeo excluído
+   sumiria do IndexedDB antes de o professor apertar Desfazer. */
+let undoAcao=null;
+function armarUndo(msg,fids,restaurar){
+  const meu={restaurar,fids:fids||[]};
+  undoAcao=meu;
+  setTimeout(()=>{if(undoAcao===meu)undoAcao=null;},8300);
+  showToast(`${msg} <button class="toast-undo" onclick="desfazerExclusao()"><i class="ti ti-undo" aria-hidden="true"></i>${tr('Desfazer')}</button>`,8000);
+  agendarLimpeza(9000);
+}
+function desfazerExclusao(){
+  if(!undoAcao){showToast(tr('O prazo para desfazer já passou.'),3000);return;}
+  const a=undoAcao;undoAcao=null;
+  a.restaurar();
+  rerenderAtual();
+  agendarLimpeza();
+  showToast(tr('Restaurado.'),3000);
+}
+// re-renderiza a tela aberta — a exclusão pode ter vindo de qualquer nível
+function rerenderAtual(){
+  const at=document.querySelector('.screen.active');if(!at)return;
+  const f={'s-main':renderDiscs,'s-series':renderSeries,'s-disc':renderAulas,'s-aula':renderCaps,'s-proj':renderProjetos}[at.id];
+  if(f)f();else saveDB();
+}
+// fids dos anexos de um pedaço qualquer do banco (para o sweep não apagar)
+function fidsDe(lista){
+  const out=[];
+  (lista||[]).forEach(d=>(d.aulas||[]).forEach(a=>(a.caps||[]).forEach(c=>(c.videos||[]).forEach(v=>(v.arquivos||[]).forEach(x=>out.push(x.fid))))));
+  return out;
 }
 
 /* ===== Relatório da série/ano (estrutura completa) ===== */
@@ -1115,11 +1237,11 @@ function openProjetos(){pushNav();closeMenu();renderProjetos();showScreen('s-pro
 function renderProjetos(){
   saveDB();
   const el=document.getElementById('list-proj');
-  el.innerHTML=projReg.projetos.map(p=>{
+  el.innerHTML=projReg.projetos.map((p,i)=>{
     const ativo=p.id===projReg.ativo;
     let nd=0,na=0;
     try{const d=ativo?db:JSON.parse(localStorage.getItem(projKey(p.id))||'{"disciplinas":[]}');nd=d.disciplinas.length;na=d.disciplinas.reduce((s,x)=>s+x.aulas.length,0);}catch(e){}
-    return `<div class="card${ativo?' proj-ativo':''}"><div class="disc-row">
+    return `<div class="card${ativo?' proj-ativo':''} ${esc(i)}"><div class="disc-row">
       <div class="disc-accent"></div>
       <div class="disc-body" onclick="ativarProjeto(${p.id})">
         <div class="disc-av"><i class="ti ti-archive" aria-hidden="true"></i></div>
@@ -1193,12 +1315,25 @@ function duplicarProjeto(id){
 function delProjeto(id){
   if(projReg.projetos.length<=1){alert(tr('Este é o único projeto. Crie outro antes de excluir este.'));return;}
   const p=projReg.projetos.find(x=>x.id===id);if(!p)return;
-  if(!confirm(trf('Excluir o projeto "{p}" com TODAS as matérias, aulas e documentos dele? Essa ação não pode ser desfeita.',{p:projNome(p)})))return;
+  if(!confirm(trf('Excluir o projeto "{p}" com TODAS as matérias, aulas e documentos dele? Você terá alguns segundos para desfazer.',{p:projNome(p)})))return;
   if(!confirm(tr('Tem certeza? Se quiser guardar uma cópia, cancele e use antes o botão de exportar (seta para baixo).')))return;
+  // guarda tudo o que é preciso para devolver o projeto: o banco em texto,
+  // a ficha no registro, a posição dela e se ele estava em uso
+  const ix=projReg.projetos.findIndex(x=>x.id===id);
+  const era=projReg.ativo===id;
+  if(era)saveDB(); // grava o que está na tela antes de trocar de projeto
+  let txt=null,fids=[];
+  try{txt=localStorage.getItem(projKey(id));fids=fidsDe((JSON.parse(txt||'{"disciplinas":[]}')).disciplinas);}catch(e){}
   try{localStorage.removeItem(projKey(id));}catch(e){}
-  projReg.projetos=projReg.projetos.filter(x=>x.id!==id);
-  if(projReg.ativo===id){projReg.ativo=projReg.projetos[0].id;loadDB();refreshProjUI();}
-  saveProjects();renderProjetos();agendarLimpeza();
+  projReg.projetos.splice(ix,1);
+  if(era){projReg.ativo=projReg.projetos[0].id;loadDB();refreshProjUI();}
+  saveProjects();renderProjetos();
+  armarUndo(trf('Ano letivo <b>{p}</b> excluído.',{p:escH(projNome(p))}),fids,()=>{
+    try{if(txt!==null)localStorage.setItem(projKey(id),txt);}catch(e){}
+    projReg.projetos.splice(ix,0,p);
+    if(era){projReg.ativo=id;loadDB();refreshProjUI();} // loadDB ANTES de qualquer saveDB
+    saveProjects();
+  });
 }
 const PROJ_BAR_MAX=7; // quantos projetos de troca rápida aparecem no menu lateral
 function refreshProjUI(){

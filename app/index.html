@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=8adbb347eb">
+<link rel="stylesheet" href="styles.css?v=834874710e">
 </head>
 <body class="L">
 <div id="root" class="L">
@@ -43,7 +43,7 @@
     <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti4" aria-hidden="true"></i></button>
   </div>
   <div class="content" id="list-series"></div>
-  <div class="fab-wrap"><button class="fab" onclick="openAddSerie()"><i class="ti ti-plus" aria-hidden="true"></i> Nova série/ano</button></div>
+  <div class="fab-wrap"><button class="fab fab-sec" id="fab-colar" hidden onclick="colarSerie()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-lbl">Colar série</span></button><button class="fab" onclick="openAddSerie()"><i class="ti ti-plus" aria-hidden="true"></i> Nova série/ano</button></div>
 </div>
 
 <div class="screen" id="s-disc">
@@ -87,8 +87,8 @@
     <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti3" aria-hidden="true"></i></button>
   </div>
   <div class="form-wrap">
-    <div><label class="flbl">Nome do vídeo</label><input class="finput" id="vf-nome" placeholder="Ex: A Primeira Revolução Industrial"/></div>
-    <div>
+    <div class="fcard"><label class="flbl">Nome do vídeo</label><input class="finput" id="vf-nome" placeholder="Ex: A Primeira Revolução Industrial"/></div>
+    <div class="fcard esc-1">
       <div class="link-dur-row">
         <div class="ld-link"><label class="flbl">Link do vídeo (YouTube)</label><input class="finput" id="vf-link" placeholder="https://youtube.com/watch?v=..." oninput="onVidLink()"/></div>
         <div class="ld-dur"><label class="flbl">Duração</label><input class="finput" id="vf-dur" placeholder="MM:SS" title="MM:SS ou H:MM:SS"/></div>
@@ -98,7 +98,7 @@
     </div>
     <div class="spin-row" id="vf-spin" style="display:none"><div class="spinner"></div><span>Buscando título e duração no YouTube…</span></div>
     <div class="fdur" id="vf-dur-info"></div>
-    <div class="mat-sec">
+    <div class="mat-sec esc-2">
       <button class="tree-toggle" id="tt-resumo" onclick="toggleResumo()" aria-expanded="false" type="button">
         <i class="ti ti-chevron-down chev" aria-hidden="true"></i>
         <span id="resumo-count">Resumo do vídeo</span>
@@ -113,7 +113,7 @@
         </div>
       </div></div></div>
     </div>
-    <div class="mat-sec">
+    <div class="mat-sec esc-3">
       <button class="tree-toggle" id="tt-mats" onclick="toggleMats()" aria-expanded="false" type="button">
         <i class="ti ti-chevron-down chev" aria-hidden="true"></i>
         <span id="mats-count">Material didático e documentos</span>
@@ -260,7 +260,7 @@
 <div id="toast-zone" aria-live="polite"></div>
 
 </div>
-<script src="i18n.js?v=8adbb347eb"></script>
-<script src="app.js?v=8adbb347eb"></script>
+<script src="i18n.js?v=834874710e"></script>
+<script src="app.js?v=834874710e"></script>
 </body>
 </html>

@@ -6,6 +6,18 @@ i.ti{display:inline-flex;align-items:center;justify-content:center;width:1em;hei
 i.ti svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .screen{display:none;flex-direction:column;min-height:100vh}
 .screen.active{display:flex}
+/* troca de tela: entrar avança da direita, voltar volta da esquerda — o mesmo
+   sentido do gesto, para o professor não se perder na hierarquia.
+   A classe .nav-back é posta pelo goBack() (app.js). Como a tela sai de
+   display:none, a animação reinicia sozinha a cada troca.
+   Nenhum elemento fixed vive dentro de .screen (drawer, modais e toasts são
+   irmãos do #root), então o transform temporário não prende nada. */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes scrIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+  @keyframes scrBack{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+  .screen.active{animation:scrIn .28s var(--g3-ease) both}
+  .screen.active.nav-back{animation-name:scrBack}
+}
 .topbar{background:var(--bar);color:#fff;padding:0 10px;height:52px;display:flex;align-items:center;gap:8px;flex-shrink:0;position:sticky;top:0;z-index:50}
 .tbk{background:none;border:none;color:#fff;cursor:pointer;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
 .tbk:hover{background:rgba(255,255,255,0.15)}
@@ -17,7 +29,10 @@ i.ti svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;strok
 .subbar{background:var(--bard);color:#fff;padding:8px 14px 10px;flex-shrink:0}
 .sb-title{font-size:13px;font-weight:500;line-height:1.35;margin-bottom:3px;cursor:pointer}
 .sb-sub{font-size:11px;color:rgba(255,255,255,0.7)}
-.content{flex:1;padding:10px;display:flex;flex-direction:column;gap:7px;padding-bottom:80px}
+/* folga à direita e entre cartões: a parede de vidro (bloco VIDRO 3D) cresce
+   para a direita e um pouco para baixo — sem esta folga ela é cortada na tela */
+.content{flex:1;padding:10px calc(10px + var(--g3-depth) * .5) 80px 10px;
+  display:flex;flex-direction:column;gap:calc(var(--g3-depth) * .5)}
 .card{background:var(--card);border-radius:12px;border:0.5px solid var(--brd);overflow:hidden}
 .disc-row{display:flex;align-items:stretch;min-height:68px}
 .disc-accent{width:5px;background:var(--bar);flex-shrink:0}
@@ -100,9 +115,16 @@ i.ti svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;strok
 .fab{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px);margin:0 16px;padding:18px 22px;background:var(--bar);color:#fff;border:none;border-radius:999px;font-size:15.5px;font-weight:600;cursor:pointer;box-shadow:var(--fab-s)}
 .fab:hover{background:var(--bard)}
 .fab i{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);font-size:19px}
+.fab[hidden]{display:none}
 
 /* form */
-.form-wrap{flex:1;padding:14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding-bottom:24px}
+/* folga à direita igual à do .content: os campos agora são painéis de vidro
+   (.fcard, bloco VIDRO 3D) e a parede cresce para a direita */
+.form-wrap{flex:1;padding:14px calc(14px + var(--g3-depth) * .5) 30px 14px;
+  display:flex;flex-direction:column;gap:22px;overflow-y:auto}
+/* campo do formulário como painel de vidro (a aparência vem do bloco VIDRO 3D;
+   aqui só o espaço interno) */
+.fcard{padding:13px 15px}
 .flbl{font-size:12px;color:var(--txt2);font-weight:500;margin-bottom:5px;display:block}
 .finput{width:100%;padding:10px 12px;border:0.5px solid var(--inpb);border-radius:8px;font-size:13px;color:var(--txt);background:var(--inp);outline:none;font-family:inherit}
 .finput:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(192,57,43,0.12)}
@@ -137,6 +159,13 @@ i.ti svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;strok
 .toast i{color:var(--acc);font-size:17px;flex-shrink:0;margin-top:1px}
 .toast b{color:var(--acc)}
 .toast.out{opacity:0;transform:translateY(-8px);transition:all .3s ease}
+/* botão Desfazer dentro do aviso: alvo de toque cheio, cor de destaque
+   (--acc é TEXTO de destaque; --bar é fundo e ficaria ilegível no escuro) */
+.toast-undo{display:flex;align-items:center;justify-content:center;gap:6px;
+  width:fit-content;margin:9px 0 1px;
+  background:none;border:1px solid var(--acc);border-radius:8px;
+  color:var(--acc);font:inherit;font-weight:700;padding:7px 14px;cursor:pointer}
+.toast-undo:hover{background:rgba(var(--grgb),.14)}
 @keyframes toast-in{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
 .P .toast{border-radius:4px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);box-shadow:0 0 16px rgba(var(--grgb),.4)}
 .D .toast{box-shadow:0 0 14px rgba(255,255,255,.3);text-shadow:0 0 4px rgba(255,255,255,.3)}
@@ -163,7 +192,9 @@ i.ti svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;strok
   animation:pendScan 1.5s linear infinite;
 }
 @keyframes pendScan{0%{background-position:0 130%}100%{background-position:0 -130%}}
-.P .cap-card.pend{box-shadow:0 0 0 1px rgba(var(--grgb),.06) inset,0 4px 18px rgba(0,0,0,.45),0 0 12px rgba(var(--grgb),.16)}
+/* capítulo a ministrar: só intensifica o halo e o fio do vidro. NÃO redefinir
+   box-shadow aqui — isso apagava a parede 3D inteira só nesses capítulos. */
+.P .cap-card.pend{--g3-halo:.34;--g3-ba:.82}
 .P .cap-check.checked .box{border-radius:2px;box-shadow:0 0 8px rgba(var(--grgb),.55);text-shadow:0 0 6px rgba(var(--grgb),.7);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
 .P .pend-badge,.P .ta-pend{text-shadow:0 0 6px rgba(var(--grgb),.6)}
 /* Escuro néon: pulso branco */
@@ -325,7 +356,9 @@ textarea.finput{resize:vertical;min-height:120px;line-height:1.45}
 .D .topbar{border-bottom:1px solid rgba(255,255,255,.65);box-shadow:0 1px 12px rgba(255,255,255,.22)}
 .D .ttl{text-shadow:var(--wn)}
 .D .subbar,.D .disc-bar-edit{border-bottom:1px solid var(--brd2)}
-.D .card,.D .cap-card,.D .modal-box{border:1px solid var(--brd);box-shadow:0 0 9px rgba(255,255,255,.12),inset 0 0 6px rgba(255,255,255,.05)}
+/* ⚠️ .card/.cap-card saíram daqui: com dois nomes de classe esta regra vencia
+   o bloco VIDRO 3D por especificidade e apagava a parede inteira no escuro. */
+.D .modal-box{border:1px solid var(--brd);box-shadow:0 0 9px rgba(255,255,255,.12),inset 0 0 6px rgba(255,255,255,.05)}
 .D .dn,.D .at,.D .cap-nome,.D .modal-title,.D .sb-title{text-shadow:var(--wn)}
 .D .ds,.D .as,.D .cap-num,.D .cap-total-dur{text-shadow:0 0 5px rgba(255,255,255,.55)}
 .D .disc-accent{background:#fff;box-shadow:0 0 8px rgba(255,255,255,.8)}
@@ -389,9 +422,9 @@ textarea.finput{resize:vertical;min-height:120px;line-height:1.45}
 .dw-projitem span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dw-projitem b{color:var(--acc);flex-shrink:0}
 .dw-projitem i{flex-shrink:0;font-size:15px;opacity:.75}
-.card.proj-ativo{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
-.P .card.proj-ativo{box-shadow:0 0 0 1px var(--cy) inset,0 0 14px rgba(var(--grgb),.25)}
-.D .card.proj-ativo{box-shadow:0 0 0 1px #fff inset,0 0 12px rgba(255,255,255,.25)}
+/* projeto ativo: fio cheio e halo mais forte. NÃO redefinir box-shadow aqui —
+   isso apagava a parede 3D justamente do cartão em destaque. */
+.card.proj-ativo{border-color:var(--acc);--g3-ba:1;--g3-halo:.28}
 
 /* ===== Menu lateral (drawer) ===== */
 .drawer-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:290;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -488,8 +521,10 @@ body{min-height:100dvh}
 .screen{min-height:100dvh}
 .P{min-height:100dvh}
 @media (min-width:760px){
-  .content{padding-left:max(10px,calc(50% - 420px));padding-right:max(10px,calc(50% - 420px))}
-  .form-wrap{padding-left:max(14px,calc(50% - 420px));padding-right:max(14px,calc(50% - 420px))}
+  .content{padding-left:max(10px,calc(50% - 420px));
+    padding-right:max(calc(10px + var(--g3-depth) * .5),calc(50% - 420px))}
+  .form-wrap{padding-left:max(14px,calc(50% - 420px));
+    padding-right:max(calc(14px + var(--g3-depth) * .5),calc(50% - 420px))}
   .subbar,.disc-bar-edit,.proj-bar,.chips-sec{padding-left:max(14px,calc(50% - 420px));padding-right:max(14px,calc(50% - 420px))}
   .fab{width:min(520px,calc(100% - 32px));margin:0 auto}
   .modal-wrap{align-items:center;padding:24px}
@@ -541,37 +576,75 @@ body{min-height:100dvh}
    ===================================================================== */
 :root{
   --g3-radius:20px;   /* arredondamento do painel */
-  --g3-bw:1.5px;      /* espessura da borda de vidro */
-  --g3-depth:13px;    /* espessura aparente (a lateral do vidro) */
-  --g3-glow:30px;     /* halo na cor do tema */
-  --g3-ry:2.4deg;     /* inclinação 3D (0 = painel reto) */
-  --g3-persp:1600px;  /* distância do olho: quanto menor, mais 3D */
+  --g3-bw:3px;        /* espessura da borda de vidro */
+  --g3-depth:24px;    /* espessura aparente (a lateral do vidro) */
+  --g3-glow:40px;     /* raio do halo na cor do tema */
+  --g3-halo:.20;      /* força do halo (usada também pelo capítulo pendente) */
+  --g3-ry:3.4deg;     /* inclinação 3D (0 = painel reto) */
+  --g3-persp:1200px;  /* distância do olho: quanto menor, mais 3D */
   --g3-tint:.10;      /* quanto da cor do tema entra no vidro */
   --g3-shine:.16;     /* força do reflexo especular */
+  --g3-drop:.30;      /* quanto a parede desce (0 = espessura só na lateral) */
+  --g3-wall:1;        /* multiplicador de opacidade da parede */
+  --g3-ba:.62;        /* opacidade do fio da borda */
   --g3-ease:cubic-bezier(.22,1,.36,1);
+  /* degrau da escada hierárquica. clamp: no celular encolhe para não estreitar
+     o cartão; no tablet (o aparelho-alvo) abre nos 26px cheios do modelo */
+  --esc:clamp(9px,2.4vw,26px);
 }
-/* cor da lateral: nos temas néon é a própria cor do tema; no claro, um
-   cinza de vidro — vermelho ali virava mancha de tinta ao redor do cartão */
-:root{--g3-edge:var(--grgb)}
-.L{--g3-tint:.05;--g3-shine:.55;--g3-glow:18px;--g3-edge:96,102,110}
-.D{--g3-tint:.04;--g3-shine:.10;--g3-glow:16px}
+/* cor da lateral e do fio: nos temas néon é a própria cor do tema; no claro,
+   um cinza de vidro — vermelho ali virava mancha de tinta ao redor do cartão */
+/* ⚠️ tem de ficar nos blocos de tema, não em :root: --grgb só existe a partir
+   de .L/.D/.P, e em :root o var() sai vazio (a parede sumia no escuro) */
+.L,.D,.P{--g3-edge:var(--grgb);--g3-bc:var(--grgb)}
+.L{--g3-tint:.05;--g3-shine:.55;--g3-glow:18px;--g3-edge:96,102,110;
+   --g3-bc:70,76,84;--g3-ba:.34;--g3-wall:.92;--g3-halo:.10}
+/* no OLED a parede é branca sobre preto: precisa de mais opacidade que nos
+   outros temas para a espessura ser vista de longe, não só com zoom */
+.D{--g3-tint:.04;--g3-shine:.10;--g3-glow:16px;--g3-wall:.62;--g3-ba:.58;--g3-halo:.12}
+
+/* --- ESCADA HIERÁRQUICA ---
+   Cada item da lista desce um degrau para a direita, como os painéis
+   MATÉRIA/SÉRIE/AULA/CAPÍTULO do modelo. Serve para o professor se situar
+   onde está. Só recua à esquerda: a borda direita fica alinhada e a parede
+   de vidro continua cabendo na folga do .content.
+   Teto de 4 degraus — numa lista de 16 séries, do 5º item em diante todos
+   ficam no mesmo degrau, senão o cartão estreitaria até sumir. */
+.esc-1{margin-left:var(--esc)}
+.esc-2{margin-left:calc(var(--esc) * 2)}
+.esc-3{margin-left:calc(var(--esc) * 3)}
+.esc-4{margin-left:calc(var(--esc) * 4)}
 
 /* --- o painel de vidro --- */
-.card,.cap-card,.mat-sec,.tut-sec,.at-card,.arq-row,.dw-proj{
+.card,.cap-card,.mat-sec,.tut-sec,.at-card,.arq-row,.dw-proj,.fcard{
   position:relative;
   border-radius:var(--g3-radius);
-  border:var(--g3-bw) solid rgba(var(--gl),.26);
+  border:var(--g3-bw) solid rgba(var(--g3-bc),var(--g3-ba));
   background:
     linear-gradient(168deg,rgba(var(--gl),var(--g3-shine)) 0%,rgba(var(--gl),0) 32%),
     linear-gradient(200deg,rgba(var(--grgb),var(--g3-tint)),rgba(var(--grgb),0) 62%),
     var(--card);
   box-shadow:
-    /* lateral do vidro: duas lâminas deslocadas dão a espessura */
-    calc(var(--g3-depth) * .5) 1px 0 calc(var(--g3-depth) * -.32) rgba(var(--g3-edge),.32),
-    var(--g3-depth) 2px 0 calc(var(--g3-depth) * -.6) rgba(var(--g3-edge),.16),
-    0 0 var(--g3-glow) rgba(var(--grgb),.16),
-    0 8px 22px rgba(0,0,0,.26),
-    inset 0 1px 0 rgba(var(--gl),.18);
+    /* A PAREDE (a espessura do vidro). Cinco cópias do painel deslocadas em
+       diagonal, sem borrão e sem recuo: juntas formam um bloco maciço que
+       nasce colado no canto e vai clareando para fora. Recuo negativo, que
+       era o jeito antigo, descolava a parede do canto de cima. */
+    calc(var(--g3-depth) * .125) calc(var(--g3-depth) * .125 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.34 * var(--g3-wall))),
+    calc(var(--g3-depth) * .25) calc(var(--g3-depth) * .25 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.30 * var(--g3-wall))),
+    calc(var(--g3-depth) * .375) calc(var(--g3-depth) * .375 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.26 * var(--g3-wall))),
+    calc(var(--g3-depth) * .5) calc(var(--g3-depth) * .5 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.22 * var(--g3-wall))),
+    calc(var(--g3-depth) * .625) calc(var(--g3-depth) * .625 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.18 * var(--g3-wall))),
+    calc(var(--g3-depth) * .75) calc(var(--g3-depth) * .75 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.14 * var(--g3-wall))),
+    calc(var(--g3-depth) * .875) calc(var(--g3-depth) * .875 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.11 * var(--g3-wall))),
+    var(--g3-depth) calc(var(--g3-depth) * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.08 * var(--g3-wall))),
+    /* fio externo: fecha a parede num canto nítido em vez de deixá-la
+       dissolver no fundo. Tem de ser mais fraco que a 1ª lâmina, senão vira
+       uma segunda borda e o bloco parece papel empilhado. */
+    calc(var(--g3-depth) + 1.5px) calc(var(--g3-depth) * var(--g3-drop) + 1px) 0 0 rgba(var(--g3-edge),calc(.26 * var(--g3-wall))),
+    0 0 var(--g3-glow) rgba(var(--grgb),var(--g3-halo)),
+    0 10px 26px rgba(0,0,0,.30),
+    inset 0 2px 0 rgba(var(--gl),.26),
+    inset 0 -2px 0 rgba(0,0,0,.22);
   clip-path:none;
 }
 .card,.cap-card{
@@ -591,26 +664,34 @@ body{min-height:100dvh}
 .card::after,.cap-card::after{
   content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
   border-radius:inherit;
-  box-shadow:inset 0 0 0 1px rgba(var(--gl),.10),
-             inset 0 -14px 22px -18px rgba(0,0,0,.7);
+  box-shadow:inset 0 0 0 1.5px rgba(var(--gl),.14),
+             inset 0 -16px 24px -18px rgba(0,0,0,.75);
   background:none;width:auto;height:auto;opacity:1;
 }
 .P .card,.P .cap-card,.P .modal-box,.P .mat-sec,.P .tut-sec,.P .arq-row,
 .P .disc-av,.P .chip,.P .add-cap-btn{clip-path:none;border-radius:var(--g3-radius)}
 .P .chip,.P .disc-av{border-radius:10px}
 .P .finput,.P .dz-btn,.P .arq-thumb,.P .arq-badge{border-radius:10px}
-.D .card,.D .cap-card{border-color:rgba(255,255,255,.34)}
+/* o fio do vidro no escuro sai de --g3-bc/--g3-ba (bloco VIDRO 3D) */
 .D .card::before,.D .cap-card::before{opacity:.5}
 @media (prefers-reduced-motion:no-preference){
   .card,.cap-card{transition:box-shadow .3s var(--g3-ease),transform .3s var(--g3-ease)}
   .card:hover,.cap-card:hover{
     transform:perspective(var(--g3-persp)) rotateY(calc(var(--g3-ry) * .4)) translateZ(6px);
     box-shadow:
-      calc(var(--g3-depth) * .5) 1px 0 calc(var(--g3-depth) * -.32) rgba(var(--g3-edge),.4),
-      var(--g3-depth) 2px 0 calc(var(--g3-depth) * -.6) rgba(var(--g3-edge),.22),
-      0 0 calc(var(--g3-glow) * 1.5) rgba(var(--grgb),.26),
-      0 12px 28px rgba(0,0,0,.3),
-      inset 0 1px 0 rgba(var(--gl),.24);
+      calc(var(--g3-depth) * .125) calc(var(--g3-depth) * .125 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.45 * var(--g3-wall))),
+      calc(var(--g3-depth) * .25) calc(var(--g3-depth) * .25 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.40 * var(--g3-wall))),
+      calc(var(--g3-depth) * .375) calc(var(--g3-depth) * .375 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.35 * var(--g3-wall))),
+      calc(var(--g3-depth) * .5) calc(var(--g3-depth) * .5 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.29 * var(--g3-wall))),
+      calc(var(--g3-depth) * .625) calc(var(--g3-depth) * .625 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.24 * var(--g3-wall))),
+      calc(var(--g3-depth) * .75) calc(var(--g3-depth) * .75 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.19 * var(--g3-wall))),
+      calc(var(--g3-depth) * .875) calc(var(--g3-depth) * .875 * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.14 * var(--g3-wall))),
+      var(--g3-depth) calc(var(--g3-depth) * var(--g3-drop)) 0 0 rgba(var(--g3-edge),calc(.10 * var(--g3-wall))),
+      calc(var(--g3-depth) + 1.5px) calc(var(--g3-depth) * var(--g3-drop) + 1px) 0 0 rgba(var(--g3-edge),calc(.34 * var(--g3-wall))),
+      0 0 calc(var(--g3-glow) * 1.5) rgba(var(--grgb),calc(var(--g3-halo) * 1.6)),
+      0 14px 30px rgba(0,0,0,.34),
+      inset 0 2px 0 rgba(var(--gl),.32),
+      inset 0 -2px 0 rgba(0,0,0,.22);
   }
 }
 
@@ -701,3 +782,13 @@ body{min-height:100dvh}
   @keyframes hintpop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 }
 @media (prefers-reduced-motion:reduce){.tbk.hint{box-shadow:0 0 0 3px rgba(255,255,255,.75)}}
+
+/* ===== Botão secundário "Colar série" =====
+   Mesma forma do fab, peso visual menor (contorno em vez de preenchido), para
+   não competir com o "Nova série/ano". Fica no FIM do arquivo e usa 2 classes
+   (.fab.fab-sec) porque as regras de tema .P .fab / .D .fab têm 2 classes e
+   venceriam um seletor de 1 classe, apagando o estilo secundário. */
+.fab.fab-sec{background:none;border:1.5px solid rgba(var(--grgb),.5);color:var(--acc);
+  box-shadow:none;text-shadow:none;font-weight:500;margin-bottom:10px}
+.fab.fab-sec:hover{background:rgba(var(--grgb),.12)}
+.fab.fab-sec i{background:rgba(var(--grgb),.14);box-shadow:none}
