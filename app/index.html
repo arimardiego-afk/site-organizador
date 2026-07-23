@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.youtube.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://i.ytimg.com; media-src 'self' blob:; connect-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
+<title>Organizador de Aulas</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050b13">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aulas">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=bfabe7db9d">
+</head>
+<body class="L">
+<div id="root" class="L">
+<div class="hud-frame" aria-hidden="true"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
+
+<div class="screen active" id="s-main">
+  <div class="topbar">
+    <button class="tbk" id="menuBtn" onclick="openMenu()" aria-label="Abrir menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+    <span class="ttl">Organizador de Aulas</span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti0" aria-hidden="true"></i><span id="tl0">Escuro</span></button>
+  </div>
+  <div class="proj-bar" onclick="openProjetos()" role="button" aria-label="Gerenciar projetos">
+    <i class="ti ti-archive" style="font-size:14px" aria-hidden="true"></i>
+    <div class="dbe-txt" id="proj-bar-lbl"></div>
+    <i class="ti ti-chevron-down" style="font-size:12px;transform:rotate(-90deg)" aria-hidden="true"></i>
+  </div>
+  <div class="content" id="list-discs"></div>
+  <div class="fab-wrap"><button class="fab" onclick="openAddDisc()"><i class="ti ti-plus" aria-hidden="true"></i> Nova matéria</button></div>
+</div>
+
+<div class="screen" id="s-series">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl" id="mat-ttl"></span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti4" aria-hidden="true"></i></button>
+  </div>
+  <div class="content" id="list-series"></div>
+  <div class="fab-wrap"><button class="fab" onclick="openAddSerie()"><i class="ti ti-plus" aria-hidden="true"></i> Nova série/ano</button></div>
+</div>
+
+<div class="screen" id="s-disc">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-series')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl" id="disc-ttl"></span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti1" aria-hidden="true"></i></button>
+    <button class="tbtn" onclick="editCurDisc()"><i class="ti ti-edit" aria-hidden="true"></i></button>
+  </div>
+  <div class="disc-bar-edit" onclick="editCurDisc()">
+    <div class="dbe-txt" id="disc-cap-lbl"></div>
+    <i class="ti ti-pencil" style="font-size:14px" aria-hidden="true"></i>
+  </div>
+  <div class="content" id="list-aulas"></div>
+  <div class="fab-wrap"><button class="fab" onclick="openAddAula()"><i class="ti ti-plus" aria-hidden="true"></i> Nova aula</button></div>
+</div>
+
+<div class="screen" id="s-aula">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-disc')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl" id="aula-num-ttl"></span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti2" aria-hidden="true"></i></button>
+    <button class="tbtn" onclick="editCurAula()"><i class="ti ti-edit" aria-hidden="true"></i></button>
+  </div>
+  <div class="subbar">
+    <div class="sb-title" id="aula-titulo-lbl" onclick="editCurAula()"></div>
+    <div class="sb-sub" id="aula-info-lbl"></div>
+  </div>
+  <div class="chips-sec">
+    <div class="chips-lbl">Capítulos (CP) — acesos têm conteúdo</div>
+    <div class="chips-grid" id="chips-cp"></div>
+  </div>
+  <div class="content" id="list-caps"></div>
+  <div class="fab-wrap"><button class="fab" onclick="openAddCap()"><i class="ti ti-plus" aria-hidden="true"></i> Novo capítulo</button></div>
+</div>
+
+<div class="screen" id="s-vid">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-aula')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl" id="vid-form-ttl">Novo vídeo</span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti3" aria-hidden="true"></i></button>
+  </div>
+  <div class="form-wrap">
+    <div><label class="flbl">Nome do vídeo</label><input class="finput" id="vf-nome" placeholder="Ex: A Primeira Revolução Industrial"/></div>
+    <div>
+      <div class="link-dur-row">
+        <div class="ld-link"><label class="flbl">Link do vídeo (YouTube)</label><input class="finput" id="vf-link" placeholder="https://youtube.com/watch?v=..." oninput="onVidLink()"/></div>
+        <div class="ld-dur"><label class="flbl">Duração</label><input class="finput" id="vf-dur" placeholder="MM:SS" title="MM:SS ou H:MM:SS"/></div>
+      </div>
+      <div class="fhint" id="vf-hint"></div>
+      <button class="add-mat" style="margin-top:8px" onclick="ytSearchForm()"><i class="ti ti-search" aria-hidden="true"></i> Buscar este vídeo no YouTube (pelo nome)</button>
+    </div>
+    <div class="spin-row" id="vf-spin" style="display:none"><div class="spinner"></div><span>Buscando título e duração no YouTube…</span></div>
+    <div class="fdur" id="vf-dur-info"></div>
+    <div class="mat-sec">
+      <button class="tree-toggle" id="tt-resumo" onclick="toggleResumo()" aria-expanded="false" type="button">
+        <i class="ti ti-chevron-down chev" aria-hidden="true"></i>
+        <span id="resumo-count">Resumo do vídeo</span>
+      </button>
+      <div class="tree-wrap" id="tw-resumo"><div class="tree-inner"><div class="mat-inner">
+        <label class="flbl pg-lbl"><span class="pg-count" id="vf-pg">≈ 0 pág.</span></label>
+        <textarea class="finput" id="vf-resumo" maxlength="9000" placeholder="Escreva ou cole aqui o resumo da aula (limite ≈ 3 páginas)" oninput="updPg()"></textarea>
+        <div class="fhint">Limite de ~3 páginas (9.000 caracteres). Exporte abaixo em Word ou PDF.</div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn-sec" onclick="expWord()"><i class="ti ti-file-text" aria-hidden="true"></i> Word (.doc)</button>
+          <button class="btn-sec" onclick="expPDF()"><i class="ti ti-download" aria-hidden="true"></i> PDF</button>
+        </div>
+      </div></div></div>
+    </div>
+    <div class="mat-sec">
+      <button class="tree-toggle" id="tt-mats" onclick="toggleMats()" aria-expanded="false" type="button">
+        <i class="ti ti-chevron-down chev" aria-hidden="true"></i>
+        <span id="mats-count">Material didático e documentos</span>
+      </button>
+      <div class="tree-wrap" id="tw-mats"><div class="tree-inner"><div class="mat-inner">
+        <label class="flbl">Livros e links citados no vídeo</label>
+        <div id="vf-mats"></div>
+        <button class="add-mat" onclick="addMat()"><i class="ti ti-book" aria-hidden="true"></i> Adicionar material</button>
+        <label class="flbl" style="margin-top:14px">Documentos anexados (PDF, imagem, Word ou áudio) · <span class="pg-count" id="arq-count">0/10</span></label>
+        <div id="vf-arqs"></div>
+        <button class="add-mat" onclick="pickArq()"><i class="ti ti-paperclip" aria-hidden="true"></i> Importar PDF, imagem, Word ou áudio</button>
+        <button class="add-mat" style="margin-top:6px" onclick="pickFoto()"><i class="ti ti-camera" aria-hidden="true"></i> Tirar foto</button>
+        <input type="file" id="vf-file" multiple accept="application/pdf,image/*,audio/*,.doc,.docx" style="display:none" onchange="onArqPick(this)"/>
+        <input type="file" id="vf-foto" accept="image/*" capture="environment" style="display:none" onchange="onArqPick(this)"/>
+      </div></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="goBack('s-aula')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarVid()">Salvar vídeo</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-proj">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl">Projetos — anos letivos</span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti5" aria-hidden="true"></i></button>
+  </div>
+  <div class="content" id="list-proj"></div>
+  <div class="fab-wrap"><button class="fab" onclick="novoProjeto()"><i class="ti ti-plus" aria-hidden="true"></i> Criar novo projeto</button></div>
+</div>
+
+<div class="screen" id="s-tut">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl">Tutorial</span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti6" aria-hidden="true"></i></button>
+  </div>
+  <div class="content tut-body" id="tut-body"></div>
+</div>
+
+<div class="screen" id="s-ativar">
+  <div class="topbar">
+    <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <span class="ttl">Ativação</span>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti7" aria-hidden="true"></i></button>
+  </div>
+  <div class="content" id="at-body"></div>
+</div>
+
+<div class="drawer-ov" id="drawer-ov" onclick="closeMenu()"></div>
+<nav class="drawer" id="drawer" aria-label="Menu principal">
+  <div class="dw-head">
+    <i class="ti ti-cpu" aria-hidden="true"></i>
+    <div><b>Organizador de Aulas</b><span id="dw-ver">Prometeu</span></div>
+    <button class="tbk dw-x" onclick="closeMenu()" aria-label="Fechar menu"><i class="ti ti-x" aria-hidden="true"></i></button>
+  </div>
+  <button class="dw-proj" onclick="openProjetos()">
+    <i class="ti ti-archive" aria-hidden="true"></i>
+    <div><span class="dw-plbl">Projeto em uso</span><b id="dw-proj"></b></div>
+    <i class="ti ti-chevron-down" style="transform:rotate(-90deg);font-size:13px" aria-hidden="true"></i>
+  </button>
+  <div id="dw-projlist"></div>
+  <button class="dw-item dw-buy" onclick="openAtivar()"><i class="ti ti-key" aria-hidden="true"></i> Ativar / Comprar</button>
+  <div class="dw-sec">Arquivo</div>
+  <button class="dw-item" onclick="novoProjeto()"><i class="ti ti-plus" aria-hidden="true"></i> Criar novo projeto</button>
+  <button class="dw-item" onclick="openProjetos()"><i class="ti ti-folder" aria-hidden="true"></i> Gerenciar projetos</button>
+  <button class="dw-item" onclick="exportBackup()"><i class="ti ti-download" aria-hidden="true"></i> Exportar backup (.json)</button>
+  <button class="dw-item" onclick="importBackupPick()"><i class="ti ti-upload" aria-hidden="true"></i> Importar backup (.json)</button>
+  <div class="dw-sec">Tamanho do texto</div>
+  <div class="dw-zoom">
+    <button class="dz-btn" onclick="mudarFonte(-1)" aria-label="Diminuir letras e botões">A−</button>
+    <span class="dz-val" id="dz-val">100%</span>
+    <button class="dz-btn" onclick="mudarFonte(1)" aria-label="Aumentar letras e botões">A+</button>
+  </div>
+  <div class="dw-sec">Ajuda</div>
+  <button class="dw-item" onclick="openTutorial()"><i class="ti ti-help" aria-hidden="true"></i> Tutorial</button>
+  <button class="dw-item" onclick="demoStart()"><i class="ti ti-player-play" aria-hidden="true"></i> Modo demonstração</button>
+  <button class="dw-item" onclick="enviarFeedback()"><i class="ti ti-mail" aria-hidden="true"></i> Enviar críticas ou sugestões</button>
+  <button class="dw-item" onclick="openIdioma()"><i class="ti ti-language" aria-hidden="true"></i> Idioma</button>
+  <button class="dw-item" onclick="openLegal('priv')"><i class="ti ti-shield" aria-hidden="true"></i> Privacidade</button>
+  <button class="dw-item" onclick="openLegal('termos')"><i class="ti ti-file-text" aria-hidden="true"></i> Termos de uso</button>
+  <button class="dw-item" id="dw-install" onclick="instalarApp()"><i class="ti ti-download" aria-hidden="true"></i> Instalar aplicativo</button>
+  <button class="dw-item" onclick="showAtualizacao()"><i class="ti ti-refresh" aria-hidden="true"></i> Atualização</button>
+  <button class="dw-item" onclick="showVersao()"><i class="ti ti-info-circle" aria-hidden="true"></i> Versão</button>
+  <input type="file" id="bk-file" accept="application/json,.json" style="display:none" onchange="importBackup(this)"/>
+</nav>
+
+<div class="modal-wrap" id="imodal" style="z-index:210" onclick="if(event.target===this)closeInfo()">
+  <div class="modal-box">
+    <div class="modal-title" id="im-title"></div>
+    <div class="im-body" id="im-body"></div>
+    <button class="btn-sec" onclick="closeInfo()">Fechar</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal" onclick="modalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-fields"></div>
+    <div class="btn-row"><button class="btn-sec" onclick="closeModal()">Cancelar</button><button class="btn-pri" id="modal-ok">Salvar</button></div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="rmodal" onclick="if(event.target===this)closeRModal()">
+  <div class="modal-box">
+    <div class="modal-title" id="rmodal-title"></div>
+    <div class="fhint" id="rmodal-sub"></div>
+    <button class="btn-pri" onclick="relWord()"><i class="ti ti-file-text" aria-hidden="true"></i> Baixar Word (.doc)</button>
+    <button class="btn-pri" onclick="relPDF()"><i class="ti ti-download" aria-hidden="true"></i> Gerar PDF (imprimir / salvar)</button>
+    <button class="btn-sec" onclick="closeRModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="cmodal">
+  <div class="modal-box">
+    <div class="modal-title">Bem-vindo!</div>
+    <div class="im-body">
+      <div>Seus dados ficam somente neste aparelho — nada é enviado para a internet. Ao continuar, você concorda com os Termos de Uso e a Política de Privacidade (disponíveis no menu ☰ → Ajuda).</div>
+      <div class="btn-row" style="margin-top:4px">
+        <button class="btn-sec" onclick="openLegal('termos')">Termos de Uso</button>
+        <button class="btn-sec" onclick="openLegal('priv')">Política de Privacidade</button>
+      </div>
+    </div>
+    <button class="btn-pri" onclick="aceitarConsent()">Aceitar e começar</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="tmodal">
+  <div class="modal-box">
+    <div class="modal-title">Tutorial rápido?</div>
+    <div class="im-body">
+      <div>Quer ver uma demonstração rápida de como o app funciona? O app navega sozinho mostrando cada função.</div>
+      <div class="fhint">Você pode revê-la quando quiser em ☰ → Modo demonstração.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="recusarTutorial()">Agora não</button>
+      <button class="btn-pri" onclick="aceitarTutorial()">Ver tutorial</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-zone" aria-live="polite"></div>
+
+</div>
+<script src="i18n.js?v=bfabe7db9d"></script>
+<script src="app.js?v=bfabe7db9d"></script>
+</body>
+</html>
