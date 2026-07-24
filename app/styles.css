@@ -929,7 +929,8 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
      professor pediu (item 1). A espessura (caixa de vidro) só aparece durante
      o BALANÇO, quando o dedo/mouse encosta e o lado direito recua forte. */
   --g3c-ry:0deg;
-  --g3c-sway:20deg;    /* o BALANÇO: quanto ela vira sob o dedo/mouse (forte) */
+  --g3c-sway:20deg;    /* o BALANÇO forte: sob o dedo, ou clique segurado */
+  --g3c-lean:3deg;     /* a viradinha de leve com o mouse por cima (exemplo Vencedor) */
   --g3c-tiltx:10deg;   /* e quanto deita para trás no mesmo movimento */
   --g3c-persp:1800px;  /* distância do olho: maior = menos distorção no giro */
   --g3c-glow:46px;     /* raio do halo */
@@ -1045,11 +1046,29 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
       inset 0 0 0 999px rgba(var(--gl),.055);
   }
 }
-/* o balanço com o mouse fica só onde existe ponteiro de verdade: no dedo o
-   :hover gruda depois do toque e o bloco ficaria virado à toa */
+/* com o MOUSE por cima, o movimento é o do exemplo Vencedor: a caixa inteira
+   vira de leve (3°) e a área clicável desliza para a direita. Fica só onde
+   existe ponteiro de verdade — no dedo o :hover gruda depois do toque e o
+   bloco ficaria virado à toa. O balanço FORTE continua no :active (clique
+   segurado / dedo encostado). */
 @media (prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine){
   .P .g3in:hover{
-    transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
+    transform:rotateX(calc(-1 * var(--g3c-lean))) rotateY(calc(var(--g3c-ry) + var(--g3c-lean)));
     transition:transform .55s cubic-bezier(.22,1,.36,1);
   }
+  /* redeclarado DEPOIS do :hover para vencer o empate: clique segurado vira forte */
+  .P .g3in:active{
+    transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
+  }
+  /* a "barra" (área clicável do cartão) desliza 5px e clareia, como no exemplo */
+  .P .g3in .disc-body,.P .g3in .aula-body,.P .g3in .cap-header{
+    transition:transform .3s cubic-bezier(.22,1,.36,1),filter .3s cubic-bezier(.22,1,.36,1);
+  }
+  .P .g3in .disc-body:hover,.P .g3in .aula-body:hover,.P .g3in .cap-header:hover{
+    filter:brightness(1.2);
+    transform:translateX(5px);
+  }
+  /* itens de dentro do bloco aberto (aulas da árvore, vídeos do capítulo) deslizam 6px */
+  .P .g3in .tree-aula,.P .g3in .vid-row{transition:transform .3s cubic-bezier(.22,1,.36,1)}
+  .P .g3in .tree-aula:hover,.P .g3in .vid-row:hover{transform:translateX(6px)}
 }
