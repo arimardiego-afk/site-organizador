@@ -82,6 +82,38 @@ function envolve3D(){
 }
 new MutationObserver(()=>{paintIcons();envolve3D();if(window.scheduleTranslate)scheduleTranslate();}).observe(document.documentElement,{childList:true,subtree:true});
 
+/* ===== BALANÇO no toque (dirigido por JS, não por :active/:hover) ==========
+   Num tablet o :active de um toque rápido some antes de a animação aparecer, e
+   o "Remover animações" do Android desligava o balanço de CSS inteiro (em todos
+   os navegadores do aparelho). Aqui o próprio toque (pointerdown) põe a classe
+   .swing no bloco de vidro; soltar o dedo — ou o arraste de reordenar começar —
+   tira. Um tempo mínimo de exibição garante que até o toque mais rápido, o que
+   já vai navegar para outra tela, mostre o balanço. Só nos temas Prometeu (P),
+   que são os únicos com a caixa de vidro 3D. */
+let _swEl=null,_swT=0,_swTimer=0;
+function _swClear(){                    // tira o balanço JÁ (ex.: quando começa o arraste)
+  clearTimeout(_swTimer);
+  if(_swEl){_swEl.classList.remove('swing');_swEl=null;}
+}
+function _swEnd(){                       // soltou o dedo: volta macia, respeitando o tempo mínimo
+  if(!_swEl)return;
+  const el=_swEl,resto=Math.max(0,240-(performance.now()-_swT));
+  clearTimeout(_swTimer);
+  _swTimer=setTimeout(()=>{el.classList.remove('swing');if(_swEl===el)_swEl=null;},resto);
+}
+document.addEventListener('pointerdown',e=>{
+  if(!document.body.classList.contains('P'))return;          // só nos temas Prometeu
+  if(mvD)return;                                             // já arrastando: não balança
+  const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('button,input,textarea,select,a'))return;     // botão é botão, não balança o cartão
+  const g=t.closest('.g3in');if(!g)return;
+  clearTimeout(_swTimer);
+  if(_swEl&&_swEl!==g)_swEl.classList.remove('swing');
+  _swEl=g;_swT=performance.now();g.classList.add('swing');
+},{passive:true});
+document.addEventListener('pointerup',_swEnd,{passive:true});
+document.addEventListener('pointercancel',_swClear,{passive:true});
+
 const CPS=['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8','CP9','CP10','CP11'];
 let themeIdx=0,_mcb=null,vidTimer=null,curDiscId=null,curAulaId=null,curCapId=null,editVidId=null,demoOn=false;
 const THEMES=['L','D','P','P PR','P PB'];
@@ -95,7 +127,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.4.1', APP_DATE='julho de 2026';
+const APP_VERSION='3.4.2', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -1036,6 +1068,7 @@ function mvIrmaos(bloco,tipo,capId){
 function mvIniciar(el,p0){
   const tipo=el.dataset.mv;
   if(MV_TIPOS.indexOf(tipo)<0)return false;
+  if(window._swClear)_swClear();   // começou o arraste: cancela qualquer balanço em curso
   const bloco=mvBloco(el),capId=el.dataset.mvc||null;
   const irmaos=mvIrmaos(bloco,tipo,capId);
   const i0=irmaos.indexOf(bloco);

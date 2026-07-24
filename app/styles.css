@@ -1020,45 +1020,48 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
   border:var(--g3-bw) solid rgba(var(--grgb),.20);
 }
 
-@media (prefers-reduced-motion:no-preference){
-  /* O BALANÇO. A volta é longa e macia; a ida passa um tico do ponto final
-     (o 2º número do cubic-bezier acima de 1) e recua — é essa passadinha que
-     dá a impressão de peso, de bloco de vidro que balança, e não de imagem
-     que gira. Quem balança é o wrapper: o cartão e a espessura vão juntos. */
-  .P .g3in{transition:transform .55s cubic-bezier(.22,1,.36,1)}
-  /* no tablet não existe "mouse por cima": o balanço acontece enquanto o dedo
-     está encostado no bloco */
-  .P .g3in:active{
-    transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
-    transition:transform .55s cubic-bezier(.22,1,.36,1);
-  }
-  /* a inclinação agora é do wrapper; o cartão só acende */
-  .P .g3in>.card:hover,.P .g3in>.cap-card:hover{
-    transform:none;
-    border-color:rgba(var(--gl),.95);
-    box-shadow:
-      0 0 calc(var(--g3c-glow) * 1.4) rgba(var(--grgb),.50),
-      0 0 calc(var(--g3c-glow) * 2.5) rgba(var(--grgb),.20),
-      0 14px 30px rgba(0,0,0,.34),
-      inset 0 1px 0 rgba(var(--gl),.38),
-      inset 0 0 36px rgba(var(--gl),.20),
-      /* raio maior que a placa: o véu de luz cobre tudo por igual, sem emenda */
-      inset 0 0 0 999px rgba(var(--gl),.055);
-  }
+/* O BALANÇO agora é ligado por JavaScript (a classe .swing, ver app.js),
+   NÃO por :active/:hover, e FORA do @media (prefers-reduced-motion). Por quê:
+   num tablet o :active de um toque rápido some antes de a animação aparecer,
+   e o "Remover animações" do Android (prefers-reduced-motion:reduce) desligava
+   o balanço inteiro — em TODOS os navegadores do aparelho, de uma vez. Como é
+   um movimento curto pedido pelo próprio toque (não fica rodando sozinho), ele
+   é aceitável mesmo com "reduzir movimento" e por isso continua ligado ali.
+   Quem balança é o wrapper: o cartão e a espessura vão juntos. A VOLTA é longa
+   e macia (peso de bloco de vidro); a IDA é mais curta, para aparecer mesmo no
+   toque rápido que já vai navegar. */
+.P .g3in{transition:transform .55s cubic-bezier(.22,1,.36,1)}          /* a VOLTA */
+.P .g3in.swing{
+  transition:transform .26s cubic-bezier(.22,1,.36,1);                 /* a IDA, rápida */
+  transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
 }
-/* com o MOUSE por cima, o movimento é o do exemplo Vencedor: a caixa inteira
-   vira de leve (3°) e a área clicável desliza para a direita. Fica só onde
-   existe ponteiro de verdade — no dedo o :hover gruda depois do toque e o
-   bloco ficaria virado à toa. O balanço FORTE continua no :active (clique
-   segurado / dedo encostado). */
-@media (prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine){
-  .P .g3in:hover{
+/* durante o balanço o cartão acende, como antes acontecia só no :hover do mouse */
+.P .g3in.swing>.card,.P .g3in.swing>.cap-card{
+  border-color:rgba(var(--gl),.95);
+  box-shadow:
+    0 0 calc(var(--g3c-glow) * 1.4) rgba(var(--grgb),.50),
+    0 0 calc(var(--g3c-glow) * 2.5) rgba(var(--grgb),.20),
+    0 14px 30px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(var(--gl),.38),
+    inset 0 0 36px rgba(var(--gl),.20),
+    /* raio maior que a placa: o véu de luz cobre tudo por igual, sem emenda */
+    inset 0 0 0 999px rgba(var(--gl),.055);
+}
+/* "Reduzir movimento" ligado no aparelho: mantém o balanço (curto e pedido
+   pelo toque), mas mais rápido e seco — é a contraparte acessível da animação */
+@media (prefers-reduced-motion:reduce){
+  .P .g3in{transition-duration:.22s}
+  .P .g3in.swing{transition-duration:.15s}
+}
+
+/* Só no DESKTOP (mouse de verdade): passar por cima já dá o movimento fino do
+   exemplo Vencedor, sem clicar — a caixa vira 3° e a "barra" desliza. Fica só
+   onde existe ponteiro de verdade; no dedo o :hover grudaria depois do toque e
+   o bloco ficaria virado à toa. Enquanto está balançando (.swing) o hover leve
+   dá lugar ao balanço forte. */
+@media (hover:hover) and (pointer:fine){
+  .P .g3in:hover:not(.swing){
     transform:rotateX(calc(-1 * var(--g3c-lean))) rotateY(calc(var(--g3c-ry) + var(--g3c-lean)));
-    transition:transform .55s cubic-bezier(.22,1,.36,1);
-  }
-  /* redeclarado DEPOIS do :hover para vencer o empate: clique segurado vira forte */
-  .P .g3in:active{
-    transform:rotateY(calc(var(--g3c-ry) + var(--g3c-sway))) rotateX(calc(-1 * var(--g3c-tiltx)));
   }
   /* a "barra" (área clicável do cartão) desliza 5px e clareia, como no exemplo */
   .P .g3in .disc-body,.P .g3in .aula-body,.P .g3in .cap-header{
