@@ -811,11 +811,12 @@ body{min-height:100dvh}
    ---------------------------------------------------------------------
    Pontinhos subindo devagar atrás das telas. Servem para dar profundidade:
    os cartões de vidro passam a flutuar sobre algo, em vez de sobre um
-   fundo chapado. São 18 <i> estáticos no index.html — nada de JS, nada de
+   fundo chapado. São 36 <i> estáticos no index.html — nada de JS, nada de
    imagem, nada de rede. Cada um traz o seu tamanho/tempo em variáveis
    inline (--ps, --pd, --pl), então todos usam a MESMA regra aqui.
    ===================================================================== */
 #bg-particles{display:none;position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.P #bg-particles{display:block}   /* a poeira aparece no tema Prometeu, com ou sem "reduzir movimento" */
 #bg-particles i{position:absolute;bottom:-8px;width:var(--ps);height:var(--ps);
   border-radius:50%;background:rgba(var(--gl),.5);
   box-shadow:0 0 6px rgba(var(--grgb),.75);filter:blur(.4px);opacity:0}
@@ -823,15 +824,22 @@ body{min-height:100dvh}
    ⚠️ NÃO incluir .topbar aqui: ela é sticky (topo grudado) e um "position"
    escrito depois a derrubaria — a barra de título deixava de acompanhar. */
 .screen{position:relative;z-index:1}
-@media (prefers-reduced-motion:no-preference){
-  .P #bg-particles{display:block}
-  #bg-particles i{animation:bgFloat var(--pd) linear infinite;animation-delay:var(--pl)}
-  @keyframes bgFloat{
-    0%{transform:translateY(0);opacity:0}
-    10%{opacity:.85}
-    85%{opacity:.55}
-    100%{transform:translateY(-102vh);opacity:0}
-  }
+@keyframes bgFloat{
+  0%{transform:translateY(0);opacity:0}
+  10%{opacity:.85}
+  85%{opacity:.55}
+  100%{transform:translateY(-102vh);opacity:0}
+}
+/* toda partícula usa a MESMA animação; cada uma tem o seu tempo (--pd) e o seu
+   atraso negativo (--pl), então já entram espalhadas na tela */
+#bg-particles i{animation:bgFloat var(--pd) linear infinite;animation-delay:var(--pl)}
+/* "Reduzir movimento" ligado (ex.: "Remover animações" do Android): a poeira
+   não sobe, mas fica visível PARADA — a animação é CONGELADA. Como cada ponto
+   tem um atraso negativo diferente, cada um congela numa altura diferente, o
+   que dá uma textura calma e espalhada sem nenhum movimento infinito. É a
+   contraparte acessível do efeito. */
+@media (prefers-reduced-motion:reduce){
+  #bg-particles i{animation-play-state:paused}
 }
 
 /* =====================================================================
@@ -930,7 +938,7 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
      o BALANÇO, quando o dedo/mouse encosta e o lado direito recua forte. */
   --g3c-ry:0deg;
   --g3c-sway:20deg;    /* o BALANÇO forte: sob o dedo, ou clique segurado */
-  --g3c-lean:3deg;     /* a viradinha de leve com o mouse por cima (exemplo Vencedor) */
+  --g3c-lean:5deg;     /* a viradinha ao passar mouse/caneta por cima (exemplo Vencedor) */
   --g3c-tiltx:10deg;   /* e quanto deita para trás no mesmo movimento */
   --g3c-persp:1800px;  /* distância do olho: maior = menos distorção no giro */
   --g3c-glow:46px;     /* raio do halo */
@@ -1074,4 +1082,38 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
   /* itens de dentro do bloco aberto (aulas da árvore, vídeos do capítulo) deslizam 6px */
   .P .g3in .tree-aula,.P .g3in .vid-row{transition:transform .3s cubic-bezier(.22,1,.36,1)}
   .P .g3in .tree-aula:hover,.P .g3in .vid-row:hover{transform:translateX(6px)}
+}
+
+/* =====================================================================
+   RETORNO AO TOQUE E À CANETA — temas CLARO (L) e ESCURO (D)
+   ---------------------------------------------------------------------
+   Fecha a lacuna que o professor apontou: em L/D não havia NENHUM retorno
+   ao toque nem à caneta (as regras de balanço/hover estavam todas presas
+   ao .P). Usa o mesmo wrapper .g3in que envolve3D já cria em TODO tema:
+     • TOQUE  (classe .swing, posta no pointerdown por app.js): um "apertar"
+       curto — o bloco encolhe ~3,5% e a borda acende no tom do tema. Em P
+       essa mesma classe faz o balanço 3D forte (bloco acima).
+     • CANETA (classe .pen, posta no pointermove com pointerType='pen'): o
+       bloco sobe 3px — o "movimento mínimo ao passar a caneta" pedido.
+   Cor sempre por --grgb do próprio tema; os 3 temas Prometeu não entram.
+   "Reduzir movimento" só ENCURTA (contraparte acessível), nunca desliga —
+   é um gesto pedido pelo próprio toque. */
+.L .g3in,.D .g3in{transition:transform .28s cubic-bezier(.22,1,.36,1)}
+.L .g3in.swing,.D .g3in.swing{
+  transition:transform .16s cubic-bezier(.34,1.56,.64,1);   /* aperta com um quê de mola */
+  transform:scale(.965);
+}
+.L .g3in.swing>.card,.D .g3in.swing>.card,
+.L .g3in.swing>.cap-card,.D .g3in.swing>.cap-card{border-color:rgba(var(--grgb),.85)}
+.L .g3in.pen:not(.swing),.D .g3in.pen:not(.swing){transform:translateY(-3px)}
+@media (prefers-reduced-motion:reduce){
+  .L .g3in.swing,.D .g3in.swing{transition-duration:.11s}
+}
+
+/* CANETA pairando no tema Prometeu: a mesma viradinha do mouse (--g3c-lean),
+   mas ligada por JS (classe .pen) para funcionar na S-Pen do tablet, onde o
+   @media (hover:hover) não alcança. Cede a vez ao balanço via :not(.swing). */
+.P .g3in.pen:not(.swing){
+  transition:transform .3s cubic-bezier(.22,1,.36,1);
+  transform:rotateX(calc(-1 * var(--g3c-lean))) rotateY(calc(var(--g3c-ry) + var(--g3c-lean)));
 }

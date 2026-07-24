@@ -102,7 +102,8 @@ function _swEnd(){                       // soltou o dedo: volta macia, respeita
   _swTimer=setTimeout(()=>{el.classList.remove('swing');if(_swEl===el)_swEl=null;},resto);
 }
 document.addEventListener('pointerdown',e=>{
-  if(!document.body.classList.contains('P'))return;          // só nos temas Prometeu
+  // vale em TODOS os temas: em P é o balanço 3D forte; em L/D um "apertar"
+  // curto (a mesma classe .swing, com visual próprio de cada tema no CSS)
   if(mvD)return;                                             // já arrastando: não balança
   const t=e.target;if(!t||!t.closest)return;
   if(t.closest('button,input,textarea,select,a'))return;     // botão é botão, não balança o cartão
@@ -113,6 +114,26 @@ document.addEventListener('pointerdown',e=>{
 },{passive:true});
 document.addEventListener('pointerup',_swEnd,{passive:true});
 document.addEventListener('pointercancel',_swClear,{passive:true});
+
+/* CANETA (S-Pen) pairando sobre um bloco: num tablet o ponteiro PRIMÁRIO é o
+   toque (coarse), então @media (hover:hover) NÃO enxerga a caneta — por isso a
+   detectamos pelo pointerType e realçamos o bloco sob a ponta (classe .pen, ver
+   styles.css), sem grudar no dedo. Quando a caneta encosta e vira balanço
+   (.swing), o próprio CSS (.pen:not(.swing)) já cede a vez — não precisa limpar
+   aqui. O dedo (touch) limpa qualquer realce de caneta pendente. */
+let _penEl=null;
+function _penSet(g){
+  if(g===_penEl)return;
+  if(_penEl)_penEl.classList.remove('pen');
+  _penEl=g; if(g)g.classList.add('pen');
+}
+document.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='pen'){ if(e.pointerType==='touch')_penSet(null); return; }
+  if(mvD){_penSet(null);return;}
+  const t=e.target;
+  _penSet(t&&t.closest?t.closest('.g3in'):null);
+},{passive:true});
+document.addEventListener('pointerleave',()=>_penSet(null),{passive:true});
 
 const CPS=['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8','CP9','CP10','CP11'];
 let themeIdx=0,_mcb=null,vidTimer=null,curDiscId=null,curAulaId=null,curCapId=null,editVidId=null,demoOn=false;
@@ -127,7 +148,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.4.2', APP_DATE='julho de 2026';
+const APP_VERSION='3.4.3', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
