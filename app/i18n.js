@@ -132,7 +132,7 @@ const I18N={
 /* ---------- INGLÊS ---------- */
 'en':{
 'Organizador de Aulas':'Lesson Organizer',
-'Abrir menu':'Open menu','Voltar':'Back','Fechar menu':'Close menu','Fechar':'Close',
+'Abrir menu':'Open menu','Voltar':'Back','Início':'Home','Fechar menu':'Close menu','Fechar':'Close',
 'Mover para cima':'Move up','Mover para baixo':'Move down','Concluir':'Done',
 'Cancelar':'Cancel','Salvar':'Save','Salvar vídeo':'Save video','Editar':'Edit','Remover':'Delete',
 'Tutorial':'Tutorial','Atualização':'Updates','Versão':'Version','Arquivo':'File','Ajuda':'Help',
@@ -204,7 +204,7 @@ const I18N={
 'Aviso':'Notice','Saiba mais':'Learn more',
 'Horas totais':'Total hours','Ministradas':'Taught','Não ministradas':'Not taught',
 'sem nome':'unnamed','Tamanho do texto':'Text size',
-'Diminuir letras e botões':'Smaller text and buttons','Aumentar letras e botões':'Bigger text and buttons',
+'Diminuir letras':'Smaller text','Aumentar letras':'Bigger text',
 'Ex: A Primeira Revolução Industrial':'E.g.: The First Industrial Revolution',
 'Nome da matéria':'Subject name','Série/Ano':'Grade/Year','Capítulo / unidade':'Chapter / unit',
 'Título da aula':'Lesson title','Número / identificador':'Number / identifier','Nome do capítulo':'Chapter name',
@@ -239,6 +239,9 @@ const I18N={
 'Não foi possível copiar: a memória do navegador está cheia.':'Could not copy: the browser storage is full.',
 'Série <b>{s}</b> copiada. Abra a matéria de destino e toque em <b>Colar</b>.':'Grade <b>{s}</b> copied. Open the target subject and tap <b>Paste</b>.',
 'Série <b>{s}</b> colada em {m}.':'Grade <b>{s}</b> pasted into {m}.',
+'Copiar aula':'Copy lesson','Colar aula':'Paste lesson','aula':'lesson',
+'Aula <b>{a}</b> copiada. Abra a série de destino e toque em <b>Colar aula</b>.':'Lesson <b>{a}</b> copied. Open the target grade and tap <b>Paste lesson</b>.',
+'Aula <b>{a}</b> colada.':'Lesson <b>{a}</b> pasted.',
 'Limite de {n} documentos por vídeo.':'Limit of {n} documents per video.',
 'Limite de {n} documentos por vídeo — os demais não foram importados.':'Limit of {n} documents per video — the rest were not imported.',
 '"{f}" passa de {n} MB e não foi importado.':'"{f}" exceeds {n} MB and was not imported.',
@@ -357,6 +360,7 @@ const I18N={
 'Copiar série':'Copiar ano','Colar série':'Colar ano','série':'ano',
 'Série <b>{s}</b> copiada. Abra a matéria de destino e toque em <b>Colar</b>.':'Ano <b>{s}</b> copiado. Abra a disciplina de destino e carregue em <b>Colar</b>.',
 'Série <b>{s}</b> colada em {m}.':'Ano <b>{s}</b> colado em {m}.',
+'Aula <b>{a}</b> copiada. Abra a série de destino e toque em <b>Colar aula</b>.':'Aula <b>{a}</b> copiada. Abra o ano de destino e carregue em <b>Colar aula</b>.',
 'Não foi possível copiar: a memória do navegador está cheia.':'Não foi possível copiar: a memória do navegador está cheia.',
 'Não foi possível guardar o arquivo neste navegador.':'Não foi possível guardar o ficheiro neste navegador.',
 'Arquivo não encontrado no armazenamento deste navegador.':'Ficheiro não encontrado no armazenamento deste navegador.',
@@ -384,7 +388,7 @@ const I18N={
 /* ---------- ESPANHOL ---------- */
 'es':{
 'Organizador de Aulas':'Organizador de Clases',
-'Abrir menu':'Abrir menú','Voltar':'Atrás','Fechar menu':'Cerrar menú','Fechar':'Cerrar',
+'Abrir menu':'Abrir menú','Voltar':'Atrás','Início':'Inicio','Fechar menu':'Cerrar menú','Fechar':'Cerrar',
 'Mover para cima':'Subir','Mover para baixo':'Bajar','Concluir':'Listo',
 'Cancelar':'Cancelar','Salvar':'Guardar','Salvar vídeo':'Guardar vídeo','Editar':'Editar','Remover':'Eliminar',
 'Tutorial':'Tutorial','Atualização':'Actualización','Versão':'Versión','Arquivo':'Archivo','Ajuda':'Ayuda',
@@ -455,7 +459,7 @@ const I18N={
 'Aviso':'Aviso','Saiba mais':'Más información',
 'Horas totais':'Horas totales','Ministradas':'Impartidas','Não ministradas':'No impartidas',
 'sem nome':'sin nombre','Tamanho do texto':'Tamaño del texto',
-'Diminuir letras e botões':'Reducir letras y botones','Aumentar letras e botões':'Agrandar letras y botones',
+'Diminuir letras':'Reducir letras','Aumentar letras':'Agrandar letras',
 'Ex: A Primeira Revolução Industrial':'Ej.: La Primera Revolución Industrial',
 'Nome da matéria':'Nombre de la asignatura','Série/Ano':'Curso/Año','Capítulo / unidade':'Capítulo / unidad',
 'Título da aula':'Título de la clase','Número / identificador':'Número / identificador','Nome do capítulo':'Nombre del capítulo',
@@ -490,6 +494,9 @@ const I18N={
 'Não foi possível copiar: a memória do navegador está cheia.':'No se pudo copiar: la memoria del navegador está llena.',
 'Série <b>{s}</b> copiada. Abra a matéria de destino e toque em <b>Colar</b>.':'Curso <b>{s}</b> copiado. Abre la asignatura de destino y toca <b>Pegar</b>.',
 'Série <b>{s}</b> colada em {m}.':'Curso <b>{s}</b> pegado en {m}.',
+'Copiar aula':'Copiar clase','Colar aula':'Pegar clase','aula':'clase',
+'Aula <b>{a}</b> copiada. Abra a série de destino e toque em <b>Colar aula</b>.':'Clase <b>{a}</b> copiada. Abre el curso de destino y toca <b>Pegar clase</b>.',
+'Aula <b>{a}</b> colada.':'Clase <b>{a}</b> pegada.',
 'Limite de {n} documentos por vídeo.':'Límite de {n} documentos por vídeo.',
 'Limite de {n} documentos por vídeo — os demais não foram importados.':'Límite de {n} documentos por vídeo — el resto no se importó.',
 '"{f}" passa de {n} MB e não foi importado.':'"{f}" supera los {n} MB y no se importó.',
@@ -587,7 +594,7 @@ const I18N={
 /* ---------- CHINÊS SIMPLIFICADO ---------- */
 'zh':{
 'Organizador de Aulas':'课程管理器',
-'Abrir menu':'打开菜单','Voltar':'返回','Fechar menu':'关闭菜单','Fechar':'关闭',
+'Abrir menu':'打开菜单','Voltar':'返回','Início':'首页','Fechar menu':'关闭菜单','Fechar':'关闭',
 'Mover para cima':'上移','Mover para baixo':'下移','Concluir':'完成',
 'Cancelar':'取消','Salvar':'保存','Salvar vídeo':'保存视频','Editar':'编辑','Remover':'删除',
 'Tutorial':'使用教程','Atualização':'更新','Versão':'版本','Arquivo':'文件','Ajuda':'帮助',
@@ -658,7 +665,7 @@ const I18N={
 'Aviso':'提示','Saiba mais':'了解更多',
 'Horas totais':'总时长','Ministradas':'已授课','Não ministradas':'未授课',
 'sem nome':'未命名','Tamanho do texto':'文字大小',
-'Diminuir letras e botões':'缩小文字和按钮','Aumentar letras e botões':'放大文字和按钮',
+'Diminuir letras':'缩小文字','Aumentar letras':'放大文字',
 'Ex: A Primeira Revolução Industrial':'例：第一次工业革命',
 'Nome da matéria':'科目名称','Série/Ano':'年级','Capítulo / unidade':'章节 / 单元',
 'Título da aula':'课程标题','Número / identificador':'编号 / 标识','Nome do capítulo':'章节名称',
@@ -693,6 +700,9 @@ const I18N={
 'Não foi possível copiar: a memória do navegador está cheia.':'无法复制：浏览器存储空间已满。',
 'Série <b>{s}</b> copiada. Abra a matéria de destino e toque em <b>Colar</b>.':'已复制年级 <b>{s}</b>。请打开目标科目并点击<b>粘贴</b>。',
 'Série <b>{s}</b> colada em {m}.':'已将年级 <b>{s}</b> 粘贴到 {m}。',
+'Copiar aula':'复制课程','Colar aula':'粘贴课程','aula':'课程',
+'Aula <b>{a}</b> copiada. Abra a série de destino e toque em <b>Colar aula</b>.':'已复制课程 <b>{a}</b>。请打开目标年级并点击<b>粘贴课程</b>。',
+'Aula <b>{a}</b> colada.':'已粘贴课程 <b>{a}</b>。',
 'Limite de {n} documentos por vídeo.':'每个视频最多 {n} 个文档。',
 'Limite de {n} documentos por vídeo — os demais não foram importados.':'每个视频最多 {n} 个文档 — 其余未导入。',
 '"{f}" passa de {n} MB e não foi importado.':'"{f}" 超过 {n} MB，未导入。',
@@ -797,6 +807,7 @@ const TUT_ML={
 <p>The <b>Lesson Organizer</b> arranges your video lessons in 5 levels, from general to specific:</p>
 %FIG0%
 <p>Example: <b>HISTORY</b> → <b>11th grade</b> → <b>Lesson 12 (French Revolution)</b> → <b>Chap. 01</b> → <b>YouTube video</b>.</p>
+<p>At the top of every screen, the <b>breadcrumb trail</b> (Home › Subject › Grade › Lesson) shows where you are — tap any level to jump straight back to it.</p>
 <p>Everything works <b>without internet</b> and is saved automatically on the device after every change.</p>`},
 {ic:'ti-menu-2',t:'The ☰ menu',c:`
 <p>The <b>☰</b> button (top-left of the home screen) opens the <b>menu</b> — the app's starting point. Inside you'll find:</p>
@@ -813,7 +824,7 @@ const TUT_ML={
 <ul>
 <li><b>Create:</b> menu ☰ → <b>Create new project</b> → fill in <b>Year</b> and <b>Institution</b>. The new project starts empty and becomes the current one.</li>
 <li><b>Archive:</b> nothing is lost — the previous year stays in the project list.</li>
-<li><b>Switch:</b> tap the school-year bar (home screen) or ☰ → <b>Manage projects</b> and pick a project.</li>
+<li><b>Switch:</b> tap the school-year bar (home screen), or open the ☰ menu and tap a project in the list — it becomes the current project and opens the <b>Manage projects</b> screen. The <b>Manage projects</b> button sits right at the top of the menu.</li>
 <li><b>Keep a copy off the device:</b> use <b>Export backup</b> (Backup section below).</li>
 </ul>`},
 {ic:'ti-books',t:'Subjects and grades',c:`
@@ -821,6 +832,8 @@ const TUT_ML={
 <ul>
 <li><b>New subject:</b> big button at the bottom of the home screen.</li>
 <li><b>New grade:</b> open the subject and tap <b>New grade/year</b>.</li>
+<li><b>Automatic suggestion:</b> when creating a grade, lesson, chapter or project, the app shows the next number in <b>light grey</b> inside the field (e.g. “12th grade” after “11th grade”). To accept it, press the <b>right-arrow → key</b>; for a different value, just type over it.</li>
+<li><b>Copy/paste a grade:</b> the <b>copy</b> icon on the grade card copies the whole grade (lessons, chapters, videos and attachments). Open the target subject — even in <b>another year/project</b> — and tap <b>Paste grade</b>.</li>
 <li>In the grade card, the <b>arrow button (lesson count)</b> opens a compact tree of the lessons.</li>
 <li><b>Hours per grade:</b> the card shows three indicators — <b>Total hours</b> (sum of all video durations), <b>Taught</b> (chapters already marked as done) and <b>Not taught</b> (what's still left). They update automatically as you check off chapters.</li>
 <li>The <b>report</b> icon on the grade generates a Word/PDF document with the whole structure.</li>
@@ -830,6 +843,7 @@ const TUT_ML={
 <p>Inside the grade are the <b>lessons</b> (numbered automatically) and, inside each lesson, the <b>chapters</b>.</p>
 %FIG2%
 <ul>
+<li><b>Copy/paste a lesson:</b> the <b>copy</b> icon on the lesson card copies the whole lesson (chapters, videos and attachments). Open the target grade — it can be in <b>another year/project</b> — and tap the <b>Paste lesson</b> button that appears at the bottom.</li>
 <li>The chapter <b>checkbox</b> controls the pending state: checked = still to be taught; empty = already taught. The “● to teach” counters roll up to lesson, grade and subject.</li>
 <li>The <b>CP1…CP11 chips</b> light up when a chapter has content; tapping a lit chip scrolls to that chapter.</li>
 <li><b>Notes:</b> each chapter has a small “Notes” panel (collapsed by default) for free-form notes — reminders, tasks, book pages. The ● dot shows there is saved text.</li>
@@ -862,11 +876,12 @@ const TUT_ML={
 <li><b>Dark</b> — OLED black with white neon.</li>
 <li><b>Prometheus</b> — cyan sci-fi HUD (the app's signature).</li>
 <li><b>P. Red</b> and <b>P. Blue</b> — Prometheus variations.</li>
-</ol>`},
-{ic:'ti-eye',t:'Bigger text and zoom',c:`
-<p>If you prefer bigger text and buttons:</p>
+</ol>
+<p>In the three <b>Prometheus</b> themes, each card becomes a <b>3D glass box</b>: tap it and it sways gently, then settles back on its own. (The effect honours the device's “reduce motion” setting.)</p>`},
+{ic:'ti-eye',t:'Text size and zoom',c:`
+<p>If you prefer bigger text:</p>
 <ul>
-<li><b>☰ → Text size:</b> tap <b>A+</b> to enlarge the text and buttons of the whole app (up to 150%) and <b>A−</b> to go back. The choice is saved.</li>
+<li><b>☰ → Text size:</b> tap <b>A+</b> to enlarge the text and <b>A−</b> to shrink it. There are <b>4 sizes</b>, from 100% up to 145%; the choice is saved. Buttons and icons stay put, so nothing falls out of place.</li>
 <li><b>Pinch zoom:</b> on phones and tablets you can also zoom into any screen by spreading two fingers on it (pinch gesture).</li>
 </ul>`},
 {ic:'ti-report',t:'Reports and exports',c:`
@@ -919,6 +934,7 @@ const TUT_ML={
 <p>El <b>Organizador de Clases</b> organiza tus clases en vídeo en 5 niveles, de lo general a lo específico:</p>
 %FIG0%
 <p>Ejemplo: <b>HISTORIA</b> → <b>2.º de bachillerato</b> → <b>Clase 12 (Revolución Francesa)</b> → <b>Cap. 01</b> → <b>vídeo de YouTube</b>.</p>
+<p>En la parte superior de cada pantalla, la <b>ruta de navegación</b> (Inicio › Asignatura › Curso › Clase) muestra dónde estás — toca cualquier nivel para volver directamente a él.</p>
 <p>Todo funciona <b>sin internet</b> y se guarda automáticamente en el dispositivo con cada cambio.</p>`},
 {ic:'ti-menu-2',t:'El menú ☰',c:`
 <p>El botón <b>☰</b> (arriba a la izquierda de la pantalla inicial) abre el <b>menú</b> — el punto de partida de la app. Dentro encontrarás:</p>
@@ -935,7 +951,7 @@ const TUT_ML={
 <ul>
 <li><b>Crear:</b> menú ☰ → <b>Crear nuevo proyecto</b> → rellena <b>Año</b> e <b>Institución</b>. El proyecto nuevo empieza vacío y pasa a ser el actual.</li>
 <li><b>Archivar:</b> no se pierde nada — el año anterior queda guardado en la lista de proyectos.</li>
-<li><b>Cambiar:</b> toca la barra del año lectivo (pantalla inicial) o ☰ → <b>Gestionar proyectos</b> y elige el proyecto.</li>
+<li><b>Cambiar:</b> toca la barra del año lectivo (pantalla inicial), o abre el menú ☰ y toca un proyecto de la lista — pasa a ser el proyecto en uso y abre la pantalla de <b>Gestionar proyectos</b>. El botón <b>Gestionar proyectos</b> está justo arriba en el menú.</li>
 <li><b>Guardar fuera del dispositivo:</b> usa <b>Exportar copia de seguridad</b> (sección más abajo).</li>
 </ul>`},
 {ic:'ti-books',t:'Asignaturas y cursos',c:`
@@ -943,6 +959,8 @@ const TUT_ML={
 <ul>
 <li><b>Nueva asignatura:</b> botón grande al pie de la pantalla inicial.</li>
 <li><b>Nuevo curso:</b> abre la asignatura y toca <b>Nuevo curso/año</b>.</li>
+<li><b>Sugerencia automática:</b> al crear un curso, clase, capítulo o proyecto, la app muestra el siguiente número en <b>gris claro</b> dentro del campo (p. ej. “3.º curso” tras “2.º curso”). Para aceptarlo, pulsa la <b>tecla de flecha → derecha</b>; para otro valor, basta con escribir encima.</li>
+<li><b>Copiar/pegar un curso:</b> el icono de <b>copiar</b> en la tarjeta del curso copia el curso entero (clases, capítulos, vídeos y adjuntos). Abre la asignatura de destino — incluso de <b>otro año/proyecto</b> — y toca <b>Pegar curso</b>.</li>
 <li>En el curso, el botón con la <b>flecha (n.º de clases)</b> abre el árbol resumido de las clases.</li>
 <li><b>Horas de cada curso:</b> la tarjeta muestra tres indicadores — <b>Horas totales</b> (suma de la duración de todos los vídeos), <b>Impartidas</b> (capítulos ya marcados como dados) y <b>No impartidas</b> (lo que aún falta). Se actualizan solos a medida que marcas los capítulos.</li>
 <li>El icono de <b>informe</b> del curso genera un documento Word/PDF con toda la estructura.</li>
@@ -952,6 +970,7 @@ const TUT_ML={
 <p>Dentro del curso están las <b>clases</b> (numeradas automáticamente) y, dentro de cada clase, los <b>capítulos</b>.</p>
 %FIG2%
 <ul>
+<li><b>Copiar/pegar una clase:</b> el icono de <b>copiar</b> en la tarjeta de la clase copia la clase entera (capítulos, vídeos y adjuntos). Abre el curso de destino — puede ser de <b>otro año/proyecto</b> — y toca el botón <b>Pegar clase</b> que aparece abajo.</li>
 <li>La <b>casilla</b> del capítulo controla lo pendiente: marcada = aún falta impartirlo; vacía = ya impartido. Los contadores “● por impartir” suben a clase, curso y asignatura.</li>
 <li>Los <b>chips CP1…CP11</b> se encienden cuando el capítulo tiene contenido; tocar un chip encendido desplaza hasta ese capítulo.</li>
 <li><b>Notas:</b> cada capítulo tiene un panel “Notas” (plegado por defecto) para anotaciones libres — recordatorios, tareas, páginas del libro. El punto ● indica que hay texto guardado.</li>
@@ -984,11 +1003,12 @@ const TUT_ML={
 <li><b>Oscuro</b> — negro OLED con neón blanco.</li>
 <li><b>Prometeo</b> — HUD de ciencia ficción cian (la firma de la app).</li>
 <li><b>P. Rojo</b> y <b>P. Azul</b> — variaciones del Prometeo.</li>
-</ol>`},
-{ic:'ti-eye',t:'Letras más grandes y zoom',c:`
-<p>Para quien prefiere letras y botones más grandes:</p>
+</ol>
+<p>En los tres temas <b>Prometeo</b>, cada tarjeta se convierte en una <b>caja de cristal 3D</b>: al tocarla, se balancea suavemente y vuelve sola. (El efecto respeta la opción “reducir movimiento” del dispositivo.)</p>`},
+{ic:'ti-eye',t:'Tamaño del texto y zoom',c:`
+<p>Para quien prefiere letras más grandes:</p>
 <ul>
-<li><b>☰ → Tamaño del texto:</b> toca <b>A+</b> para agrandar las letras y los botones de toda la app (hasta el 150%) y <b>A−</b> para volver. La elección queda guardada.</li>
+<li><b>☰ → Tamaño del texto:</b> toca <b>A+</b> para agrandar las letras y <b>A−</b> para reducirlas. Hay <b>4 tamaños</b>, del 100% hasta el 145%; la elección queda guardada. Los botones y los iconos se quedan en su sitio, así que nada se descoloca.</li>
 <li><b>Zoom de pellizco:</b> en móviles y tabletas también puedes ampliar cualquier pantalla separando dos dedos sobre ella (gesto de pellizco).</li>
 </ul>`},
 {ic:'ti-report',t:'Informes y exportaciones',c:`
@@ -1041,6 +1061,7 @@ const TUT_ML={
 <p><b>课程管理器</b>将你的视频课程按 5 个层级组织，从整体到具体：</p>
 %FIG0%
 <p>示例：<b>历史</b> → <b>高二</b> → <b>第 12 课（法国大革命）</b> → <b>第 1 章</b> → <b>YouTube 视频</b>。</p>
+<p>每个屏幕顶部都有<b>导航路径</b>（首页 › 科目 › 年级 › 课程），显示你当前的位置——点按任一层级即可直接返回。</p>
 <p>一切<b>无需网络</b>即可使用，每次更改都会自动保存在设备上。</p>`},
 {ic:'ti-menu-2',t:'☰ 菜单',c:`
 <p><b>☰</b> 按钮（主屏幕左上角）打开<b>菜单</b> —— 这是使用应用的起点。里面有：</p>
@@ -1057,7 +1078,7 @@ const TUT_ML={
 <ul>
 <li><b>创建：</b>菜单 ☰ → <b>新建项目</b> → 填写<b>年份</b>和<b>学校</b>。新项目从空白开始并成为当前项目。</li>
 <li><b>归档：</b>不会丢失任何内容 — 上一学年保留在项目列表中。</li>
-<li><b>切换：</b>点按主屏幕的学年栏，或 ☰ → <b>管理项目</b>并选择项目。</li>
+<li><b>切换：</b>点按主屏幕的学年栏，或打开 ☰ 菜单并点按列表中的某个项目——它会成为当前项目并打开<b>管理项目</b>屏幕。<b>管理项目</b>按钮就在菜单顶部。</li>
 <li><b>保存到设备之外：</b>使用<b>导出备份</b>（见下方备份部分）。</li>
 </ul>`},
 {ic:'ti-books',t:'科目与年级',c:`
@@ -1065,6 +1086,8 @@ const TUT_ML={
 <ul>
 <li><b>新科目：</b>主屏幕底部的大按钮。</li>
 <li><b>新年级：</b>打开科目后点按<b>新年级</b>。</li>
+<li><b>自动建议：</b>创建年级、课程、章节或项目时，应用会在输入框中以<b>浅灰色</b>显示下一个编号（例如“高二”之后显示“高三”）。按键盘上的<b>右箭头 → 键</b>即可接受；若要其他值，直接输入覆盖即可。</li>
+<li><b>复制/粘贴年级：</b>年级卡片上的<b>复制</b>图标可复制整个年级（课程、章节、视频和附件）。打开目标科目——甚至是<b>另一个学年/项目</b>——再点按<b>粘贴年级</b>。</li>
 <li>年级卡片上的<b>箭头按钮（课程数）</b>可展开课程树。</li>
 <li><b>每个年级的时长：</b>卡片显示三个指标——<b>总时长</b>（所有视频时长之和）、<b>已授课</b>（已标记为完成的章节）和<b>未授课</b>（尚未完成的部分）。勾选章节时它们会自动更新。</li>
 <li>年级上的<b>报告</b>图标可生成包含整个结构的 Word/PDF 文档。</li>
@@ -1074,6 +1097,7 @@ const TUT_ML={
 <p>年级内是自动编号的<b>课程</b>，每节课内是<b>章节</b>。</p>
 %FIG2%
 <ul>
+<li><b>复制/粘贴课程：</b>课程卡片上的<b>复制</b>图标可复制整节课（章节、视频和附件）。打开目标年级——可以是<b>另一个学年/项目</b>——再点按底部出现的<b>粘贴课程</b>按钮。</li>
 <li>章节的<b>勾选框</b>控制待办状态：勾选 = 尚未授课；空 = 已授课。“● 待授课”计数会汇总到课程、年级和科目。</li>
 <li><b>CP1…CP11 圆片</b>在章节有内容时亮起；点按亮起的圆片可滚动到对应章节。</li>
 <li><b>备注：</b>每个章节都有一个默认收起的“备注”面板，可自由记录 — 提醒、任务、教材页码。● 圆点表示已保存文字。</li>
@@ -1106,11 +1130,12 @@ const TUT_ML={
 <li><b>深色</b> — OLED 纯黑配白色霓虹。</li>
 <li><b>普罗米修斯</b> — 青色科幻 HUD（应用的招牌）。</li>
 <li><b>普罗米修斯·红</b>和<b>普罗米修斯·蓝</b> — 两种变体。</li>
-</ol>`},
-{ic:'ti-eye',t:'放大文字与缩放',c:`
-<p>如果您更喜欢较大的文字和按钮：</p>
+</ol>
+<p>在三个<b>普罗米修斯</b>主题中，每张卡片都会变成一个<b>3D 玻璃盒</b>：点按时它会轻轻摇摆，然后自动复位。（该效果会遵循设备的“减弱动态效果”设置。）</p>`},
+{ic:'ti-eye',t:'文字大小与缩放',c:`
+<p>如果您更喜欢较大的文字：</p>
 <ul>
-<li><b>☰ → 文字大小：</b>点按 <b>A+</b> 可放大整个应用的文字和按钮（最高 150%），点按 <b>A−</b> 恢复。选择会被保存。</li>
+<li><b>☰ → 文字大小：</b>点按 <b>A+</b> 放大文字，点按 <b>A−</b> 缩小。共有 <b>4 种大小</b>，从 100% 到 145%；选择会被保存。按钮和图标保持原位，因此不会错位。</li>
 <li><b>双指缩放：</b>在手机和平板上，也可以在任意屏幕上张开两根手指进行放大（捏合手势）。</li>
 </ul>`},
 {ic:'ti-report',t:'报告与导出',c:`

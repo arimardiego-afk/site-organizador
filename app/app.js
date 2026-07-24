@@ -95,7 +95,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.3', APP_DATE='julho de 2026';
+const APP_VERSION='3.4', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -307,9 +307,21 @@ function toggleTree(id){
   wrap.classList.toggle('open',open);
   if(btn)btn.classList.toggle('open',open);
 }
+/* ===== Trilha de navegação (breadcrumb) — mostra em que nível o usuário está.
+   partes = [{t:'texto', go:'s-x'}]; o ÚLTIMO é a tela atual (sem link).
+   Reaproveita goBack(), que já re-renderiza a tela de destino. ===== */
+function setCrumbs(elId,partes){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML=partes.map((p,i)=>{
+    const txt=escH(p.t||'—');
+    if(i===partes.length-1)return `<span class="crumb crumb-cur" aria-current="page">${txt}</span>`;
+    return `<button class="crumb" onclick="goBack('${p.go}')">${txt}</button><span class="crumb-sep" aria-hidden="true">›</span>`;
+  }).join('');
+}
 function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas no botão
   saveDB();
   document.getElementById('mat-ttl').textContent=curMat||'';
+  setCrumbs('bc-series',[{t:tr('Início'),go:'s-main'},{t:curMat||''}]);
   const el=document.getElementById('list-series');
   const ds=matDiscs(curMat);
   refreshColarBtn(); // antes do return de lista vazia: colar numa matéria sem séries é o caso mais útil
@@ -358,7 +370,10 @@ function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas n
 }
 function openAddSerie(){
   if(!exigirAtivacao())return;
-  openModal(trf('Nova série/ano — {m}',{m:curMat}),[{id:'md-t',lbl:'Série/Ano',ph:'Ex: 6° ANO'},{id:'md-c',lbl:'Capítulo / unidade',ph:'Ex: Cap. 01 — Brasil Colônia'}],()=>{
+  // sugere a próxima série e o próximo capítulo a partir da última série desta matéria
+  const irmas=db.disciplinas.filter(d=>d.nome===curMat),ult=irmas[irmas.length-1];
+  const sugT=ult?sugerirProximo(ult.turma):'',sugC=ult?sugerirProximo(ult.capitulo):'';
+  openModal(trf('Nova série/ano — {m}',{m:curMat}),[{id:'md-t',lbl:'Série/Ano',ph:'Ex: 6° ANO',sug:sugT},{id:'md-c',lbl:'Capítulo / unidade',ph:'Ex: Cap. 01 — Brasil Colônia',sug:sugC}],()=>{
     const turma=vi('md-t');if(!turma){alert(tr('Informe a série/ano.'));return;}
     db.disciplinas.push({id:nid(),nome:curMat,turma,capitulo:vi('md-c'),aulas:[]});closeModal();renderSeries();
   });
@@ -409,6 +424,46 @@ function colarSerie(){
   refreshColarBtn();
   showToast(trf('Série <b>{s}</b> colada em {m}.',{s:escH(nova.turma),m:escH(curMat||'')}),4000);
 }
+/* ===== Copiar e colar uma AULA (com capítulos e vídeos) =====
+   Mesma ideia da série: a "área de transferência" fica no localStorage, então
+   sobrevive a fechar o app e permite colar em OUTRA série — ou até em outro ano. */
+const CLIPA_KEY='prometeu.clip.aula.v1';
+function lerClipAula(){try{return JSON.parse(localStorage.getItem(CLIPA_KEY)||'null');}catch(e){return null;}}
+function copiarAula(id){
+  const disc=getDisc(curDiscId);if(!disc)return;
+  const a=getAula(disc,id);if(!a)return;
+  try{localStorage.setItem(CLIPA_KEY,JSON.stringify({titulo:a.titulo,caps:a.caps}));}
+  catch(e){alert(tr('Não foi possível copiar: a memória do navegador está cheia.'));return;}
+  refreshColarAulaBtn();
+  showToast(trf('Aula <b>{a}</b> copiada. Abra a série de destino e toque em <b>Colar aula</b>.',{a:escH(a.titulo||'')}),6000);
+}
+// mostra/esconde o botão Colar aula e escreve nele o título da aula copiada
+function refreshColarAulaBtn(){
+  const b=document.getElementById('fab-colar-aula');if(!b)return;
+  const c=lerClipAula();
+  b.hidden=!c;
+  if(c)document.getElementById('fab-colar-aula-lbl').textContent=trf('Colar {s}',{s:c.titulo||tr('aula')});
+}
+function colarAula(){
+  if(!exigirAtivacao())return;
+  const disc=getDisc(curDiscId);if(!disc)return;
+  const c=lerClipAula();if(!c){showToast(tr('Nada foi copiado ainda.'),3000);return;}
+  const novoId=geradorId();
+  const num=(disc.aulas.reduce((m,a)=>Math.max(m,a.numero),0))+1;
+  // ids novos em todos os níveis; os fid dos anexos são MANTIDOS de propósito —
+  // o blob no IndexedDB é o mesmo arquivo, compartilhado (igual ao colar série)
+  const nova={id:novoId(),numero:num,titulo:c.titulo||'',
+    caps:(c.caps||[]).map(cp=>({id:novoId(),num:cp.num||'',nome:cp.nome||'',apresentado:!!cp.apresentado,obs:cp.obs||'',
+      videos:(cp.videos||[]).map(v=>({...v,id:novoId(),
+        materiais:(v.materiais||[]).map(m=>({...m})),
+        arquivos:(v.arquivos||[]).map(f=>({...f}))}))}))};
+  disc.aulas.push(nova);
+  // colou: esvazia a área de transferência e esconde o FAB (correção da v3.3)
+  try{localStorage.removeItem(CLIPA_KEY);}catch(e){}
+  renderAulas();
+  refreshColarAulaBtn();
+  showToast(trf('Aula <b>{a}</b> colada.',{a:escH(nova.titulo)}),4000);
+}
 function openDisc(id){pushNav();curDiscId=id;renderAulas();showScreen('s-disc');}
 function openAddDisc(){if(!exigirAtivacao())return;openModal(tr('Nova matéria'),[{id:'md-n',lbl:'Nome da matéria',ph:'Ex: HISTÓRIA'},{id:'md-t',lbl:'Série/Ano',ph:'Ex: 6° ANO'},{id:'md-c',lbl:'Capítulo / unidade',ph:'Ex: Cap. 01 — Brasil Colônia'}],()=>{
   const nome=vi('md-n');if(!nome){alert(tr('Informe o nome.'));return;}
@@ -431,7 +486,9 @@ function removeDisc(id){
 function renderAulas(){
   saveDB();
   const disc=getDisc(curDiscId);if(!disc)return;
+  refreshColarAulaBtn(); // colar numa série sem aulas é o caso mais útil — antes de qualquer return
   document.getElementById('disc-ttl').textContent=`${disc.nome}${disc.turma?' — '+disc.turma:''}`;
+  setCrumbs('bc-disc',[{t:tr('Início'),go:'s-main'},{t:disc.nome||'',go:'s-series'},{t:disc.turma||'—'}]);
   document.getElementById('disc-cap-lbl').textContent=disc.capitulo||'Toque para editar';
   const el=document.getElementById('list-aulas');
   if(!disc.aulas.length){el.innerHTML='<div class="empty"><i class="ti ti-video-off" aria-hidden="true"></i><p>Nenhuma aula.<br>Toque em <b>Nova aula</b>.</p></div>';return;}
@@ -446,6 +503,7 @@ function renderAulas(){
         <div class="ac">${(()=>{const cps=a.caps.map((c,i)=>c.videos.length?`CP${i+1}`:null).filter(Boolean);return cps.length?cps.join(' · '):'Sem conteúdo nos capítulos';})()}</div>
       </div>
       <div class="side-btns">
+        <button class="iBtn" onclick="copiarAula(${a.id})" aria-label="Copiar aula"><i class="ti ti-copy" aria-hidden="true"></i></button>
         <button class="iBtn edt" onclick="openEditAula(${a.id})" aria-label="Editar"><i class="ti ti-edit" aria-hidden="true"></i></button>
         <button class="iBtn del" onclick="removeAula(${a.id})" aria-label="Remover"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
@@ -455,7 +513,10 @@ function openAula(id){pushNav();curAulaId=id;selCP=null;renderCaps();showScreen(
 function openAddAula(){
   if(!exigirAtivacao())return;
   const disc=getDisc(curDiscId);
-  openModal(tr('Nova aula'),[{id:'ma-t',lbl:'Título da aula',ph:'Ex: A Sociedade Patriarcal'}],()=>{
+  // sugere o próximo título só quando o último traz número (ex.: "Aula 03" → "Aula 04")
+  const ultA=disc.aulas[disc.aulas.length-1];
+  const sugTit=(ultA&&/\d/.test(ultA.titulo||''))?sugerirProximo(ultA.titulo):'';
+  openModal(tr('Nova aula'),[{id:'ma-t',lbl:'Título da aula',ph:'Ex: A Sociedade Patriarcal',sug:sugTit}],()=>{
     const titulo=vi('ma-t');if(!titulo){alert(tr('Informe o título.'));return;}
     const num=(disc.aulas.reduce((m,a)=>Math.max(m,a.numero),0))+1;
     disc.aulas.push({id:nid(),numero:num,titulo,cps:[],caps:[]});closeModal();renderAulas();
@@ -508,6 +569,7 @@ function renderCaps(){
   const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);if(!aula)return;
   document.getElementById('aula-num-ttl').textContent=trf('Aula {n}',{n:String(aula.numero).padStart(2,'0')});
   document.getElementById('aula-titulo-lbl').textContent=aula.titulo;
+  setCrumbs('bc-aula',[{t:tr('Início'),go:'s-main'},{t:disc.nome||'',go:'s-series'},{t:disc.turma||'—',go:'s-disc'},{t:trf('Aula {n}',{n:String(aula.numero).padStart(2,'0')})}]);
   const totalVids=aula.caps.reduce((s,c)=>s+c.videos.length,0);
   const pend=aulaPend(aula),feitos=aulaMinistrados(aula),comConteudo=pend+feitos;
   const pendTxt=comConteudo>0?(pend>0?` · <span class="pend-badge" style="display:inline-flex">● ${pend} a ministrar</span>`:' · <span class="done-badge" style="display:inline-flex">✓ tudo ministrado</span>'):'';
@@ -601,10 +663,12 @@ function selectCP(n,capId){
 function openAddCap(){
   if(!exigirAtivacao())return;
   const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);
-  openModal(tr('Novo capítulo'),[{id:'cf-num',lbl:'Número / identificador',ph:'Ex: Cap. 01',val:`Cap. ${String(aula.caps.length+1).padStart(2,'0')}`},{id:'cf-nome',lbl:'Nome do capítulo',ph:'Ex: Ciclo do Pau Brasil'}],()=>{
+  // capítulo numerado como "fantasma": aceita com a seta →, ou entra sozinho se o professor não digitar nada
+  const sugNum=`Cap. ${String(aula.caps.length+1).padStart(2,'0')}`;
+  openModal(tr('Novo capítulo'),[{id:'cf-num',lbl:'Número / identificador',ph:'Ex: Cap. 01',sug:sugNum},{id:'cf-nome',lbl:'Nome do capítulo',ph:'Ex: Ciclo do Pau Brasil'}],()=>{
     const nome=vi('cf-nome');if(!nome){alert(tr('Informe o nome.'));return;}
     const capId=nid();
-    aula.caps.push({id:capId,num:vi('cf-num'),nome,videos:[]});
+    aula.caps.push({id:capId,num:vi('cf-num')||sugNum,nome,videos:[]});
     openCaps.add(capId); // capítulo novo abre expandido
     closeModal();renderCaps();
   });
@@ -662,6 +726,7 @@ function goToFormVid(capId,vidId){
   const vid=vidId?cap.videos.find(x=>x.id===vidId):null;
   const numVid=vid?cap.videos.indexOf(vid)+1:cap.videos.length+1;
   document.getElementById('vid-form-ttl').textContent=vid?trf('Editar V{v} — {c}',{v:numVid,c:cap.num}):trf('Novo vídeo — {c}',{c:cap.num||cap.nome});
+  setCrumbs('bc-vid',[{t:tr('Início'),go:'s-main'},{t:disc.nome||'',go:'s-series'},{t:disc.turma||'—',go:'s-disc'},{t:trf('Aula {n}',{n:String(aula.numero).padStart(2,'0')}),go:'s-aula'},{t:vid?(vid.nome||tr('Novo vídeo')):tr('Novo vídeo')}]);
   document.getElementById('vf-nome').value=vid?.nome||'';
   document.getElementById('vf-link').value=vid?.link||'';
   document.getElementById('vf-dur').value=vid&&vid.dur&&vid.dur!=='--:--'?vid.dur:'';
@@ -1434,15 +1499,42 @@ function checarDraft(){ // no boot: oferece restaurar um formulário que ficou a
   if((d.resumo||'').trim()&&!resumoOpen)toggleResumo();
 }
 
+/* Sugere o "próximo" valor incrementando o último número do texto e preservando
+   os zeros à esquerda: "Aula 04"→"Aula 05", "6° ANO"→"7° ANO", "2025"→"2026".
+   Texto sem número volta igual (nada a sugerir). */
+function sugerirProximo(txt){
+  if(txt==null)return '';
+  const m=String(txt).match(/^(.*?)(\d+)(\D*)$/);
+  if(!m)return String(txt);
+  const largura=m[2].length,n=parseInt(m[2],10)+1;
+  return m[1]+String(n).padStart(largura,'0')+m[3];
+}
 function openModal(title,fields,cb){
   pushNav();
   document.getElementById('modal-title').textContent=title;
   document.getElementById('modal-fields').innerHTML=fields.map(f=>{
-    const campo=f.type==='select'
-      ?`<select class="finput" id="${f.id}">${(f.opts||[]).map(o=>`<option value="${escH(o.v)}"${o.v===(f.val||'')?' selected':''}>${escH(o.t)}</option>`).join('')}</select>`
-      :`<input class="finput" id="${f.id}" placeholder="${escH(f.ph||'')}" value="${escH(f.val||'')}"/>`;
+    let campo;
+    if(f.type==='select'){
+      campo=`<select class="finput" id="${f.id}">${(f.opts||[]).map(o=>`<option value="${escH(o.v)}"${o.v===(f.val||'')?' selected':''}>${escH(o.t)}</option>`).join('')}</select>`;
+    }else if(f.sug&&!f.val){
+      // sugestão "fantasma": texto cinza que a seta → do teclado aceita por inteiro
+      campo=`<div class="fwrap"><input class="finput" id="${f.id}" placeholder="" value="" autocomplete="off"/><span class="fghost" id="${f.id}-gh">${escH(f.sug)}</span></div>`;
+    }else{
+      campo=`<input class="finput" id="${f.id}" placeholder="${escH(f.ph||'')}" value="${escH(f.val||'')}"/>`;
+    }
     return `<div style="margin-bottom:12px"><label class="flbl">${escH(f.lbl)}</label>${campo}</div>`;
   }).join('');
+  // liga o "ghost text": a seta → do teclado (o tablet tem setas) aceita a sugestão
+  fields.forEach(f=>{
+    if(f.type==='select'||!(f.sug&&!f.val))return;
+    const inp=document.getElementById(f.id),gh=document.getElementById(f.id+'-gh');
+    if(!inp||!gh)return;
+    const upd=()=>{gh.style.display=inp.value?'none':'';};
+    inp.addEventListener('input',upd);
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight'&&!inp.value){inp.value=f.sug;upd();e.preventDefault();}
+    });
+  });
   _mcb=cb;document.getElementById('modal-ok').onclick=()=>_mcb&&_mcb();
   document.getElementById('modal').classList.add('open');
   setTimeout(()=>{const el=document.getElementById(fields[0].id);if(el){el.focus();if(fields[0].val&&typeof el.select==='function')el.select();}},60);
@@ -1493,13 +1585,16 @@ function renderProjetos(){
 function novoProjeto(){
   closeMenu();
   if(!exigirAtivacao())return;
+  // sugere o ano seguinte ao projeto mais recente (ou o ano atual, se não houver)
+  const anos=projReg.projetos.map(p=>parseInt(p.ano,10)).filter(n=>!isNaN(n));
+  const sugAno=anos.length?String(Math.max(...anos)+1):String(new Date().getFullYear());
   openModal(tr('Criar novo projeto (ano letivo)'),[
-    {id:'pj-ano',lbl:'Ano',ph:'Ex: '+new Date().getFullYear(),val:String(new Date().getFullYear())},
+    {id:'pj-ano',lbl:'Ano',ph:'Ex: '+new Date().getFullYear(),sug:sugAno},
     {id:'pj-inst',lbl:'Instituição',ph:'Ex: Escola Estadual …'},
     {id:'pj-prof',lbl:tr('Professor'),ph:tr('Ex: Nome do professor')},
     {id:'pj-form',lbl:tr('Formação'),type:'select',opts:formacaoOpts()}
   ],()=>{
-    const ano=vi('pj-ano');if(!ano){alert(tr('Informe o ano.'));return;}
+    const ano=vi('pj-ano')||sugAno;if(!ano){alert(tr('Informe o ano.'));return;}
     saveDB(); // garante o projeto atual salvo antes de trocar
     const id=nid();
     try{localStorage.setItem(projKey(id),'{"disciplinas":[]}');}catch(e){alert(tr('Sem espaço no navegador para criar o projeto.'));return;}
@@ -1516,6 +1611,19 @@ function ativarProjeto(id){
   loadDB();refreshProjUI();renderDiscs();showScreen('s-main');
   const p=curProj();
   showToast(trf('<b>Projeto ativo:</b> {p}.',{p:escH(projNome(p))}),5000);
+}
+// ☰ → tocar num projeto da lista: ativa (se for outro) E abre o gerenciamento (s-proj),
+// inclusive quando já é o projeto ativo. Só a lista do menu usa isto; a tela s-proj
+// continua com ativarProjeto (que volta para a home).
+function ativarProjetoDrawer(id){
+  if(id!==projReg.ativo){
+    saveDB();
+    projReg.ativo=id;saveProjects();
+    loadDB();refreshProjUI();renderDiscs();
+    const p=curProj();
+    showToast(trf('<b>Projeto ativo:</b> {p}.',{p:escH(projNome(p))}),4000);
+  }
+  openProjetos(); // pushNav()+closeMenu()+renderProjetos()+showScreen('s-proj')
 }
 function editProjeto(id){
   const p=projReg.projetos.find(x=>x.id===id);if(!p)return;
@@ -1578,7 +1686,7 @@ function refreshProjUI(){
     const lista=[ativo,...outros].filter(Boolean).slice(0,PROJ_BAR_MAX);
     box.innerHTML=lista.map(pr=>{
       const on=pr.id===projReg.ativo;
-      return `<button class="dw-projitem${on?' on':''}" onclick="ativarProjeto(${pr.id})"><i class="ti ti-archive" aria-hidden="true"></i><span>${escH(projNome(pr))}</span>${on?'<b>✓</b>':''}</button>`;
+      return `<button class="dw-projitem${on?' on':''}" onclick="ativarProjetoDrawer(${pr.id})"><i class="ti ti-archive" aria-hidden="true"></i><span>${escH(projNome(pr))}</span>${on?'<b>✓</b>':''}</button>`;
     }).join('');
     paintIcons();
   }
@@ -1678,6 +1786,7 @@ const TUT=[
 <p>O <b>Organizador de Aulas</b> organiza suas aulas em vídeo em 5 níveis, do geral para o específico:</p>
 %FIG0%
 <p>Exemplo: <b>HISTÓRIA</b> → <b>2° ano EM</b> → <b>Aula 12 (Revolução Francesa)</b> → <b>Cap. 01</b> → <b>vídeo do YouTube</b>.</p>
+<p>No alto de cada tela, a <b>trilha de navegação</b> (Início › Matéria › Série › Aula) mostra onde você está — toque em qualquer nível para voltar direto a ele.</p>
 <p>Tudo funciona <b>sem internet</b> e é salvo automaticamente no aparelho a cada alteração.</p>`},
 {ic:'ti-menu-2',t:'O menu ☰',c:`
 <p>O botão <b>☰</b> (canto superior esquerdo da tela inicial) abre o <b>menu</b> — é por ele que se começa a usar o app. Lá dentro estão:</p>
@@ -1694,7 +1803,7 @@ const TUT=[
 <ul>
 <li><b>Criar:</b> menu ☰ → <b>Criar novo projeto</b> → preencha <b>Ano</b> e <b>Instituição</b>. O projeto novo começa vazio e vira o projeto em uso.</li>
 <li><b>Arquivar:</b> nada se perde — o ano anterior fica guardado na lista de projetos.</li>
-<li><b>Trocar:</b> toque na barra do ano letivo (na tela inicial) ou em ☰ → <b>Gerenciar projetos</b> e escolha o projeto.</li>
+<li><b>Trocar:</b> toque na barra do ano letivo (na tela inicial) ou abra o menu ☰ e toque no projeto na lista — ele vira o projeto em uso e já abre a tela de <b>Gerenciar projetos</b>. O botão <b>Gerenciar projetos</b> fica logo no topo do menu.</li>
 <li><b>Guardar fora do aparelho:</b> use <b>Exportar backup</b> (seção Backup, mais abaixo).</li>
 </ul>`},
 {ic:'ti-books',t:'Matérias e séries',c:`
@@ -1702,6 +1811,8 @@ const TUT=[
 <ul>
 <li><b>Nova matéria:</b> botão grande no rodapé da tela inicial.</li>
 <li><b>Nova série:</b> abra a matéria e toque em <b>Nova série/ano</b>.</li>
+<li><b>Sugestão automática:</b> ao criar série, aula, capítulo ou projeto, o app mostra o próximo número em <b>cinza-claro</b> dentro do campo (ex.: “3° ANO” depois de “2° ANO”). Para aceitar, aperte a <b>seta → do teclado</b>; para outro valor, é só digitar por cima.</li>
+<li><b>Copiar/colar série:</b> o ícone de <b>copiar</b> no cartão da série copia a série inteira (aulas, capítulos, vídeos e anexos). Abra a matéria de destino — inclusive de <b>outro ano/projeto</b> — e toque em <b>Colar série</b>.</li>
 <li>Na série, o botão com a <b>setinha (nº de aulas)</b> abre a árvore resumida das aulas.</li>
 <li><b>Horas de cada série:</b> o cartão mostra três indicadores — <b>Horas totais</b> (soma da duração de todos os vídeos), <b>Ministradas</b> (capítulos já marcados como dados) e <b>Não ministradas</b> (o que ainda falta). Eles se atualizam sozinhos conforme você marca os capítulos.</li>
 <li>O ícone de <b>relatório</b> na série gera um documento Word/PDF com toda a estrutura.</li>
@@ -1711,6 +1822,7 @@ const TUT=[
 <p>Dentro da série ficam as <b>aulas</b> (numeradas automaticamente) e, dentro de cada aula, os <b>capítulos</b>.</p>
 %FIG2%
 <ul>
+<li><b>Copiar/colar aula:</b> o ícone de <b>copiar</b> no cartão da aula copia a aula inteira (capítulos, vídeos e anexos). Abra a série de destino — pode ser de <b>outro ano/projeto</b> — e toque no botão <b>Colar aula</b> que surge no rodapé.</li>
 <li>A <b>caixinha</b> do capítulo controla a pendência: marcada = ainda falta dar essa aula; vazia = já ministrada. Os contadores “● a ministrar” sobem para aula, série e matéria.</li>
 <li>Os <b>chips CP1…CP11</b> acendem quando o capítulo tem conteúdo; tocar num chip aceso rola até o capítulo.</li>
 <li><b>Observações:</b> cada capítulo tem uma janelinha “Observações” (recolhida por padrão) para anotações livres — lembretes, tarefas, páginas do livro. O ponto ● indica que há texto salvo.</li>
@@ -1743,11 +1855,12 @@ const TUT=[
 <li><b>Escuro</b> — preto OLED com néon branco.</li>
 <li><b>Prometeu</b> — HUD sci-fi ciano (assinatura do app).</li>
 <li><b>P. Vermelho</b> e <b>P. Azul</b> — variações do Prometeu.</li>
-</ol>`},
-{ic:'ti-eye',t:'Letras maiores e zoom',c:`
-<p>Para quem prefere letras e botões maiores:</p>
+</ol>
+<p>Nos três temas <b>Prometeu</b>, cada cartão vira uma <b>caixa de vidro 3D</b>: ao tocar, ela balança de leve e volta sozinha. (O efeito respeita a opção “reduzir movimento” do aparelho.)</p>`},
+{ic:'ti-eye',t:'Tamanho do texto e zoom',c:`
+<p>Para quem prefere letras maiores:</p>
 <ul>
-<li><b>☰ → Tamanho do texto:</b> toque em <b>A+</b> para aumentar as letras e os botões do app inteiro (até 150%) e em <b>A−</b> para voltar. A escolha fica salva.</li>
+<li><b>☰ → Tamanho do texto:</b> toque em <b>A+</b> para aumentar as letras e em <b>A−</b> para diminuir. São <b>4 tamanhos</b>, de 100% até 145%; a escolha fica salva. Os botões e ícones ficam no mesmo lugar, então nada sai do encaixe.</li>
 <li><b>Zoom de pinça:</b> em celulares e tablets, você também pode ampliar qualquer tela afastando dois dedos sobre ela (movimento de pinça).</li>
 </ul>`},
 {ic:'ti-report',t:'Relatórios e exportações',c:`
@@ -2173,13 +2286,23 @@ function renderAtivar(){
   paintIcons();
 }
 
-/* ===== Tamanho do texto (acessibilidade — letras e botões maiores) ===== */
+/* ===== Tamanho do texto (acessibilidade — letras maiores) =====
+   Só as LETRAS crescem (via --fscale nas classes de texto do CSS); o layout,
+   os botões e os círculos de número ficam do mesmo tamanho. Antes usava
+   body.style.zoom, que ampliava a tela inteira (igual à pinça do celular). */
 const FS_KEY='prometeu.fontscale.v1';
-const FS_NIVEIS=[100,112,125,137,150];
-let fsIdx=(function(){try{const v=parseInt(localStorage.getItem(FS_KEY)||'100',10);const i=FS_NIVEIS.indexOf(v);return i>=0?i:0;}catch(e){return 0;}})();
+const FS_NIVEIS=[100,115,130,145];
+let fsIdx=(function(){try{
+  const v=parseInt(localStorage.getItem(FS_KEY)||'100',10);
+  // valor antigo salvo (112/125/137/150) migra para o nível MAIS PRÓXIMO
+  let best=0,bd=Infinity;
+  FS_NIVEIS.forEach((n,i)=>{const d=Math.abs(n-v);if(d<bd){bd=d;best=i;}});
+  return best;
+}catch(e){return 0;}})();
 function aplicarFonte(){
   const pct=FS_NIVEIS[fsIdx]||100;
-  document.body.style.zoom=pct+'%';
+  document.body.style.zoom='';           // limpa o zoom antigo (ampliava tudo)
+  document.documentElement.style.setProperty('--fscale',(pct/100).toFixed(2));
   const el=document.getElementById('dz-val');if(el)el.textContent=pct+'%';
   try{localStorage.setItem(FS_KEY,String(pct));}catch(e){}
 }
