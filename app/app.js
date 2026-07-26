@@ -148,7 +148,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.5', APP_DATE='julho de 2026';
+const APP_VERSION='3.6', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -312,6 +312,33 @@ function renderDiscs(){ // TELA 1: apenas as matérias
   el.innerHTML=MATS.map((m,i)=>{
     const ds=groups[m];
     const nAulas=ds.reduce((s,d)=>s+d.aulas.length,0);
+    const matOpen=openMats.has(m);
+    /* ESCADA NA MESMA TELA: as séries da matéria abrem AQUI, um degrau abaixo,
+       e cada série abre as aulas dela mais um degrau — sem trocar de tela.
+       Quem quiser a tela cheia (para criar série, copiar, relatório) continua
+       tendo: é o toque no corpo do cartão, que chama openMat(). */
+    const seriesHtml=ds.map((d,si)=>{
+      const sOpen=openSeries.has(d.id);
+      const aulasHtml=d.aulas.length?d.aulas.map((a,ai)=>`
+        <div class="tree-aula" style="--i:${ai}" onclick="curDiscId=${d.id};openAula(${a.id})">
+          <div class="ta-line"><b>Aula ${String(a.numero).padStart(2,'0')}</b><span>${escH(a.titulo)}</span>${aulaPend(a)>0?`<span class="ta-pend">● ${aulaPend(a)}</span>`:''}<span class="ta-dur">${fmtS(aulaDurSeg(a))}</span></div>
+          ${a.caps.map(c=>`<div class="tree-cap">${escH(c.num||'Cap.')} — ${escH(c.nome)}</div>`).join('')}
+        </div>`).join(''):'<div class="tree-empty">Sem aulas ainda</div>';
+      return `
+      <div class="tree-serie" style="--i:${si}">
+        <div class="ts-line" onclick="openDisc(${d.id})">
+          <b>${escH(d.turma||'Série/Ano não definido')}</b>
+          <span class="ts-cap">${escH(d.capitulo||'Sem capítulo')}</span>
+          ${discPend(d)>0?`<span class="ta-pend">● ${discPend(d)}</span>`:''}
+          <span class="ta-dur">${fmtS(discDurSeg(d))}</span>
+        </div>
+        <button class="tree-toggle sub${sOpen?' open':''}" id="htt-${d.id}" onclick="toggleTree(${d.id},'h')" aria-expanded="${sOpen}">
+          <i class="ti ti-chevron-down chev" aria-hidden="true"></i>
+          <span>${d.aulas.length} aula${d.aulas.length!==1?'s':''}</span>
+        </button>
+        <div class="tree-wrap${sOpen?' open':''}" id="htw-${d.id}"><div class="tree-inner"><div class="tree-aulas">${aulasHtml}</div></div></div>
+      </div>`;
+    }).join('');
     return `
     <div class="card ${esc(i)}" data-mv="mat" data-mvk="${escH(m)}"><div class="disc-row">
       <div class="disc-accent"></div>
@@ -319,7 +346,8 @@ function renderDiscs(){ // TELA 1: apenas as matérias
         <div class="disc-av">${escH(m.slice(0,3))}</div>
         <div class="disc-info">
           <div class="dn">${escH(m)}</div>
-          <div class="dc">${ds.length} série${ds.length!==1?'s':''}/ano${ds.length!==1?'s':''}</div>
+          ${/* a contagem de séries NÃO vem aqui: ela já é o texto do botão da
+              escada, logo abaixo. Repetir enche o cartão sem informar nada. */''}
           <div class="ds">${nAulas} aula${nAulas!==1?'s':''} · ${fmtS(matDur(m))}${(()=>{const pp=ds.reduce((s,d)=>s+discPend(d),0);return pp>0?` · <span class="ta-pend">● ${pp} a ministrar</span>`:'';})()}</div>
           ${scanBar(matDur(m),maxDur)}
         </div>
@@ -328,8 +356,15 @@ function renderDiscs(){ // TELA 1: apenas as matérias
         <button class="iBtn edt" onclick="renameMat(${i})" aria-label="Renomear matéria"><i class="ti ti-edit" aria-hidden="true"></i></button>
         <button class="iBtn del" onclick="removeMat(${i})" aria-label="Remover matéria"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
-    </div></div>`;
+    </div>
+    <button class="tree-toggle${matOpen?' open':''}" id="mt-${i}" onclick="toggleMat(${i})" aria-expanded="${matOpen}">
+      <i class="ti ti-chevron-down chev" aria-hidden="true"></i>
+      <span>${ds.length} série${ds.length!==1?'s':''}/ano${ds.length!==1?'s':''}</span>
+    </button>
+    <div class="tree-wrap${matOpen?' open':''}" id="mw-${i}"><div class="tree-inner"><div class="tree-series">${seriesHtml}</div></div></div>
+    </div>`;
   }).join('');
+  paintIcons();
 }
 function openMat(i){pushNav();curMat=MATS[i];renderSeries();showScreen('s-series');}
 function renameMat(i){
@@ -352,11 +387,26 @@ function removeMat(i){
 }
 
 const openSeries=new Set(); // séries com a árvore de aulas expandida (estado da sessão)
-function toggleTree(id){
-  const wrap=document.getElementById('tw-'+id),btn=document.getElementById('tt-'+id);
+const openMats=new Set();   // matérias abertas na home (a escada da tela 1)
+/* pre = prefixo do id. A MESMA série aparece em duas telas ao mesmo tempo (a
+   home e a tela de séries), e as duas ficam no DOM juntas — sem prefixo,
+   getElementById pegaria sempre a primeira e a outra não abriria. A home usa
+   'h'. O estado (openSeries) é o mesmo de propósito: abriu numa, está aberta
+   na outra. */
+function toggleTree(id,pre){
+  pre=pre||'';
+  const wrap=document.getElementById(pre+'tw-'+id),btn=document.getElementById(pre+'tt-'+id);
   if(!wrap)return;
   const open=!openSeries.has(id);
   open?openSeries.add(id):openSeries.delete(id);
+  wrap.classList.toggle('open',open);
+  if(btn)btn.classList.toggle('open',open);
+}
+function toggleMat(i){
+  const m=MATS[i],wrap=document.getElementById('mw-'+i),btn=document.getElementById('mt-'+i);
+  if(!wrap)return;
+  const open=!openMats.has(m);
+  open?openMats.add(m):openMats.delete(m);
   wrap.classList.toggle('open',open);
   if(btn)btn.classList.toggle('open',open);
 }
@@ -381,8 +431,8 @@ function renderSeries(){ // TELA 2: séries/anos da matéria; aulas recolhidas n
   if(!ds.length){el.innerHTML='<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><p>Nenhuma série/ano.<br>Toque em <b>Nova série/ano</b>.</p></div>';return;}
   const maxDur=Math.max(1,...ds.map(discDurSeg));
   el.innerHTML=ds.map((d,i)=>{
-    const aulasHtml=d.aulas.length?d.aulas.map(a=>`
-      <div class="tree-aula" onclick="curDiscId=${d.id};openAula(${a.id})">
+    const aulasHtml=d.aulas.length?d.aulas.map((a,ai)=>`
+      <div class="tree-aula" style="--i:${ai}" onclick="curDiscId=${d.id};openAula(${a.id})">
         <div class="ta-line"><b>Aula ${String(a.numero).padStart(2,'0')}</b><span>${escH(a.titulo)}</span>${aulaPend(a)>0?`<span class="ta-pend">● ${aulaPend(a)}</span>`:''}<span class="ta-dur">${fmtS(aulaDurSeg(a))}</span></div>
         ${a.caps.map(c=>`<div class="tree-cap">${escH(c.num||'Cap.')} — ${escH(c.nome)}</div>`).join('')}
       </div>`).join(''):'<div class="tree-empty">Sem aulas ainda</div>';
@@ -2199,7 +2249,7 @@ function demoStart(){
   demoBak=JSON.stringify(db);          // guarda o banco real do usuário
   db=buildDemoDB();                    // carrega a amostra temporária
   curMat=null;curDiscId=null;curAulaId=null;curCapId=null;
-  openSeries.clear();openCaps.clear();openObs.clear();
+  openSeries.clear();openMats.clear();openCaps.clear();openObs.clear();
   showScreen('s-main');renderDiscs();
   // holofote (aponta o elemento explicado) + legenda grande
   const spot=document.createElement('div');spot.id='demo-spot';document.body.appendChild(spot);
@@ -2240,7 +2290,7 @@ function demoStop(){
   closeMenu();closeRModal();
   if(demoBak!=null){try{db=JSON.parse(demoBak);}catch(e){}demoBak=null;} // restaura o banco real
   curMat=null;curDiscId=null;curAulaId=null;curCapId=null;
-  openSeries.clear();openCaps.clear();openObs.clear();
+  openSeries.clear();openMats.clear();openCaps.clear();openObs.clear();
   themeIdx=demoTheme0;applyThemeUI(THEMES[themeIdx]);saveTheme();
   showScreen('s-main');renderDiscs();openMenu(); // termina na tela inicial com o menu ☰ aberto
 }
