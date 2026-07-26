@@ -77,7 +77,7 @@ function envolve3D(){
     });
     pai.insertBefore(box,card);
     inn.appendChild(card);box.appendChild(inn);
-    inn.insertAdjacentHTML('beforeend','<div class="f3 back"></div><div class="f3 right"></div>');
+    inn.insertAdjacentHTML('beforeend','<div class="f3 back"></div><div class="f3 right"></div><div class="f3 top"></div>');
   });
 }
 new MutationObserver(()=>{paintIcons();envolve3D();if(window.scheduleTranslate)scheduleTranslate();}).observe(document.documentElement,{childList:true,subtree:true});
@@ -148,7 +148,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.4.3', APP_DATE='julho de 2026';
+const APP_VERSION='3.5', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -967,6 +967,7 @@ function baixarBlob(r){
   const a=document.createElement('a');a.href=url;a.download=r.nome||'arquivo';
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),60000);
+  avisoSalvo(r.nome||'arquivo');
 }
 async function abrirArq(fid){
   let r=null;
@@ -1052,6 +1053,7 @@ function expWord(){
   a.download=`resumo-${nomeArquivoResumo()}.doc`;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  avisoSalvo(a.download);
 }
 function expPDF(){
   const w=window.open('','_blank');
@@ -1060,6 +1062,7 @@ function expPDF(){
   w.document.close();
   w.focus();
   setTimeout(()=>w.print(),350); // na caixa de impressão, escolha "Salvar como PDF"
+  avisoPDF();
 }
 
 /* ===== Reordenar blocos: SEGURAR E ARRASTAR (sem botão nenhum) =====
@@ -1239,16 +1242,27 @@ document.addEventListener('click',e=>{
 },true);
 
 /* ===== Toast de notificação ===== */
-function showToast(html,ms){
+function showToast(html,ms,ic){
   const zone=document.getElementById('toast-zone');
   const t=document.createElement('div');
   t.className='toast';
-  t.innerHTML=`<i class="ti ti-alert-triangle" aria-hidden="true"></i><div>${html}</div>`;
+  t.innerHTML=`<i class="ti ti-${ic||'alert-triangle'}" aria-hidden="true"></i><div>${html}</div>`;
   t.onclick=()=>dismiss();
   zone.appendChild(t);paintIcons();
   let gone=false;
   function dismiss(){if(gone)return;gone=true;t.classList.add('out');setTimeout(()=>t.remove(),320);}
   setTimeout(dismiss,ms||6000);
+}
+/* Aviso padrão de arquivo salvo (pedido 2.2): o navegador baixa direto na
+   pasta Downloads do aparelho, sem tela de escolha — quem não sabe disso
+   acha que o app não salvou nada. Todo download do app avisa onde caiu. */
+function avisoSalvo(nome){
+  showToast(trf('<b>Arquivo salvo!</b> “{a}” foi para a pasta <b>Downloads</b> deste aparelho.',{a:escH(nome)}),8000,'download');
+}
+/* O PDF é diferente: o app abre a caixa de impressão do sistema e é o
+   usuário quem escolhe "Salvar como PDF" — o aviso ensina o caminho. */
+function avisoPDF(){
+  showToast(tr('Na janela que abrir, escolha <b>“Salvar como PDF”</b> — o arquivo vai para a pasta <b>Downloads</b>.'),9000,'download');
 }
 
 /* ===== Desfazer exclusão (todas as camadas + anos letivos) =====
@@ -1396,6 +1410,7 @@ function relWord(){
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   closeRModal();
+  avisoSalvo(a.download);
 }
 function relPDF(){
   if(relDiscId==null)return;
@@ -1405,6 +1420,7 @@ function relPDF(){
   w.document.close();w.focus();
   setTimeout(()=>w.print(),350);
   closeRModal();
+  avisoPDF();
 }
 
 /* ===== Detecção de vídeo duplicado na mesma série/ano ===== */
@@ -1578,7 +1594,9 @@ function openModal(title,fields,cb){
     }
     return `<div style="margin-bottom:12px"><label class="flbl">${escH(f.lbl)}</label>${campo}</div>`;
   }).join('');
-  // liga o "ghost text": a seta → do teclado (o tablet tem setas) aceita a sugestão
+  // liga o "ghost text": a seta → OU o Enter aceitam a sugestão. O Enter entrou
+  // porque o teclado virtual do celular/tablet não entrega a seta ao app
+  // (pedido 2.3); não há <form> no modal, então o Enter não dispara mais nada.
   fields.forEach(f=>{
     if(f.type==='select'||!(f.sug&&!f.val))return;
     const inp=document.getElementById(f.id),gh=document.getElementById(f.id+'-gh');
@@ -1586,7 +1604,7 @@ function openModal(title,fields,cb){
     const upd=()=>{gh.style.display=inp.value?'none':'';};
     inp.addEventListener('input',upd);
     inp.addEventListener('keydown',e=>{
-      if(e.key==='ArrowRight'&&!inp.value){inp.value=f.sug;upd();e.preventDefault();}
+      if((e.key==='ArrowRight'||e.key==='Enter')&&!inp.value){inp.value=f.sug;upd();e.preventDefault();}
     });
   });
   _mcb=cb;document.getElementById('modal-ok').onclick=()=>_mcb&&_mcb();
@@ -1769,7 +1787,7 @@ async function exportBackup(pid){
   a.download=('prometeu-'+(p.ano||'projeto')+(p.instituicao?'-'+p.instituicao:'')).toLowerCase().replace(/[^a-z0-9à-ú]+/gi,'-').slice(0,60)+'.json';
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  showToast(tr('<b>Backup exportado.</b> Guarde o arquivo .json em local seguro (Drive, pen-drive…).'),6000);
+  showToast(trf('<b>Backup exportado!</b> “{a}” foi para a pasta <b>Downloads</b>. Guarde uma cópia em local seguro (Drive, pen-drive…).',{a:escH(a.download)}),9000,'download');
 }
 function importBackupPick(){closeMenu();document.getElementById('bk-file').click();}
 async function importBackup(input){

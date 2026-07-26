@@ -15,11 +15,31 @@
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=142d495997">
+<link rel="stylesheet" href="styles.css?v=6678ddb012">
 </head>
 <body class="L">
 <div id="root" class="L">
 <div class="hud-frame" aria-hidden="true"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
+
+<!-- Filtro de ONDULAÇÃO do vidro (só no tema Prometeu). É o que faz o fundo
+     ENTORTAR atrás do bloco, como acontece atrás de vidro de verdade: sem
+     isso o bloco fica só embaçado, e embaçado sozinho parece plástico.
+     O <svg> tem 0x0 — não ocupa espaço nenhum na tela, só empresta o filtro
+     para o CSS (backdrop-filter:url(#lgWave)). É interno, não é recurso de
+     rede: continua funcionando offline e não mexe na CSP. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <filter id="lgWave" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="1" seed="7" result="n"/>
+    <feGaussianBlur in="n" stdDeviation="1.4" result="ns"/>
+    <feDisplacementMap in="SourceGraphic" in2="ns" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<!-- Chapa de vidro do fundo: uma luz larga que atravessa a tela devagar, por
+     BAIXO de tudo. Como os blocos são de vidro de verdade, quando ela passa
+     por baixo eles acendem junto. Vem antes da poeira para a poeira ficar
+     por cima dela. -->
+<div id="glass-base" aria-hidden="true"></div>
 
 <!-- Poeira luminosa subindo no fundo (só no tema Prometeu) — dá profundidade
      às telas sem custar nada: são 36 pontinhos animados só por CSS. -->
@@ -69,6 +89,8 @@
 <div class="screen active" id="s-main">
   <div class="topbar">
     <button class="tbk" id="menuBtn" onclick="openMenu()" aria-label="Abrir menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+    <!-- logo-medalhão (decorativa): troca sozinha por CSS conforme o tema -->
+    <span class="app-logo" aria-hidden="true"></span>
     <span class="ttl">Organizador de Aulas</span>
     <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti0" aria-hidden="true"></i><span id="tl0">Escuro</span></button>
   </div>
@@ -217,7 +239,7 @@
 <div class="drawer-ov" id="drawer-ov" onclick="closeMenu()"></div>
 <nav class="drawer" id="drawer" aria-label="Menu principal">
   <div class="dw-head">
-    <i class="ti ti-cpu" aria-hidden="true"></i>
+    <span class="app-logo" aria-hidden="true"></span>
     <div><b>Organizador de Aulas</b><span id="dw-ver">Prometeu</span></div>
     <button class="tbk dw-x" onclick="closeMenu()" aria-label="Fechar menu"><i class="ti ti-x" aria-hidden="true"></i></button>
   </div>
@@ -309,7 +331,7 @@
 <div id="toast-zone" aria-live="polite"></div>
 
 </div>
-<script src="i18n.js?v=142d495997"></script>
-<script src="app.js?v=142d495997"></script>
+<script src="i18n.js?v=6678ddb012"></script>
+<script src="app.js?v=6678ddb012"></script>
 </body>
 </html>

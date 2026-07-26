@@ -131,6 +131,8 @@ const I18N={
 
 /* ---------- INGLÊS ---------- */
 'en':{
+'<b>Arquivo salvo!</b> “{a}” foi para a pasta <b>Downloads</b> deste aparelho.':'<b>File saved!</b> “{a}” went to the <b>Downloads</b> folder on this device.',
+'Na janela que abrir, escolha <b>“Salvar como PDF”</b> — o arquivo vai para a pasta <b>Downloads</b>.':'In the window that opens, choose <b>“Save as PDF”</b> — the file goes to the <b>Downloads</b> folder.',
 'Organizador de Aulas':'Lesson Organizer',
 'Abrir menu':'Open menu','Voltar':'Back','Início':'Home','Fechar menu':'Close menu','Fechar':'Close',
 'Mover para cima':'Move up','Mover para baixo':'Move down','Concluir':'Done',
@@ -277,7 +279,7 @@ const I18N={
 'Ano letivo {a}':'School year {a}',
 '<b>Projeto ativo:</b> {p}.':'<b>Active project:</b> {p}.',
 '<b>Projeto {a} criado e em uso.</b> O anterior ficou arquivado — troque quando quiser em ☰ → Gerenciar projetos.':'<b>Project {a} created and in use.</b> The previous one is archived — switch anytime via ☰ → Manage projects.',
-'<b>Backup exportado.</b> Guarde o arquivo .json em local seguro (Drive, pen-drive…).':'<b>Backup exported.</b> Keep the .json file somewhere safe (Drive, USB stick…).',
+'<b>Backup exportado!</b> “{a}” foi para a pasta <b>Downloads</b>. Guarde uma cópia em local seguro (Drive, pen-drive…).':'<b>Backup exported!</b> “{a}” went to the <b>Downloads</b> folder. Keep a copy somewhere safe (Drive, USB stick…).',
 '<b>Projeto importado</b> e colocado em uso.':'<b>Project imported</b> and set as current.',
 '<b>Vídeo duplicado nesta série:</b> mesmo nome e link já existem na <b>Aula {a}</b> · {c}.':'<b>Duplicate video in this grade:</b> same name and link already exist in <b>Lesson {a}</b> · {c}.',
 'Esta cópia roda como arquivo único: para atualizar, substitua o prometeu.html por uma versão mais nova. Seus dados não se perdem.':'This copy runs as a single file: to update, replace prometeu.html with a newer version. Your data is not lost.',
@@ -340,6 +342,8 @@ const I18N={
 
 /* ---------- PORTUGUÊS DE PORTUGAL (só o que difere do pt-BR) ---------- */
 'pt-PT':{
+'<b>Arquivo salvo!</b> “{a}” foi para a pasta <b>Downloads</b> deste aparelho.':'<b>Ficheiro guardado!</b> “{a}” foi para a pasta <b>Transferências</b> deste aparelho.',
+'Na janela que abrir, escolha <b>“Salvar como PDF”</b> — o arquivo vai para a pasta <b>Downloads</b>.':'Na janela que abrir, escolha <b>“Guardar como PDF”</b> — o ficheiro vai para a pasta <b>Transferências</b>.',
 'Arquivo':'Ficheiro','✓ ministrado':'✓ lecionado','● a ministrar':'● por lecionar',
 'Exportar backup (.json)':'Exportar cópia de segurança (.json)',
 'Importar backup (.json)':'Importar cópia de segurança (.json)',
@@ -375,7 +379,7 @@ const I18N={
 'Você tinha um vídeo não salvo ("{n}"). Restaurar o rascunho?':'Tinha um vídeo por guardar ("{n}"). Restaurar o rascunho?',
 'Exportar arquivo deste projeto':'Exportar ficheiro deste projeto',
 'Este arquivo não é um backup do Organizador de Aulas.':'Este ficheiro não é uma cópia de segurança do Organizador de Aulas.',
-'<b>Backup exportado.</b> Guarde o arquivo .json em local seguro (Drive, pen-drive…).':'<b>Cópia de segurança exportada.</b> Guarde o ficheiro .json em local seguro (Drive, pen…).',
+'<b>Backup exportado!</b> “{a}” foi para a pasta <b>Downloads</b>. Guarde uma cópia em local seguro (Drive, pen-drive…).':'<b>Cópia de segurança exportada!</b> “{a}” foi para a pasta <b>Transferências</b>. Guarde uma cópia em local seguro (Drive, pen…).',
 'Seus dados ficam somente neste aparelho — nada é enviado para a internet. Ao continuar, você concorda com os Termos de Uso e a Política de Privacidade (disponíveis no menu ☰ → Ajuda).':'Os seus dados ficam apenas neste aparelho — nada é enviado para a internet. Ao continuar, concorda com os Termos de Utilização e a Política de Privacidade (disponíveis no menu ☰ → Ajuda).',
 'Termos de uso':'Termos de utilização','Termos de Uso':'Termos de Utilização',
 'Quer ver uma demonstração rápida de como o app funciona? O app navega sozinho mostrando cada função.':'Quer ver uma demonstração rápida de como a aplicação funciona? A aplicação navega sozinha mostrando cada função.',
@@ -387,6 +391,8 @@ const I18N={
 
 /* ---------- ESPANHOL ---------- */
 'es':{
+'<b>Arquivo salvo!</b> “{a}” foi para a pasta <b>Downloads</b> deste aparelho.':'<b>¡Archivo guardado!</b> “{a}” fue a la carpeta <b>Descargas</b> de este dispositivo.',
+'Na janela que abrir, escolha <b>“Salvar como PDF”</b> — o arquivo vai para a pasta <b>Downloads</b>.':'En la ventana que se abra, elige <b>“Guardar como PDF”</b> — el archivo va a la carpeta <b>Descargas</b>.',
 'Organizador de Aulas':'Organizador de Clases',
 'Abrir menu':'Abrir menú','Voltar':'Atrás','Início':'Inicio','Fechar menu':'Cerrar menú','Fechar':'Cerrar',
 'Mover para cima':'Subir','Mover para baixo':'Bajar','Concluir':'Listo',
@@ -532,7 +538,7 @@ const I18N={
 'Ano letivo {a}':'Año lectivo {a}',
 '<b>Projeto ativo:</b> {p}.':'<b>Proyecto activo:</b> {p}.',
 '<b>Projeto {a} criado e em uso.</b> O anterior ficou arquivado — troque quando quiser em ☰ → Gerenciar projetos.':'<b>Proyecto {a} creado y en uso.</b> El anterior quedó archivado — cámbialo cuando quieras en ☰ → Gestionar proyectos.',
-'<b>Backup exportado.</b> Guarde o arquivo .json em local seguro (Drive, pen-drive…).':'<b>Copia exportada.</b> Guarda el archivo .json en un lugar seguro (Drive, USB…).',
+'<b>Backup exportado!</b> “{a}” foi para a pasta <b>Downloads</b>. Guarde uma cópia em local seguro (Drive, pen-drive…).':'<b>¡Copia exportada!</b> “{a}” fue a la carpeta <b>Descargas</b>. Guarda una copia en un lugar seguro (Drive, USB…).',
 '<b>Projeto importado</b> e colocado em uso.':'<b>Proyecto importado</b> y puesto en uso.',
 '<b>Vídeo duplicado nesta série:</b> mesmo nome e link já existem na <b>Aula {a}</b> · {c}.':'<b>Vídeo duplicado en este curso:</b> el mismo nombre y enlace ya existen en la <b>Clase {a}</b> · {c}.',
 'Esta cópia roda como arquivo único: para atualizar, substitua o prometeu.html por uma versão mais nova. Seus dados não se perdem.':'Esta copia funciona como archivo único: para actualizar, sustituye prometeu.html por una versión más nueva. Tus datos no se pierden.',
@@ -593,6 +599,8 @@ const I18N={
 
 /* ---------- CHINÊS SIMPLIFICADO ---------- */
 'zh':{
+'<b>Arquivo salvo!</b> “{a}” foi para a pasta <b>Downloads</b> deste aparelho.':'<b>文件已保存！</b>“{a}”已存入本设备的<b>下载</b>文件夹。',
+'Na janela que abrir, escolha <b>“Salvar como PDF”</b> — o arquivo vai para a pasta <b>Downloads</b>.':'在弹出的窗口中选择<b>“另存为 PDF”</b>——文件将存入<b>下载</b>文件夹。',
 'Organizador de Aulas':'课程管理器',
 'Abrir menu':'打开菜单','Voltar':'返回','Início':'首页','Fechar menu':'关闭菜单','Fechar':'关闭',
 'Mover para cima':'上移','Mover para baixo':'下移','Concluir':'完成',
@@ -737,7 +745,7 @@ const I18N={
 'Ano letivo {a}':'{a} 学年',
 '<b>Projeto ativo:</b> {p}.':'<b>当前项目：</b>{p}。',
 '<b>Projeto {a} criado e em uso.</b> O anterior ficou arquivado — troque quando quiser em ☰ → Gerenciar projetos.':'<b>项目 {a} 已创建并启用。</b>之前的项目已归档 — 可随时在 ☰ → 管理项目中切换。',
-'<b>Backup exportado.</b> Guarde o arquivo .json em local seguro (Drive, pen-drive…).':'<b>备份已导出。</b>请将 .json 文件保存在安全的地方（云盘、U 盘……）。',
+'<b>Backup exportado!</b> “{a}” foi para a pasta <b>Downloads</b>. Guarde uma cópia em local seguro (Drive, pen-drive…).':'<b>备份已导出！</b>“{a}”已存入<b>下载</b>文件夹。请另外保存一份在安全的地方（云盘、U 盘……）。',
 '<b>Projeto importado</b> e colocado em uso.':'<b>项目已导入</b>并启用。',
 '<b>Vídeo duplicado nesta série:</b> mesmo nome e link já existem na <b>Aula {a}</b> · {c}.':'<b>本年级中存在重复视频：</b>相同的名称和链接已存在于<b>第 {a} 课</b> · {c}。',
 'Esta cópia roda como arquivo único: para atualizar, substitua o prometeu.html por uma versão mais nova. Seus dados não se perdem.':'此副本以单文件方式运行：更新时用新版本替换 prometeu.html 即可。数据不会丢失。',
