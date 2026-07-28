@@ -148,7 +148,7 @@ const THEME_META={
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.6', APP_DATE='julho de 2026';
+const APP_VERSION='3.7', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -303,7 +303,8 @@ function renderDiscs(){ // TELA 1: apenas as matérias
   saveDB();
   if(window.fireMenuHint)fireMenuHint(); // destaque do ☰ quando a home aparece (1º uso)
   const el=document.getElementById('list-discs');
-  if(!db.disciplinas.length){el.innerHTML='<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><p>Nenhuma matéria.<br>Toque em <b>Nova matéria</b>.</p></div>';return;}
+  refreshColarMatBtn(); // antes do return de lista vazia: colar num ano letivo NOVO (ainda vazio) é o caso mais útil
+  if(!db.disciplinas.length){MATS=[];el.innerHTML='<div class="empty"><i class="ti ti-books" aria-hidden="true"></i><p>Nenhuma matéria.<br>Toque em <b>Nova matéria</b>.</p></div>';return;}
   const groups={};
   db.disciplinas.forEach(d=>{(groups[matKey(d)]=groups[matKey(d)]||[]).push(d);});
   MATS=Object.keys(groups);
@@ -354,6 +355,7 @@ function renderDiscs(){ // TELA 1: apenas as matérias
       </div>
       <div class="side-btns">
         <button class="iBtn edt" onclick="renameMat(${i})" aria-label="Renomear matéria"><i class="ti ti-edit" aria-hidden="true"></i></button>
+        <button class="iBtn" onclick="copiarMateria(${i})" aria-label="Copiar matéria para outro ano letivo"><i class="ti ti-copy" aria-hidden="true"></i></button>
         <button class="iBtn del" onclick="removeMat(${i})" aria-label="Remover matéria"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
     </div>
@@ -493,6 +495,17 @@ function geradorId(){
   db.disciplinas.forEach(d=>{usados.add(d.id);(d.aulas||[]).forEach(a=>{usados.add(a.id);(a.caps||[]).forEach(c=>{usados.add(c.id);(c.videos||[]).forEach(v=>usados.add(v.id));});});});
   return()=>{let n;do{n=nid();}while(usados.has(n));usados.add(n);return n;};
 }
+/* Cópia funda de UMA aula: ids novos em todos os níveis, mas os fid dos anexos
+   são MANTIDOS de propósito — o blob no IndexedDB é o mesmo arquivo,
+   compartilhado (igual ao duplicar um ano letivo). Serve aos três "colar"
+   (aula, série e matéria) para que não saiam de sintonia com o tempo. */
+function clonarAula(a,novoId,numero){
+  return {id:novoId(),numero:numero!==undefined?numero:a.numero,titulo:a.titulo||'',
+    caps:(a.caps||[]).map(cp=>({id:novoId(),num:cp.num||'',nome:cp.nome||'',apresentado:!!cp.apresentado,obs:cp.obs||'',
+      videos:(cp.videos||[]).map(v=>({...v,id:novoId(),
+        materiais:(v.materiais||[]).map(m=>({...m})),
+        arquivos:(v.arquivos||[]).map(f=>({...f}))}))}))};
+}
 function copiarSerie(id){
   const d=getDisc(id);if(!d)return;
   try{localStorage.setItem(CLIP_KEY,JSON.stringify({turma:d.turma,capitulo:d.capitulo,aulas:d.aulas}));}
@@ -511,14 +524,8 @@ function colarSerie(){
   if(!exigirAtivacao())return;
   const c=lerClip();if(!c){showToast(tr('Nada foi copiado ainda.'),3000);return;}
   const novoId=geradorId();
-  // ids novos em todos os níveis; os fid dos anexos são MANTIDOS de propósito —
-  // o blob no IndexedDB é o mesmo arquivo, compartilhado (igual ao duplicar projeto)
   const nova={id:novoId(),nome:curMat,turma:c.turma||'',capitulo:c.capitulo||'',
-    aulas:(c.aulas||[]).map(a=>({id:novoId(),numero:a.numero,titulo:a.titulo||'',
-      caps:(a.caps||[]).map(cp=>({id:novoId(),num:cp.num||'',nome:cp.nome||'',apresentado:!!cp.apresentado,obs:cp.obs||'',
-        videos:(cp.videos||[]).map(v=>({...v,id:novoId(),
-          materiais:(v.materiais||[]).map(m=>({...m})),
-          arquivos:(v.arquivos||[]).map(f=>({...f}))}))}))}))};
+    aulas:(c.aulas||[]).map(a=>clonarAula(a,novoId))};
   db.disciplinas.push(nova);
   // colou: a área de transferência se esvazia e o botão "Colar" some (antes ele
   // ficava para sempre na tela, convidando a colar a mesma série de novo)
@@ -553,19 +560,55 @@ function colarAula(){
   const c=lerClipAula();if(!c){showToast(tr('Nada foi copiado ainda.'),3000);return;}
   const novoId=geradorId();
   const num=(disc.aulas.reduce((m,a)=>Math.max(m,a.numero),0))+1;
-  // ids novos em todos os níveis; os fid dos anexos são MANTIDOS de propósito —
-  // o blob no IndexedDB é o mesmo arquivo, compartilhado (igual ao colar série)
-  const nova={id:novoId(),numero:num,titulo:c.titulo||'',
-    caps:(c.caps||[]).map(cp=>({id:novoId(),num:cp.num||'',nome:cp.nome||'',apresentado:!!cp.apresentado,obs:cp.obs||'',
-      videos:(cp.videos||[]).map(v=>({...v,id:novoId(),
-        materiais:(v.materiais||[]).map(m=>({...m})),
-        arquivos:(v.arquivos||[]).map(f=>({...f}))}))}))};
+  const nova=clonarAula(c,novoId,num);
   disc.aulas.push(nova);
   // colou: esvazia a área de transferência e esconde o FAB (correção da v3.3)
   try{localStorage.removeItem(CLIPA_KEY);}catch(e){}
   renderAulas();
   refreshColarAulaBtn();
   showToast(trf('Aula <b>{a}</b> colada.',{a:escH(nova.titulo)}),4000);
+}
+/* ===== Copiar e colar uma MATÉRIA inteira (com todas as suas séries) =====
+   Mesmo mecanismo da série e da aula, um nível acima. O uso principal é LEVAR
+   UMA MATÉRIA PARA OUTRO ANO LETIVO: copiar na tela inicial, trocar de ano
+   pelo ☰ ou por "Projetos", e o botão "Colar matéria" aparece lá.
+   A área de transferência fica no localStorage justamente por isso — ela
+   precisa atravessar a troca de ano letivo, que recarrega o banco. */
+const CLIPM_KEY='prometeu.clip.materia.v1';
+function lerClipMat(){try{return JSON.parse(localStorage.getItem(CLIPM_KEY)||'null');}catch(e){return null;}}
+function copiarMateria(i){
+  const m=MATS[i];const ds=matDiscs(m);if(!ds.length)return;
+  try{localStorage.setItem(CLIPM_KEY,JSON.stringify({nome:m,
+    series:ds.map(d=>({turma:d.turma,capitulo:d.capitulo,aulas:d.aulas}))}));}
+  catch(e){alert(tr('Não foi possível copiar: a memória do navegador está cheia.'));return;}
+  refreshColarMatBtn();
+  showToast(trf('Matéria <b>{m}</b> copiada com {n} série(s). Troque de ano letivo e toque em <b>Colar matéria</b>.',
+    {m:escH(m),n:ds.length}),7000);
+}
+// mostra/esconde o botão Colar matéria e escreve nele o nome da matéria copiada
+function refreshColarMatBtn(){
+  const b=document.getElementById('fab-colar-mat');if(!b)return;
+  const c=lerClipMat();
+  b.hidden=!c;
+  if(c)document.getElementById('fab-colar-mat-lbl').textContent=trf('Colar {s}',{s:c.nome||tr('matéria')});
+}
+function colarMateria(){
+  if(!exigirAtivacao())return;
+  const c=lerClipMat();if(!c){showToast(tr('Nada foi copiado ainda.'),3000);return;}
+  const novoId=geradorId();
+  let nome=(c.nome||'').toUpperCase();
+  /* Já existe matéria com esse nome no ano aberto? Entra marcada como cópia.
+     Sem isto as séries das duas se juntariam no mesmo cartão da home (que
+     agrupa por NOME) e o professor não veria que colou em cima. */
+  if(db.disciplinas.some(d=>matKey(d)===nome))nome=nome+' '+tr('(cópia)');
+  const novas=(c.series||[]).map(s=>({id:novoId(),nome,turma:s.turma||'',capitulo:s.capitulo||'',
+    aulas:(s.aulas||[]).map(a=>clonarAula(a,novoId))}));
+  novas.forEach(n=>db.disciplinas.push(n));
+  // colou: esvazia a área de transferência e esconde o FAB
+  try{localStorage.removeItem(CLIPM_KEY);}catch(e){}
+  renderDiscs();
+  refreshColarMatBtn();
+  showToast(trf('Matéria <b>{m}</b> colada com {n} série(s).',{m:escH(nome),n:novas.length}),5000);
 }
 function openDisc(id){pushNav();curDiscId=id;renderAulas();showScreen('s-disc');}
 function openAddDisc(){if(!exigirAtivacao())return;openModal(tr('Nova matéria'),[{id:'md-n',lbl:'Nome da matéria',ph:'Ex: HISTÓRIA'},{id:'md-t',lbl:'Série/Ano',ph:'Ex: 6° ANO'},{id:'md-c',lbl:'Capítulo / unidade',ph:'Ex: Cap. 01 — Brasil Colônia'}],()=>{
@@ -937,8 +980,12 @@ async function sweepOrphans(){ // apaga do IndexedDB arquivos que nenhum projeto
   });
   formArqs.forEach(a=>usados.add(a.fid)); // protege anexos de um formulário ainda aberto
   try{const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');((d&&d.arqs)||[]).forEach(a=>usados.add(a.fid));}catch(e){} // e do rascunho guardado
-  coleta({disciplinas:[{aulas:(lerClip()||{}).aulas||[]}]}); // e da série copiada (colar depois de excluir a original)
-  if(undoAcao&&undoAcao.fids)undoAcao.fids.forEach(f=>usados.add(f)); // e do que ainda dá para desfazer
+  // e de tudo que está na área de transferência (colar depois de excluir o original)
+  coleta({disciplinas:[{aulas:(lerClip()||{}).aulas||[]}]});                    // série copiada
+  coleta({disciplinas:[{aulas:[lerClipAula()||{caps:[]}]}]});                   // aula copiada
+  coleta({disciplinas:(lerClipMat()||{series:[]}).series||[]});                 // matéria copiada
+  // e de tudo que ainda dá para recuperar: a faixa Desfazer E a lixeira
+  lixeira.forEach(it=>(it.fids||[]).forEach(f=>usados.add(f)));
   const keys=await fKeys();
   await fDel(keys.filter(k=>!usados.has(k)));
 }
@@ -1119,11 +1166,12 @@ function expPDF(){
    Segurar o dedo (ou a caneta) ~0,5 s em cima de um cartão e, SEM SOLTAR,
    arrastar para cima ou para baixo: o cartão acompanha o dedo, os vizinhos
    deslizam para abrir espaço e, ao soltar, a ordem nova é salva.
-   Funciona nos 5 níveis — cada cartão carrega data-mv (o tipo) e data-mvk
-   (a chave); o vídeo carrega também data-mvc (o capítulo dele).
+   Funciona nos 5 níveis e também na lista de anos letivos ('proj') — cada
+   cartão carrega data-mv (o tipo) e data-mvk (a chave); o vídeo carrega
+   também data-mvc (o capítulo dele).
    A troca no banco só acontece no SOLTAR: durante o arrasto a tela não é
    redesenhada, então o dedo nunca perde o cartão que está segurando. */
-const MV_TIPOS=['mat','serie','aula','cap','vid'];
+const MV_TIPOS=['mat','serie','aula','cap','vid','proj'];
 let mvAlvo=null,mvTimer=null,mvP0=null,mvSkipAte=0,mvD=null,mvRolar=null;
 /* nos temas Prometeu o cartão mora dentro do wrapper 3D (.g3box); quem tem de
    se mexer é a caixa inteira, senão a espessura fica para trás */
@@ -1210,11 +1258,15 @@ function mvSoltar(){
   /* as funções abaixo movem UMA casa por vez e reencontram o cartão pela chave
      (nunca pela posição, que é justamente o que muda); repetir |i-i0| vezes
      leva o cartão até o lugar onde o dedo o largou */
-  const f={mat:mvMoverMat,serie:mvMoverSerie,aula:mvMoverAula,cap:mvMoverCap,vid:mvMoverVid}[alvo.tipo];
+  const f={mat:mvMoverMat,serie:mvMoverSerie,aula:mvMoverAula,cap:mvMoverCap,vid:mvMoverVid,
+           proj:mvMoverProj}[alvo.tipo];
   const dir=i>i0?1:-1;let ok=false;
   for(let k=Math.abs(i-i0);k>0&&f;k--){if(!f(dir))break;ok=true;}
+  const tipo=alvo.tipo;
   mvAlvo=null;
-  if(ok){saveDB();rerenderAtual();}
+  /* o ano letivo mora em OUTRO registro (prometeu.projects.v1), não no banco de
+     aulas — por isso a ordem dele se grava com saveProjects(), não com saveDB() */
+  if(ok){if(tipo==='proj')saveProjects();else saveDB();rerenderAtual();}
 }
 // cancelar (trocar de tela, o navegador interromper o toque): volta tudo ao lugar
 function mvSair(){if(!mvD)return;mvD.i=mvD.i0;mvSoltar();}
@@ -1256,6 +1308,12 @@ function mvMoverVid(dir){
   const aula=getAula(getDisc(curDiscId),curAulaId);if(!aula)return false;
   const cap=aula.caps.find(c=>String(c.id)===mvAlvo.capId);if(!cap)return false;
   return mvSwap(cap.videos,cap.videos.findIndex(v=>String(v.id)===mvAlvo.chave),dir);
+}
+/* anos letivos: só a ORDEM da lista muda. Qual está aberto (projReg.ativo) e o
+   banco de cada um (prometeu.db.p<id>) não são tocados — arrastar 2025 para
+   cima não abre o 2025 nem mexe nas aulas dele. */
+function mvMoverProj(dir){
+  return mvSwap(projReg.projetos,projReg.projetos.findIndex(p=>String(p.id)===mvAlvo.chave),dir);
 }
 /* Detecção da pressão longa: 520 ms parado (tolerância de 12 px, senão rolar a
    tela com o dedo em cima de um cartão viraria "arrastar"). */
@@ -1315,26 +1373,45 @@ function avisoPDF(){
   showToast(tr('Na janela que abrir, escolha <b>“Salvar como PDF”</b> — o arquivo vai para a pasta <b>Downloads</b>.'),9000,'download');
 }
 
-/* ===== Desfazer exclusão (todas as camadas + anos letivos) =====
-   Guarda só a ÚLTIMA exclusão e mostra a barra fixa no alto do app, logo
-   abaixo da barra de título. A barra NÃO some sozinha: fica até o professor
-   desfazer, fechar no X, ou excluir outra coisa (o aviso de 8 s passava
-   despercebido no tablet). Enquanto ela estiver de pé o sweepOrphans()
-   preserva os anexos do que foi excluído — ver a linha do undoAcao.fids em
-   sweepOrphans(). */
-let undoAcao=null;
+/* ===== Desfazer exclusão + LIXEIRA (todas as camadas + anos letivos) =====
+   Duas peças da MESMA coisa:
+   1) a faixa "Desfazer", que aparece logo abaixo da barra de título e some
+      sozinha em 10 s — atalho rápido para o arrependimento imediato;
+   2) a LIXEIRA, o botão com contador na barra de título, que guarda as 10
+      últimas exclusões. Sumir a faixa NÃO perde nada: o item continua lá.
+   A lixeira vive só na MEMÓRIA (não vai para o localStorage): fechar o app
+   esvazia. É de propósito — um banco com centenas de aulas encheria a
+   memória do navegador se cada exclusão ficasse guardada para sempre.
+   ⚠️ Enquanto um item estiver na lixeira o sweepOrphans() preserva os anexos
+   dele — ver a linha dos fids em sweepOrphans(). */
+const LIX_MAX=10;      // quantas exclusões a lixeira guarda
+const UNDO_MS=10000;   // 10 s de faixa "Desfazer" à vista
+let undoAcao=null,undoTimer=null,lixeira=[],lixSeq=0;
 function undoBar(){return document.getElementById('undo-bar');}
-/* A faixa é UMA só, mas cada tela tem a sua barra de título. Por isso ela é
-   MUDADA DE LUGAR: entra sempre logo depois da barra de título da tela aberta.
-   (Deixá-la solta no topo do #root empurrava e cobria o título e o botão ☰.) */
+/* A faixa é UMA só, mas cada tela tem o seu cabeçalho. Por isso ela é MUDADA
+   DE LUGAR: entra sempre no fim do .hdr-fix da tela aberta, para descer e
+   subir grudada junto com o título. (Solta no topo do #root ela empurrava e
+   cobria o título e o botão ☰.) */
 function posicionarUndo(){
   const bar=undoBar();if(!bar||bar.hidden)return;
   const tela=document.querySelector('.screen.active');if(!tela)return;
-  const tb=tela.querySelector('.topbar');if(!tb)return;
-  if(bar.previousElementSibling!==tb)tb.insertAdjacentElement('afterend',bar);
+  const hdr=tela.querySelector('.hdr-fix');if(!hdr)return;
+  if(bar.parentElement!==hdr||bar.nextElementSibling)hdr.appendChild(bar);
 }
-function armarUndo(msg,fids,restaurar){
-  undoAcao={restaurar,fids:fids||[]};
+function ocultarUndoBar(){
+  clearTimeout(undoTimer);undoTimer=null;undoAcao=null;
+  const bar=undoBar();if(bar){bar.hidden=true;bar.innerHTML='';}
+}
+function armarUndo(msg,fids,restaurar,opts){
+  /* proj = de qual ano letivo o item saiu. As funções de restaurar mexem no
+     banco ABERTO; recuperar um item do ano A com o ano B aberto escreveria no
+     ano errado. Por isso a lixeira confere isto antes de deixar recuperar.
+     opts.global = a restauração não depende do banco aberto (ano letivo). */
+  const item={id:++lixSeq,msg,fids:fids||[],restaurar,quando:new Date(),
+              proj:projReg.ativo,global:!!(opts&&opts.global)};
+  lixeira.unshift(item);
+  if(lixeira.length>LIX_MAX)lixeira.length=LIX_MAX;
+  undoAcao=item;
   const bar=undoBar();
   if(bar){
     bar.innerHTML=`<i class="ti ti-trash" aria-hidden="true"></i>`+
@@ -1343,22 +1420,67 @@ function armarUndo(msg,fids,restaurar){
       `<button class="ub-x" onclick="fecharUndo()" aria-label="${tr('Fechar')}"><i class="ti ti-x" aria-hidden="true"></i></button>`;
     bar.hidden=false;posicionarUndo();paintIcons();
   }
+  clearTimeout(undoTimer);
+  undoTimer=setTimeout(()=>{if(undoAcao===item)ocultarUndoBar();},UNDO_MS);
+  atualizarLixBtn();
   agendarLimpeza(1500);
 }
-function fecharUndo(){
-  undoAcao=null;
-  const bar=undoBar();if(bar){bar.hidden=true;bar.innerHTML='';}
-  agendarLimpeza();
-}
+// X da faixa: fecha o aviso, mas o item CONTINUA na lixeira
+function fecharUndo(){ocultarUndoBar();agendarLimpeza();}
 function desfazerExclusao(){
-  if(!undoAcao){fecharUndo();return;}
-  const a=undoAcao;undoAcao=null;
-  const bar=undoBar();if(bar){bar.hidden=true;bar.innerHTML='';}
-  a.restaurar();
+  if(!undoAcao){ocultarUndoBar();return;}
+  restaurarItem(undoAcao);
+}
+/* Coração da recuperação — serve tanto ao "Desfazer" quanto à lixeira. */
+function restaurarItem(item){
+  if(!item)return false;
+  if(!item.global&&item.proj!==projReg.ativo){
+    const p=projReg.projetos.find(x=>x.id===item.proj);
+    showToast(trf('Este item saiu do <b>{p}</b>. Abra esse ano letivo para recuperá-lo.',
+      {p:escH(p?projNome(p):tr('outro ano letivo'))}),7000);
+    return false;
+  }
+  const ix=lixeira.indexOf(item);if(ix>=0)lixeira.splice(ix,1);
+  if(undoAcao===item)ocultarUndoBar();
+  item.restaurar();
   rerenderAtual();
+  atualizarLixBtn();
+  if(document.getElementById('lixmodal').classList.contains('open'))abrirLixeira();
   agendarLimpeza();
   showToast(tr('Restaurado.'),3000);
+  return true;
 }
+// o botão da lixeira só existe depois que alguma coisa foi excluída
+function atualizarLixBtn(){
+  const n=lixeira.length;
+  document.querySelectorAll('.lix-btn').forEach(b=>{
+    b.hidden=n===0;
+    const s=b.querySelector('.lix-n');if(s)s.textContent=n?String(n):'';
+    b.setAttribute('aria-label',trf('Lixeira — {n} item(ns) para recuperar',{n}));
+  });
+}
+function abrirLixeira(){
+  const lista=document.getElementById('lix-list'),sub=document.getElementById('lix-sub');
+  if(!lixeira.length){
+    sub.textContent=tr('A lixeira está vazia.');
+    lista.innerHTML='';
+  }else{
+    sub.innerHTML=trf('Guarda as <b>{n} últimas</b> exclusões. Fechar o app esvazia a lixeira.',{n:LIX_MAX});
+    lista.innerHTML=lixeira.map(it=>{
+      const outro=!it.global&&it.proj!==projReg.ativo;
+      const p=outro?projReg.projetos.find(x=>x.id===it.proj):null;
+      const hora=it.quando.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      const onde=outro?' · '+escH(trf('do {p} — abra esse ano para recuperar',{p:p?projNome(p):tr('outro ano')})):'';
+      return `<div class="lix-item"><i class="ti ti-trash" aria-hidden="true"></i>`+
+        `<div class="lix-txt">${it.msg}<span class="lix-when">${escH(hora)}${onde}</span></div>`+
+        `<button class="lix-rec"${outro?' disabled':''} onclick="restaurarItem(lixeira.find(x=>x.id===${it.id}))">`+
+        `<i class="ti ti-undo" aria-hidden="true"></i>${tr('Recuperar')}</button></div>`;
+    }).join('');
+  }
+  document.getElementById('lixmodal').classList.add('open');
+  paintIcons();
+}
+function fecharLixeira(){document.getElementById('lixmodal').classList.remove('open');}
 // re-renderiza a tela aberta — a exclusão pode ter vindo de qualquer nível
 function rerenderAtual(){
   const at=document.querySelector('.screen.active');if(!at)return;
@@ -1684,7 +1806,7 @@ function renderProjetos(){
     const ativo=p.id===projReg.ativo;
     let nd=0,na=0;
     try{const d=ativo?db:JSON.parse(localStorage.getItem(projKey(p.id))||'{"disciplinas":[]}');nd=d.disciplinas.length;na=d.disciplinas.reduce((s,x)=>s+x.aulas.length,0);}catch(e){}
-    return `<div class="card${ativo?' proj-ativo':''} ${esc(i)}"><div class="disc-row">
+    return `<div class="card${ativo?' proj-ativo':''} ${esc(i)}" data-mv="proj" data-mvk="${p.id}"><div class="disc-row">
       <div class="disc-accent"></div>
       <div class="disc-body" onclick="ativarProjeto(${p.id})">
         <div class="disc-av"><i class="ti ti-archive" aria-hidden="true"></i></div>
@@ -1792,7 +1914,7 @@ function delProjeto(id){
     projReg.projetos.splice(ix,0,p);
     if(era){projReg.ativo=id;loadDB();refreshProjUI();} // loadDB ANTES de qualquer saveDB
     saveProjects();
-  });
+  },{global:true}); // ano letivo se recupera de qualquer ano aberto: não depende do banco atual
 }
 const PROJ_BAR_MAX=7; // quantos projetos de troca rápida aparecem no menu lateral
 function refreshProjUI(){
