@@ -150,7 +150,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.10', APP_DATE='julho de 2026';
+const APP_VERSION='3.11', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -173,6 +173,7 @@ function projNome(p){return (p.ano||'—')+(p.instituicao?' · '+p.instituicao:'
 const DB_KEY='prometeu.db.v2', OLD_DB_KEY='prometeu.db.v1', THEME_KEY='prometeu.theme.v1';
 let db;
 function loadDB(){
+  histReset(); // banco novo (boot ou troca de projeto) = histórico de desfazer zera
   try{
     const raw=localStorage.getItem(dbKey());
     if(raw){const parsed=JSON.parse(raw);if(parsed&&Array.isArray(parsed.disciplinas)){db=parsed;normalizeDB();return;}}
@@ -213,7 +214,45 @@ function aulaPend(a){return a.caps.filter(c=>!c.apresentado).length;}
 function aulaMinistrados(a){return a.caps.filter(c=>c.apresentado).length;}
 function saveDB(){
   if(demoOn)return; // durante a demonstração o banco é temporário — nunca persiste
-  try{localStorage.setItem(dbKey(),JSON.stringify(db));}catch(e){}
+  try{
+    const s=JSON.stringify(db);
+    // ===== Desfazer geral (botão ↩ ao lado da lixeira, 31/07/2026) =====
+    // Cada estado salvo diferente do anterior vira uma foto no histórico da
+    // sessão (só em memória, HIST_MAX fotos). Desfazer = voltar uma foto.
+    if(histUlt===null)histUlt=s;
+    else if(s!==histUlt){
+      histU.push(histUlt);
+      if(histU.length>HIST_MAX)histU.shift();
+      histUlt=s;
+      atualizarUndoBtn();
+    }
+    localStorage.setItem(dbKey(),s);
+  }catch(e){}
+}
+const HIST_MAX=30;
+let histU=[],histUlt=null; // fotos anteriores + a foto do estado atual
+function histReset(){histU=[];histUlt=null;atualizarUndoBtn();}
+function desfazerAcao(){
+  if(!histU.length){showToast(tr('Nada para desfazer.'),3000);return;}
+  const s=histU.pop();
+  try{db=JSON.parse(s);}catch(e){return;}
+  histUlt=s;
+  try{localStorage.setItem(dbKey(),s);}catch(e){}
+  atualizarUndoBtn();
+  // se a tela atual mostrava algo que a volta apagou, recua para uma tela segura
+  const telas=['s-vid','s-aula','s-disc'];
+  const ativa=document.querySelector('.screen.active');
+  if(ativa&&telas.includes(ativa.id)){
+    const d=getDisc(curDiscId);
+    const a=d&&getAula(d,curAulaId);
+    if(!d){showScreen('s-main');renderDiscs();}
+    else if(ativa.id!=='s-disc'&&!a){openDisc(d.id);}
+    else rerenderAtual();
+  }else rerenderAtual();
+  showToast(tr('Última alteração desfeita.'),3000);
+}
+function atualizarUndoBtn(){
+  document.querySelectorAll('.undo-btn').forEach(b=>{b.hidden=!histU.length;});
 }
 function loadTheme(){
   try{const t=parseInt(localStorage.getItem(THEME_KEY),10);if(!isNaN(t)&&t>=0&&t<THEMES.length)return t;}catch(e){}
@@ -310,6 +349,10 @@ function showScreen(id,dir){if(window.mvSair)mvSair(); // trocar de tela encerra
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.remove('nav-back');});
   const el=document.getElementById(id);el.classList.toggle('nav-back',dir==='back');el.classList.add('active');
   if(window.fecharConfirm)fecharConfirm(); // cartão "tem certeza?" não sobrevive à navegação
+  // puxar a tela para baixo só atualiza a página na tela inicial; nas telas de
+  // dentro o gesto acidental jogava o professor de volta às matérias (31/07/2026)
+  document.documentElement.classList.toggle('sem-ptr',id!=='s-main');
+  if(window.refreshTransfBar)refreshTransfBar();
   if(window.posicionarUndo)posicionarUndo();}
 function goBack(to){if(document.getElementById('s-vid').classList.contains('active'))limparDraft();closeModal();showScreen(to,'back');if(to==='s-main')renderDiscs();else if(to==='s-series')renderSeries();else if(to==='s-disc')renderAulas();else if(to==='s-aula')renderCaps();}
 
@@ -407,7 +450,9 @@ function removeMat(i){
   const salvos=[];db.disciplinas.forEach((d,ix)=>{if(matKey(d)===m)salvos.push({ix,d});});
   db.disciplinas=db.disciplinas.filter(d=>matKey(d)!==m);renderDiscs();
   armarUndo(trf('Matéria <b>{m}</b> excluída.',{m:escH(m)}),fidsDe(salvos.map(s=>s.d)),
-    ()=>{salvos.forEach(s=>db.disciplinas.splice(s.ix,0,s.d));});
+    ()=>{salvos.forEach(s=>{ // o "Desfazer geral" pode já ter devolvido — não duplicar
+      if(!db.disciplinas.some(x=>x.id===s.d.id))db.disciplinas.splice(Math.min(s.ix,db.disciplinas.length),0,s.d);
+    });});
   });
 }
 
@@ -592,9 +637,9 @@ function colarAula(){
   refreshColarAulaBtn();
   showToast(trf('Aula <b>{a}</b> colada.',{a:escH(nova.titulo)}),4000);
 }
-/* ===== Transferência seletiva de aulas (pressão de 3 s) =====
+/* ===== Transferência seletiva de aulas (pressão de 2 s) =====
    (pedido de 30/07/2026 — substituiu o botão "Transferir aulas" que levava
-   TODAS de uma vez.) Segurar uma aula por 3 s — mais que os 520 ms do
+   TODAS de uma vez.) Segurar uma aula por 2 s — mais que os 520 ms do
    arrastar, e SEM mover o dedo — liga o modo seleção: cada aula ganha uma
    caixa ao lado do botão de copiar, e a barra de baixo leva as marcadas.
    MOVE, não copia: as aulas saem com os mesmos ids/fids, então os anexos do
@@ -604,7 +649,7 @@ let selAulas=null,selTimer=null,selP0=null; // Set de ids em seleção (null = m
 function selCancela(){if(selTimer){clearTimeout(selTimer);selTimer=null;}selP0=null;}
 function selArm(alvo,p0){
   selCancela();selP0=p0;
-  selTimer=setTimeout(()=>{selTimer=null;selDisparar(alvo);},3000);
+  selTimer=setTimeout(()=>{selTimer=null;selDisparar(alvo);},2000);
 }
 function selDisparar(alvo){
   selP0=null;
@@ -623,6 +668,13 @@ function toggleSelAula(id){
   renderAulas();
 }
 function sairSelecao(){selAulas=null;renderAulas();}
+// marca todas as aulas da série; se já estão todas marcadas, desmarca tudo
+function selTodas(){
+  const disc=getDisc(curDiscId);if(!disc||!selAulas)return;
+  if(selAulas.size>=disc.aulas.length)selAulas.clear();
+  else disc.aulas.forEach(a=>selAulas.add(a.id));
+  renderAulas();
+}
 // a barra vive no rodapé da tela de aulas; enquanto ela está de pé, os FABs somem
 function refreshSelBar(){
   const bar=document.getElementById('sel-bar'),fw=document.querySelector('#s-disc .fab-wrap');
@@ -630,35 +682,52 @@ function refreshSelBar(){
   if(!selAulas){bar.hidden=true;if(fw)fw.hidden=false;return;}
   if(fw)fw.hidden=true;
   bar.hidden=false;
-  const n=selAulas.size;
+  const n=selAulas.size,disc=getDisc(curDiscId),tot=disc?disc.aulas.length:0;
   bar.innerHTML=`<span class="sel-n">${trf('{n} selecionada(s)',{n})}</span>`+
+    `<button class="fab fab-sec" onclick="selTodas()"><i class="ti ti-check" aria-hidden="true"></i> ${tot&&n>=tot?tr('Nenhuma'):tr('Todas')}</button>`+
     `<button class="fab fab-sec" onclick="sairSelecao()"><i class="ti ti-x" aria-hidden="true"></i> ${tr('Cancelar')}</button>`+
     `<button class="fab" onclick="abrirTransferencia()"${n?'':' disabled'}><i class="ti ti-transfer" aria-hidden="true"></i> ${tr('Transferir')}</button>`;
 }
+/* O destino NÃO é mais escolhido num menu suspenso (confuso com muitas séries
+   — pedido de 31/07/2026): "Transferir" volta para a tela de séries e o
+   professor toca no BLOCO da série que vai receber, do jeito que já navega. */
+let transfAulas=null; // {srcId, ids:Set} enquanto se escolhe o destino
 function abrirTransferencia(){
-  const disc=getDisc(curDiscId);if(!disc||!selAulas)return;
-  const escolhidas=disc.aulas.filter(a=>selAulas.has(a.id));
-  if(!escolhidas.length)return;
-  const outras=db.disciplinas.filter(d=>d.id!==disc.id);
-  if(!outras.length)return;
-  const opts=outras.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')||(a.turma||'').localeCompare(b.turma||''))
-    .map(d=>({v:String(d.id),t:`${d.nome} — ${d.turma||'—'}`}));
-  openModal(tr('Transferir aulas'),[
-    {id:'tf-dest',lbl:trf('Levar {n} aula(s) para:',{n:escolhidas.length}),type:'select',opts}
-  ],()=>{
-    const dest=getDisc(parseInt(document.getElementById('tf-dest').value,10));
-    if(!dest)return;
-    const n=escolhidas.length;
-    const base=dest.aulas.reduce((m,a)=>Math.max(m,a.numero||0),0);
-    escolhidas.forEach((a,i)=>{a.numero=base+i+1;dest.aulas.push(a);});
-    const ids=new Set(escolhidas.map(a=>a.id));
-    disc.aulas=disc.aulas.filter(a=>!ids.has(a.id));
-    disc.aulas.forEach((a,i)=>a.numero=i+1); // as que ficam fecham os buracos
-    selAulas=null;
-    closeModal();
-    renderAulas();
-    showToast(trf('{n} aula(s) transferida(s) para <b>{d}</b>.',{n,d:escH(`${dest.nome} — ${dest.turma||''}`)}),5000);
-  },tr('Transferir'));
+  const disc=getDisc(curDiscId);if(!disc||!selAulas||!selAulas.size)return;
+  transfAulas={srcId:disc.id,ids:new Set(selAulas)};
+  selAulas=null;
+  renderAulas();
+  curMat=matKey(disc); // garante os blocos certos mesmo vindo por outro caminho
+  renderSeries();
+  showScreen('s-series','back');
+  showToast(tr('Toque na série/ano que vai receber as aulas.'),5000);
+}
+function cancelarTransferencia(){transfAulas=null;refreshTransfBar();}
+// faixa fixa no rodapé enquanto se escolhe o bloco de destino
+function refreshTransfBar(){
+  const bar=document.getElementById('transf-bar');if(!bar)return;
+  const fws=document.querySelectorAll('#s-main .fab-wrap,#s-series .fab-wrap');
+  if(!transfAulas){bar.hidden=true;fws.forEach(f=>f.hidden=false);return;}
+  fws.forEach(f=>f.hidden=true);
+  bar.hidden=false;
+  bar.innerHTML=`<span class="sel-n">${trf('Levar {n} aula(s): toque no destino',{n:transfAulas.ids.size})}</span>`+
+    `<button class="fab fab-sec" onclick="cancelarTransferencia()"><i class="ti ti-x" aria-hidden="true"></i> ${tr('Cancelar')}</button>`;
+}
+function executarTransf(destId){
+  const t=transfAulas;if(!t)return;
+  const src=getDisc(t.srcId),dest=getDisc(destId);
+  if(!src||!dest||src.id===dest.id){cancelarTransferencia();return;}
+  const escolhidas=src.aulas.filter(a=>t.ids.has(a.id));
+  if(!escolhidas.length){cancelarTransferencia();return;}
+  const n=escolhidas.length;
+  const base=dest.aulas.reduce((m,a)=>Math.max(m,a.numero||0),0);
+  escolhidas.forEach((a,i)=>{a.numero=base+i+1;dest.aulas.push(a);});
+  src.aulas=src.aulas.filter(a=>!t.ids.has(a.id));
+  src.aulas.forEach((a,i)=>a.numero=i+1); // as que ficam fecham os buracos
+  transfAulas=null;
+  refreshTransfBar();
+  openDisc(destId); // já mostra as aulas na nova casa
+  showToast(trf('{n} aula(s) transferida(s) para <b>{d}</b>.',{n,d:escH(`${dest.nome} — ${dest.turma||''}`)}),5000);
 }
 /* ===== Copiar e colar uma MATÉRIA inteira (com todas as suas séries) =====
    Mesmo mecanismo da série e da aula, um nível acima. O uso principal é LEVAR
@@ -702,7 +771,16 @@ function colarMateria(){
   refreshColarMatBtn();
   showToast(trf('Matéria <b>{m}</b> colada com {n} série(s).',{m:escH(nome),n:novas.length}),5000);
 }
-function openDisc(id){pushNav();curDiscId=id;renderAulas();showScreen('s-disc');}
+function openDisc(id){
+  if(transfAulas){ // escolhendo o destino da transferência: o toque no bloco decide
+    if(id===transfAulas.srcId){showToast(tr('As aulas já estão nesta série/ano.'),4000);return;}
+    const dest=getDisc(id);if(!dest)return;
+    confirmar(trf('Levar {n} aula(s) para <b>{d}</b>?',{n:transfAulas.ids.size,d:escH(`${dest.nome} — ${dest.turma||''}`)}),
+      ()=>executarTransf(id),{sim:tr('Transferir'),ic:'transfer'});
+    return;
+  }
+  pushNav();curDiscId=id;renderAulas();showScreen('s-disc');
+}
 function openAddDisc(){if(!exigirAtivacao())return;openModal(tr('Nova matéria'),[{id:'md-n',lbl:'Nome da matéria',ph:'Ex: HISTÓRIA'},{id:'md-t',lbl:'Série/Ano',ph:'Ex: 6° ANO'},{id:'md-c',lbl:'Capítulo / unidade',ph:'Ex: Cap. 01 — Brasil Colônia'}],()=>{
   const nome=vi('md-n');if(!nome){alert(tr('Informe o nome.'));return;}
   db.disciplinas.push({id:nid(),nome:nome.toUpperCase(),turma:vi('md-t'),capitulo:vi('md-c'),aulas:[]});closeModal();renderDiscs();
@@ -718,7 +796,9 @@ function removeDisc(id){
   const ix=db.disciplinas.findIndex(d=>d.id===id);if(ix<0)return;
   const d=db.disciplinas[ix];
   db.disciplinas.splice(ix,1);renderSeries();
-  armarUndo(trf('Série <b>{s}</b> excluída.',{s:escH(d.turma||'')}),fidsDe([d]),()=>{db.disciplinas.splice(ix,0,d);});
+  armarUndo(trf('Série <b>{s}</b> excluída.',{s:escH(d.turma||'')}),fidsDe([d]),()=>{
+    if(!db.disciplinas.some(x=>x.id===d.id))db.disciplinas.splice(Math.min(ix,db.disciplinas.length),0,d);
+  });
   });
 }
 
@@ -772,10 +852,15 @@ function removeAula(id){
   confirmar(tr('Remover esta aula?'),()=>{
   const ix=disc.aulas.findIndex(a=>a.id===id);if(ix<0)return;
   const aula=disc.aulas[ix];
-  const nums=disc.aulas.map(a=>({a,n:a.numero})); // a renumeração também tem de voltar no Desfazer
+  const nums=disc.aulas.map(a=>({id:a.id,n:a.numero})); // a renumeração também tem de voltar no Desfazer
+  const discId=disc.id;
   disc.aulas.splice(ix,1);disc.aulas.forEach((a,i)=>a.numero=i+1);renderAulas();
   armarUndo(trf('Aula <b>{t}</b> excluída.',{t:escH(aula.titulo||'')}),fidsDe([{aulas:[aula]}]),
-    ()=>{disc.aulas.splice(ix,0,aula);nums.forEach(x=>x.a.numero=x.n);});
+    ()=>{ // resolve por id na hora: o "Desfazer geral" pode ter trocado o objeto db
+      const d=getDisc(discId);if(!d||d.aulas.some(x=>x.id===aula.id))return;
+      d.aulas.splice(Math.min(ix,d.aulas.length),0,aula);
+      d.aulas.forEach(a=>{const x=nums.find(y=>y.id===a.id);if(x)a.numero=x.n;});
+    });
   });
 }
 
@@ -927,10 +1012,12 @@ function removeCap(capId){
   const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);
   confirmar(tr('Remover este capítulo e todos os seus vídeos?'),()=>{
   const ix=aula.caps.findIndex(c=>c.id===capId);if(ix<0)return;
-  const cap=aula.caps[ix];
+  const cap=aula.caps[ix],discId=disc.id,aulaId=aula.id;
   aula.caps.splice(ix,1);renderCaps();
   armarUndo(trf('Capítulo <b>{c}</b> excluído.',{c:escH(cap.nome||cap.num||'')}),fidsDe([{aulas:[{caps:[cap]}]}]),
-    ()=>{aula.caps.splice(ix,0,cap);});
+    ()=>{const d=getDisc(discId),au=d&&getAula(d,aulaId);
+      if(!au||au.caps.some(x=>x.id===cap.id))return;
+      au.caps.splice(Math.min(ix,au.caps.length),0,cap);});
   });
 }
 let celebrarCapId=null; // cap a festejar no próximo renderCaps (setado ao marcar como ministrado)
@@ -961,10 +1048,12 @@ function removeVid(capId,vidId){
   const disc=getDisc(curDiscId);const aula=getAula(disc,curAulaId);const cap=getCap(aula,capId);
   confirmar(tr('Remover este vídeo?'),()=>{
   const ix=cap.videos.findIndex(v=>v.id===vidId);if(ix<0)return;
-  const v=cap.videos[ix];
+  const v=cap.videos[ix],discId=disc.id,aulaId=aula.id;
   cap.videos.splice(ix,1);renderCaps();
   armarUndo(trf('Vídeo <b>{v}</b> excluído.',{v:escH(v.nome||'')}),(v.arquivos||[]).map(x=>x.fid),
-    ()=>{cap.videos.splice(ix,0,v);});
+    ()=>{const d=getDisc(discId),au=d&&getAula(d,aulaId),c=au&&getCap(au,capId);
+      if(!c||c.videos.some(x=>x.id===v.id))return;
+      c.videos.splice(Math.min(ix,c.videos.length),0,v);});
   });
 }
 
@@ -1431,7 +1520,7 @@ document.addEventListener('pointerdown',e=>{
   const alvo=t.closest('[data-mv]');if(!alvo)return;
   const p0={x:e.clientX,y:e.clientY,id:e.pointerId,sc:window.scrollY};
   mvP0=p0;
-  // aula: a MESMA pressão, mantida por 3 s sem sair do lugar, vira modo seleção
+  // aula: a MESMA pressão, mantida por 2 s sem sair do lugar, vira modo seleção
   if(alvo.dataset.mv==='aula'&&!selAulas)selArm(alvo,p0);
   mvTimer=setTimeout(()=>{
     mvTimer=null;
@@ -1441,8 +1530,9 @@ document.addEventListener('pointerdown',e=>{
   },520);
 },true);
 document.addEventListener('pointermove',e=>{
-  // o dedo saiu do lugar: a pressão de 3 s morre (vale também durante o arraste)
-  if(selTimer&&selP0&&(Math.abs(e.clientX-selP0.x)>12||Math.abs(e.clientY-selP0.y)>12))selCancela();
+  // o dedo saiu do lugar: a pressão de 2 s morre (tolerância maior que a do
+  // arraste, porque 2 s parado no tablet sempre escorrega alguns pixels)
+  if(selTimer&&selP0&&(Math.abs(e.clientX-selP0.x)>18||Math.abs(e.clientY-selP0.y)>18))selCancela();
   if(mvD){if(e.pointerId===mvD.ptr)mvArrastar(e.clientY);return;}
   if(!mvTimer||!mvP0)return;
   if(Math.abs(e.clientX-mvP0.x)>12||Math.abs(e.clientY-mvP0.y)>12)mvCancelaTimer();
@@ -1478,13 +1568,13 @@ function fecharConfirm(){
   clearTimeout(confirmTimer);confirmTimer=null;
   if(confirmEl){const e=confirmEl;confirmEl=null;e.classList.add('out');setTimeout(()=>e.remove(),320);}
 }
-function confirmar(html,aoSim){
+function confirmar(html,aoSim,opts){ // opts: {sim: rótulo do botão, ic: ícone}
   fecharConfirm();
   const zone=document.getElementById('toast-zone');
   const t=document.createElement('div');
   t.className='toast confirm';
-  t.innerHTML=`<i class="ti ti-trash" aria-hidden="true"></i><div class="cf-body"><div>${html}</div>`+
-    `<div class="cf-btns"><button type="button" class="cf-sim">${tr('Remover')}</button>`+
+  t.innerHTML=`<i class="ti ti-${(opts&&opts.ic)||'trash'}" aria-hidden="true"></i><div class="cf-body"><div>${html}</div>`+
+    `<div class="cf-btns"><button type="button" class="cf-sim">${(opts&&opts.sim)||tr('Remover')}</button>`+
     `<button type="button" class="cf-nao">${tr('Cancelar')}</button></div></div>`;
   t.querySelector('.cf-sim').onclick=()=>{fecharConfirm();aoSim();};
   t.querySelector('.cf-nao').onclick=()=>fecharConfirm();
@@ -1579,10 +1669,13 @@ function restaurarItem(item){
   return true;
 }
 // o botão da lixeira só existe depois que alguma coisa foi excluída
+const LIX_VISTA_KEY='prometeu.lixeira.vista.v1'; // já houve descarte alguma vez?
 function atualizarLixBtn(){
   const n=lixeira.length;
+  if(n)try{localStorage.setItem(LIX_VISTA_KEY,'1');}catch(e){}
+  let vista=false;try{vista=localStorage.getItem(LIX_VISTA_KEY)==='1';}catch(e){}
   document.querySelectorAll('.lix-btn').forEach(b=>{
-    b.hidden=n===0;
+    b.hidden=!n&&!vista; // depois do 1º descarte o botão fica sempre à mão
     const s=b.querySelector('.lix-n');if(s)s.textContent=n?String(n):'';
     b.setAttribute('aria-label',trf('Lixeira — {n} item(ns) para recuperar',{n}));
   });
@@ -2749,6 +2842,7 @@ applyThemeUI(THEMES[themeIdx]);
 refreshProjUI();
 const _dv=document.getElementById('dw-ver');if(_dv)_dv.textContent='Prometeu · v'+APP_VERSION;
 if(isStandalone()){const _bi=document.getElementById('dw-install');if(_bi)_bi.style.display='none';} // já instalado
+atualizarLixBtn(); // se já houve descarte algum dia, a lixeira nasce visível
 paintIcons();
 if(window.i18nBoot)i18nBoot(); // traduz a interface estática e o título
 installTs();checkConsent();checarAviso();

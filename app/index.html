@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=a3784b56fe">
+<link rel="stylesheet" href="styles.css?v=1c8d6b8e40">
 </head>
 <body class="L">
 <div id="root" class="L">
@@ -87,6 +87,9 @@
      lixeira do topo, então sumir o aviso não perde nada. -->
 <div id="undo-bar" class="undo-bar" role="status" hidden></div>
 
+<!-- faixa fixa "escolha o destino" da transferência de aulas; conteúdo vem de refreshTransfBar() -->
+<div class="sel-bar transf-bar" id="transf-bar" hidden></div>
+
 <!-- Janela da lixeira (últimas 10 exclusões da sessão) -->
 <div class="modal-wrap" id="lixmodal" style="z-index:205" onclick="if(event.target===this)fecharLixeira()">
   <div class="modal-box">
@@ -106,7 +109,7 @@
       <!-- logo-medalhão (decorativa): troca sozinha por CSS conforme o tema -->
       <span class="app-logo" aria-hidden="true"></span>
       <span class="ttl">Organizador de Aulas</span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
     <div class="proj-bar" onclick="openProjetos()" role="button" aria-label="Gerenciar projetos">
@@ -124,7 +127,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="mat-ttl"></span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
     <nav class="crumbs" id="bc-series" aria-label="Trilha de navegação"></nav>
@@ -138,7 +141,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-series')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="disc-ttl"></span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
       <button class="tbtn" onclick="editCurDisc()"><i class="ti ti-edit" aria-hidden="true"></i></button>
     </div>
@@ -149,7 +152,7 @@
     </div>
   </div>
   <div class="content" id="list-aulas"></div>
-  <!-- barra da transferência seletiva (pressão de 3 s numa aula); o conteúdo vem de refreshSelBar() -->
+  <!-- barra da transferência seletiva (pressão de 2 s numa aula); o conteúdo vem de refreshSelBar() -->
   <div class="sel-bar" id="sel-bar" hidden></div>
   <div class="fab-wrap"><button class="fab fab-sec" id="fab-colar-aula" hidden onclick="colarAula()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-aula-lbl">Colar aula</span></button><button class="fab" onclick="openAddAula()"><i class="ti ti-plus" aria-hidden="true"></i> Nova aula</button></div>
 </div>
@@ -159,7 +162,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-disc')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="aula-num-ttl"></span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
       <button class="tbtn" onclick="editCurAula()"><i class="ti ti-edit" aria-hidden="true"></i></button>
     </div>
@@ -183,7 +186,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-aula')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="vid-form-ttl">Novo vídeo</span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
     <nav class="crumbs" id="bc-vid" aria-label="Trilha de navegação"></nav>
@@ -244,7 +247,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl">Projetos — anos letivos</span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
   </div>
@@ -257,7 +260,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl">Tutorial</span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
   </div>
@@ -269,7 +272,7 @@
     <div class="topbar">
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl">Ativação</span>
-      <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
+      <button class="tbk undo-btn" onclick="desfazerAcao()" aria-label="Desfazer a última alteração" hidden><i class="ti ti-undo" aria-hidden="true"></i></button><button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
       <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
   </div>
@@ -371,7 +374,7 @@
 <div id="toast-zone" aria-live="polite"></div>
 
 </div>
-<script src="i18n.js?v=a3784b56fe"></script>
-<script src="app.js?v=a3784b56fe"></script>
+<script src="i18n.js?v=1c8d6b8e40"></script>
+<script src="app.js?v=1c8d6b8e40"></script>
 </body>
 </html>
