@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=815045388d">
+<link rel="stylesheet" href="styles.css?v=9bcd74fed0">
 </head>
 <body class="L">
 <div id="root" class="L">
@@ -107,7 +107,7 @@
       <span class="app-logo" aria-hidden="true"></span>
       <span class="ttl">Organizador de Aulas</span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti0" aria-hidden="true"></i><span id="tl0">Escuro</span></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
     <div class="proj-bar" onclick="openProjetos()" role="button" aria-label="Gerenciar projetos">
       <i class="ti ti-archive" style="font-size:14px" aria-hidden="true"></i>
@@ -125,7 +125,7 @@
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="mat-ttl"></span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti4" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
     <nav class="crumbs" id="bc-series" aria-label="Trilha de navegação"></nav>
   </div>
@@ -139,7 +139,7 @@
       <button class="tbk" onclick="goBack('s-series')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="disc-ttl"></span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti1" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
       <button class="tbtn" onclick="editCurDisc()"><i class="ti ti-edit" aria-hidden="true"></i></button>
     </div>
     <nav class="crumbs" id="bc-disc" aria-label="Trilha de navegação"></nav>
@@ -149,7 +149,7 @@
     </div>
   </div>
   <div class="content" id="list-aulas"></div>
-  <div class="fab-wrap"><button class="fab fab-sec" id="fab-colar-aula" hidden onclick="colarAula()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-aula-lbl">Colar aula</span></button><button class="fab" onclick="openAddAula()"><i class="ti ti-plus" aria-hidden="true"></i> Nova aula</button></div>
+  <div class="fab-wrap"><button class="fab fab-sec" id="fab-transferir" hidden onclick="abrirTransferencia()"><i class="ti ti-transfer" aria-hidden="true"></i> Transferir aulas</button><button class="fab fab-sec" id="fab-colar-aula" hidden onclick="colarAula()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-aula-lbl">Colar aula</span></button><button class="fab" onclick="openAddAula()"><i class="ti ti-plus" aria-hidden="true"></i> Nova aula</button></div>
 </div>
 
 <div class="screen" id="s-aula">
@@ -158,7 +158,7 @@
       <button class="tbk" onclick="goBack('s-disc')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="aula-num-ttl"></span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti2" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
       <button class="tbtn" onclick="editCurAula()"><i class="ti ti-edit" aria-hidden="true"></i></button>
     </div>
     <nav class="crumbs" id="bc-aula" aria-label="Trilha de navegação"></nav>
@@ -182,7 +182,7 @@
       <button class="tbk" onclick="goBack('s-aula')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl" id="vid-form-ttl">Novo vídeo</span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti3" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
     <nav class="crumbs" id="bc-vid" aria-label="Trilha de navegação"></nav>
   </div>
@@ -243,7 +243,7 @@
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl">Projetos — anos letivos</span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti5" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
   </div>
   <div class="content" id="list-proj"></div>
@@ -256,7 +256,7 @@
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl">Tutorial</span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti6" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
   </div>
   <div class="content tut-body" id="tut-body"></div>
@@ -268,7 +268,7 @@
       <button class="tbk" onclick="goBack('s-main')" aria-label="Voltar"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <span class="ttl">Ativação</span>
       <button class="tbk lix-btn" onclick="abrirLixeira()" aria-label="Lixeira" hidden><i class="ti ti-trash" aria-hidden="true"></i><span class="lix-n"></span></button>
-      <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ti7" aria-hidden="true"></i></button>
+      <div class="theme-group" role="group" aria-label="Tema"></div>
     </div>
   </div>
   <div class="content" id="at-body"></div>
@@ -369,7 +369,7 @@
 <div id="toast-zone" aria-live="polite"></div>
 
 </div>
-<script src="i18n.js?v=815045388d"></script>
-<script src="app.js?v=815045388d"></script>
+<script src="i18n.js?v=9bcd74fed0"></script>
+<script src="app.js?v=9bcd74fed0"></script>
 </body>
 </html>
