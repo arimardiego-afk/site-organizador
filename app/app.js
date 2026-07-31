@@ -138,18 +138,19 @@ document.addEventListener('pointerleave',()=>_penSet(null),{passive:true});
 
 const CPS=['CP1','CP2','CP3','CP4','CP5','CP6','CP7','CP8','CP9','CP10','CP11'];
 let themeIdx=0,_mcb=null,vidTimer=null,curDiscId=null,curAulaId=null,curCapId=null,editVidId=null,demoOn=false;
-const THEMES=['L','D','P','P PR','P PB'];
+const THEMES=['L','D','P','P PR','P PB','P SN'];
 const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
   'L':{icon:'ti-sun',label:'Claro',bg:'#F0EDE8',sw:'#C0392B'},
   'D':{icon:'ti-moon',label:'Escuro',bg:'#000',sw:'#fff'},
   'P':{icon:'ti-cpu',label:'Prometeu',bg:'#050b13',sw:'#2dd9ff'},
   'P PR':{icon:'ti-cpu',label:'P. Vermelho',bg:'#120407',sw:'#ff5566'},
-  'P PB':{icon:'ti-cpu',label:'P. Azul',bg:'#04060f',sw:'#4d80ff'}
+  'P PB':{icon:'ti-cpu',label:'P. Azul',bg:'#04060f',sw:'#4d80ff'},
+  'P SN':{icon:'ti-cpu',label:'Sinal Noturno',bg:'#070b10',sw:'#35e0d8'} // identidade oficial do grupo
 };
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.9', APP_DATE='julho de 2026';
+const APP_VERSION='3.10', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -2225,14 +2226,15 @@ const TUT=[
 <li>Os anexos entram no backup do projeto e saem nos relatórios.</li>
 </ul>`},
 {ic:'ti-palette',t:'Temas',c:`
-<p>O botão no canto superior direito alterna entre os 5 temas — a preferência fica salva:</p>
+<p>O botão no canto superior direito alterna entre os 6 temas — a preferência fica salva:</p>
 <ol>
 <li><b>Claro</b> — fundo bege, vermelho terracota.</li>
 <li><b>Escuro</b> — preto OLED com néon branco.</li>
 <li><b>Prometeu</b> — HUD sci-fi ciano (assinatura do app).</li>
 <li><b>P. Vermelho</b> e <b>P. Azul</b> — variações do Prometeu.</li>
+<li><b>Sinal Noturno</b> — azul-noite com ciano e âmbar.</li>
 </ol>
-<p>Nos três temas <b>Prometeu</b>, cada cartão vira uma <b>caixa de vidro 3D</b>: ao tocar, ela balança de leve e volta sozinha. (O efeito respeita a opção “reduzir movimento” do aparelho.)</p>`},
+<p>Nos temas da família <b>Prometeu</b>, cada cartão vira uma <b>caixa de vidro 3D</b>: ao tocar, ela balança de leve e volta sozinha. (O efeito respeita a opção “reduzir movimento” do aparelho.)</p>`},
 {ic:'ti-eye',t:'Tamanho do texto e zoom',c:`
 <p>Para quem prefere letras maiores:</p>
 <ul>

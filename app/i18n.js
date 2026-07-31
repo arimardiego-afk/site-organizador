@@ -949,14 +949,15 @@ const TUT_ML={
 <li>Attachments are included in project backups and in reports.</li>
 </ul>`},
 {ic:'ti-palette',t:'Themes',c:`
-<p>The button in the top-right corner cycles through the 5 themes — the preference is saved:</p>
+<p>The button in the top-right corner cycles through the 6 themes — the preference is saved:</p>
 <ol>
 <li><b>Light</b> — beige background, terracotta red.</li>
 <li><b>Dark</b> — OLED black with white neon.</li>
 <li><b>Prometheus</b> — cyan sci-fi HUD (the app's signature).</li>
 <li><b>P. Red</b> and <b>P. Blue</b> — Prometheus variations.</li>
+<li><b>Sinal Noturno</b> — night blue with cyan and amber.</li>
 </ol>
-<p>In the three <b>Prometheus</b> themes, each card becomes a <b>3D glass box</b>: tap it and it sways gently, then settles back on its own. (The effect honours the device's “reduce motion” setting.)</p>`},
+<p>In the <b>Prometheus</b>-family themes, each card becomes a <b>3D glass box</b>: tap it and it sways gently, then settles back on its own. (The effect honours the device's “reduce motion” setting.)</p>`},
 {ic:'ti-eye',t:'Text size and zoom',c:`
 <p>If you prefer bigger text:</p>
 <ul>
@@ -1076,14 +1077,15 @@ const TUT_ML={
 <li>Los adjuntos entran en la copia de seguridad del proyecto y salen en los informes.</li>
 </ul>`},
 {ic:'ti-palette',t:'Temas',c:`
-<p>El botón de la esquina superior derecha alterna entre los 5 temas — la preferencia queda guardada:</p>
+<p>El botón de la esquina superior derecha alterna entre los 6 temas — la preferencia queda guardada:</p>
 <ol>
 <li><b>Claro</b> — fondo beige, rojo terracota.</li>
 <li><b>Oscuro</b> — negro OLED con neón blanco.</li>
 <li><b>Prometeo</b> — HUD de ciencia ficción cian (la firma de la app).</li>
 <li><b>P. Rojo</b> y <b>P. Azul</b> — variaciones del Prometeo.</li>
+<li><b>Sinal Noturno</b> — azul nocturno con cian y ámbar.</li>
 </ol>
-<p>En los tres temas <b>Prometeo</b>, cada tarjeta se convierte en una <b>caja de cristal 3D</b>: al tocarla, se balancea suavemente y vuelve sola. (El efecto respeta la opción “reducir movimiento” del dispositivo.)</p>`},
+<p>En los temas de la familia <b>Prometeo</b>, cada tarjeta se convierte en una <b>caja de cristal 3D</b>: al tocarla, se balancea suavemente y vuelve sola. (El efecto respeta la opción “reducir movimiento” del dispositivo.)</p>`},
 {ic:'ti-eye',t:'Tamaño del texto y zoom',c:`
 <p>Para quien prefiere letras más grandes:</p>
 <ul>
@@ -1203,14 +1205,15 @@ const TUT_ML={
 <li>附件会包含在项目备份和报告中。</li>
 </ul>`},
 {ic:'ti-palette',t:'主题',c:`
-<p>右上角的按钮在 5 种主题间切换 — 偏好会被保存：</p>
+<p>右上角的按钮在 6 种主题间切换 — 偏好会被保存：</p>
 <ol>
 <li><b>浅色</b> — 米色背景，赤陶红。</li>
 <li><b>深色</b> — OLED 纯黑配白色霓虹。</li>
 <li><b>普罗米修斯</b> — 青色科幻 HUD（应用的招牌）。</li>
 <li><b>普罗米修斯·红</b>和<b>普罗米修斯·蓝</b> — 两种变体。</li>
+<li><b>Sinal Noturno</b>（夜间信号）— 夜蓝底色配青色与琥珀色。</li>
 </ol>
-<p>在三个<b>普罗米修斯</b>主题中，每张卡片都会变成一个<b>3D 玻璃盒</b>：点按时它会轻轻摇摆，然后自动复位。（该效果会遵循设备的“减弱动态效果”设置。）</p>`},
+<p>在<b>普罗米修斯</b>系列主题中，每张卡片都会变成一个<b>3D 玻璃盒</b>：点按时它会轻轻摇摆，然后自动复位。（该效果会遵循设备的“减弱动态效果”设置。）</p>`},
 {ic:'ti-eye',t:'文字大小与缩放',c:`
 <p>如果您更喜欢较大的文字：</p>
 <ul>
