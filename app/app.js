@@ -149,7 +149,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.8', APP_DATE='julho de 2026';
+const APP_VERSION='3.9', APP_DATE='julho de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -305,6 +305,7 @@ function buildThemeGroups(){
 }
 // dir='back' faz a tela entrar pela esquerda (animação scrBack no styles.css)
 function showScreen(id,dir){if(window.mvSair)mvSair(); // trocar de tela encerra o modo mover
+  if(id!=='s-disc')selAulas=null; // e o modo seleção também (selAulas é let, não mora no window)
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.remove('nav-back');});
   const el=document.getElementById(id);el.classList.toggle('nav-back',dir==='back');el.classList.add('active');
   if(window.fecharConfirm)fecharConfirm(); // cartão "tem certeza?" não sobrevive à navegação
@@ -590,27 +591,69 @@ function colarAula(){
   refreshColarAulaBtn();
   showToast(trf('Aula <b>{a}</b> colada.',{a:escH(nova.titulo)}),4000);
 }
-/* ===== Transferir TODAS as aulas de uma série para outra =====
-   (pedido de 29/07/2026 — antes era preciso copiar e colar aula por aula.)
-   MOVE, não copia: as aulas saem da série atual e entram na escolhida com os
-   mesmos ids/fids, então os anexos do IndexedDB continuam valendo — nada é
-   clonado. Numeração: destino vazio mantém os números; destino com aulas
-   continua a contagem a partir do maior número. */
+/* ===== Transferência seletiva de aulas (pressão de 3 s) =====
+   (pedido de 30/07/2026 — substituiu o botão "Transferir aulas" que levava
+   TODAS de uma vez.) Segurar uma aula por 3 s — mais que os 520 ms do
+   arrastar, e SEM mover o dedo — liga o modo seleção: cada aula ganha uma
+   caixa ao lado do botão de copiar, e a barra de baixo leva as marcadas.
+   MOVE, não copia: as aulas saem com os mesmos ids/fids, então os anexos do
+   IndexedDB continuam valendo — nada é clonado. Numeração: as que chegam
+   continuam a contagem do destino; as que ficam são renumeradas de 1. */
+let selAulas=null,selTimer=null,selP0=null; // Set de ids em seleção (null = modo desligado)
+function selCancela(){if(selTimer){clearTimeout(selTimer);selTimer=null;}selP0=null;}
+function selArm(alvo,p0){
+  selCancela();selP0=p0;
+  selTimer=setTimeout(()=>{selTimer=null;selDisparar(alvo);},3000);
+}
+function selDisparar(alvo){
+  selP0=null;
+  // se a pressão virou arraste de verdade (saiu do lugar), o arraste vence
+  if(mvD){if(mvD.i!==mvD.i0||Math.abs(mvD.dy)>14)return;mvSair();}
+  if(db.disciplinas.length<2){showToast(tr('Crie outra série/ano para receber as aulas.'),4000);return;}
+  selAulas=new Set([parseInt(alvo.dataset.mvk,10)]);
+  mvSkipAte=Date.now()+900; // o soltar do dedo não pode abrir a aula
+  if(navigator.vibrate){try{navigator.vibrate([20,60,20]);}catch(e){}}
+  renderAulas();
+  showToast(tr('Marque as aulas e toque em <b>Transferir</b>.'),4000);
+}
+function toggleSelAula(id){
+  if(!selAulas)return;
+  if(selAulas.has(id))selAulas.delete(id);else selAulas.add(id);
+  renderAulas();
+}
+function sairSelecao(){selAulas=null;renderAulas();}
+// a barra vive no rodapé da tela de aulas; enquanto ela está de pé, os FABs somem
+function refreshSelBar(){
+  const bar=document.getElementById('sel-bar'),fw=document.querySelector('#s-disc .fab-wrap');
+  if(!bar)return;
+  if(!selAulas){bar.hidden=true;if(fw)fw.hidden=false;return;}
+  if(fw)fw.hidden=true;
+  bar.hidden=false;
+  const n=selAulas.size;
+  bar.innerHTML=`<span class="sel-n">${trf('{n} selecionada(s)',{n})}</span>`+
+    `<button class="fab fab-sec" onclick="sairSelecao()"><i class="ti ti-x" aria-hidden="true"></i> ${tr('Cancelar')}</button>`+
+    `<button class="fab" onclick="abrirTransferencia()"${n?'':' disabled'}><i class="ti ti-transfer" aria-hidden="true"></i> ${tr('Transferir')}</button>`;
+}
 function abrirTransferencia(){
-  const disc=getDisc(curDiscId);if(!disc||!disc.aulas.length)return;
+  const disc=getDisc(curDiscId);if(!disc||!selAulas)return;
+  const escolhidas=disc.aulas.filter(a=>selAulas.has(a.id));
+  if(!escolhidas.length)return;
   const outras=db.disciplinas.filter(d=>d.id!==disc.id);
   if(!outras.length)return;
   const opts=outras.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')||(a.turma||'').localeCompare(b.turma||''))
     .map(d=>({v:String(d.id),t:`${d.nome} — ${d.turma||'—'}`}));
-  openModal(tr('Transferir todas as aulas'),[
-    {id:'tf-dest',lbl:trf('Levar as {n} aulas para:',{n:disc.aulas.length}),type:'select',opts}
+  openModal(tr('Transferir aulas'),[
+    {id:'tf-dest',lbl:trf('Levar {n} aula(s) para:',{n:escolhidas.length}),type:'select',opts}
   ],()=>{
     const dest=getDisc(parseInt(document.getElementById('tf-dest').value,10));
     if(!dest)return;
-    const n=disc.aulas.length;
+    const n=escolhidas.length;
     const base=dest.aulas.reduce((m,a)=>Math.max(m,a.numero||0),0);
-    disc.aulas.forEach((a,i)=>{if(base)a.numero=base+i+1;dest.aulas.push(a);});
-    disc.aulas=[];
+    escolhidas.forEach((a,i)=>{a.numero=base+i+1;dest.aulas.push(a);});
+    const ids=new Set(escolhidas.map(a=>a.id));
+    disc.aulas=disc.aulas.filter(a=>!ids.has(a.id));
+    disc.aulas.forEach((a,i)=>a.numero=i+1); // as que ficam fecham os buracos
+    selAulas=null;
     closeModal();
     renderAulas();
     showToast(trf('{n} aula(s) transferida(s) para <b>{d}</b>.',{n,d:escH(`${dest.nome} — ${dest.turma||''}`)}),5000);
@@ -682,16 +725,14 @@ function renderAulas(){
   saveDB();
   const disc=getDisc(curDiscId);if(!disc)return;
   refreshColarAulaBtn(); // colar numa série sem aulas é o caso mais útil — antes de qualquer return
-  // "Transferir aulas" só aparece quando há o que levar E outra série para receber
-  const fabTf=document.getElementById('fab-transferir');
-  if(fabTf)fabTf.hidden=!(disc.aulas.length&&db.disciplinas.length>1);
+  refreshSelBar(); // barra da transferência seletiva (esconde os FABs enquanto seleciona)
   document.getElementById('disc-ttl').textContent=`${disc.nome}${disc.turma?' — '+disc.turma:''}`;
   setCrumbs('bc-disc',[{t:tr('Início'),go:'s-main'},{t:disc.nome||'',go:'s-series'},{t:disc.turma||'—'}]);
   document.getElementById('disc-cap-lbl').textContent=disc.capitulo||'Toque para editar';
   const el=document.getElementById('list-aulas');
   if(!disc.aulas.length){el.innerHTML='<div class="empty"><i class="ti ti-video-off" aria-hidden="true"></i><p>Nenhuma aula.<br>Toque em <b>Nova aula</b>.</p></div>';return;}
   el.innerHTML=disc.aulas.map((a,i)=>`
-    <div class="card ${esc(i)}${aulaPend(a)===0&&aulaMinistrados(a)>0?' ok-min':''}" data-mv="aula" data-mvk="${a.id}"><div class="aula-row">
+    <div class="card ${esc(i)}${aulaPend(a)===0&&aulaMinistrados(a)>0?' ok-min':''}${selAulas&&selAulas.has(a.id)?' sel-on':''}" data-mv="aula" data-mvk="${a.id}"><div class="aula-row">
       <div class="aula-nc" onclick="openAula(${a.id})" aria-label="Abrir aula ${String(a.numero).padStart(2,'0')}"><div class="num-c">A${String(a.numero).padStart(2,'0')}</div></div>
       <div class="aula-body" onclick="openAula(${a.id})">
         <div class="at">${escH(a.titulo)}</div>
@@ -700,13 +741,14 @@ function renderAulas(){
         <div class="ac">${(()=>{const cps=a.caps.map((c,i)=>c.videos.length?`CP${i+1}`:null).filter(Boolean);return cps.length?cps.join(' · '):'Sem conteúdo nos capítulos';})()}</div>
       </div>
       <div class="side-btns">
+        ${selAulas?`<button class="iBtn sel-chk${selAulas.has(a.id)?' on':''}" onclick="toggleSelAula(${a.id})" role="checkbox" aria-checked="${selAulas.has(a.id)}" aria-label="Selecionar aula"><i class="ti ti-check" aria-hidden="true"></i></button>`:''}
         <button class="iBtn" onclick="copiarAula(${a.id})" aria-label="Copiar aula"><i class="ti ti-copy" aria-hidden="true"></i></button>
         <button class="iBtn edt" onclick="openEditAula(${a.id})" aria-label="Editar"><i class="ti ti-edit" aria-hidden="true"></i></button>
         <button class="iBtn del" onclick="removeAula(${a.id})" aria-label="Remover"><i class="ti ti-trash" aria-hidden="true"></i></button>
       </div>
     </div></div>`).join('');
 }
-function openAula(id){pushNav();curAulaId=id;selCP=null;renderCaps();showScreen('s-aula');}
+function openAula(id){if(selAulas){toggleSelAula(id);return;}pushNav();curAulaId=id;selCP=null;renderCaps();showScreen('s-aula');}
 function openAddAula(){
   if(!exigirAtivacao())return;
   const disc=getDisc(curDiscId);
@@ -1388,6 +1430,8 @@ document.addEventListener('pointerdown',e=>{
   const alvo=t.closest('[data-mv]');if(!alvo)return;
   const p0={x:e.clientX,y:e.clientY,id:e.pointerId,sc:window.scrollY};
   mvP0=p0;
+  // aula: a MESMA pressão, mantida por 3 s sem sair do lugar, vira modo seleção
+  if(alvo.dataset.mv==='aula'&&!selAulas)selArm(alvo,p0);
   mvTimer=setTimeout(()=>{
     mvTimer=null;
     if(!mvIniciar(alvo,p0))return;
@@ -1396,15 +1440,17 @@ document.addEventListener('pointerdown',e=>{
   },520);
 },true);
 document.addEventListener('pointermove',e=>{
+  // o dedo saiu do lugar: a pressão de 3 s morre (vale também durante o arraste)
+  if(selTimer&&selP0&&(Math.abs(e.clientX-selP0.x)>12||Math.abs(e.clientY-selP0.y)>12))selCancela();
   if(mvD){if(e.pointerId===mvD.ptr)mvArrastar(e.clientY);return;}
   if(!mvTimer||!mvP0)return;
   if(Math.abs(e.clientX-mvP0.x)>12||Math.abs(e.clientY-mvP0.y)>12)mvCancelaTimer();
 },true);
 // enquanto arrasta, o dedo carrega o cartão — não rola a página
 document.addEventListener('touchmove',e=>{if(mvD)e.preventDefault();},{passive:false});
-document.addEventListener('pointerup',()=>{mvCancelaTimer();mvSoltar();},true);
-document.addEventListener('pointercancel',()=>{mvCancelaTimer();mvSair();},true);
-['scroll','wheel'].forEach(ev=>document.addEventListener(ev,()=>{if(!mvD)mvCancelaTimer();},true));
+document.addEventListener('pointerup',()=>{mvCancelaTimer();selCancela();mvSoltar();},true);
+document.addEventListener('pointercancel',()=>{mvCancelaTimer();selCancela();mvSair();},true);
+['scroll','wheel'].forEach(ev=>document.addEventListener(ev,()=>{if(!mvD)mvCancelaTimer();selCancela();},true));
 document.addEventListener('click',e=>{
   // o clique que nasce junto com a pressão longa não pode abrir o cartão
   if(mvSkipAte&&Date.now()<mvSkipAte){mvSkipAte=0;e.stopPropagation();e.preventDefault();}
