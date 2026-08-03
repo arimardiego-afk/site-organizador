@@ -998,6 +998,17 @@ body{min-height:100dvh}
 .fab.fab-sec:hover{background:rgba(var(--grgb),.12)}
 .fab.fab-sec i{background:rgba(var(--grgb),.14);box-shadow:none}
 
+/* ===== Linha "Colar …" + ✕ de descarte (pedido de 03/08/2026) =====
+   A cópia em espera agora pode ser APAGADA sem colar — antes a faixa só saía
+   da tela colando em algum lugar. O hidden mora na LINHA inteira (botão e ✕
+   aparecem e somem juntos); a regra [hidden] é explícita porque display
+   próprio (flex) vence o [hidden] do navegador (caso do botão desfazer). */
+.fab-row{display:flex;align-items:stretch;gap:8px;width:min(520px,calc(100% - 32px));margin:0 auto}
+.fab-row[hidden]{display:none}
+.fab-row .fab{width:auto;flex:1;margin:0 0 10px}
+.fab-row .fab-x{flex:0 0 54px;width:54px;padding:0}
+.fab.fab-x i{position:static;transform:none;width:auto;height:auto;background:none;border:0;box-shadow:none;font-size:19px}
+
 /* =====================================================================
    POEIRA LUMINOSA NO FUNDO (só no tema Prometeu)
    ---------------------------------------------------------------------
@@ -1220,7 +1231,6 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
      menor = giro mais dramático) e quase o dobro de inclinação, o que abre a
      "tampa" de verdade em vez de insinuá-la. */
   --g3c-fwd:66px;      /* quanto o bloco avança na direção do olho */
-  --g3c-tilt:13deg;    /* o giro do topo para a frente (mostra a "tampa") */
   --g3c-lean:5deg;     /* a viradinha ao passar mouse/caneta por cima (exemplo Vencedor) */
   --g3c-persp:1100px;  /* distância do olho: maior = menos distorção no giro */
   --g3c-glow:46px;     /* raio do halo */
@@ -1245,22 +1255,13 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
   background:radial-gradient(52% 100% at 50% 0%,
     rgba(var(--grgb),.28) 0%,rgba(var(--grgb),.10) 44%,transparent 78%);
   filter:blur(9px);
-  transition:transform .55s var(--g3-ease),opacity .55s ease,filter .55s ease;
 }
-/* o derrame se abre quando o bloco vem para a frente — é o que dá a sensação
-   de que ele levantou do chão, e não só de que ficou maior */
-.P .g3box:has(.g3in.swing)::after{
-  transition-duration:.28s;
-  transform:translateY(5px) scale(1.14,1.30);opacity:.85;filter:blur(13px);
-}
-/* o giro sai da BORDA ESQUERDA: girando pelo centro, o lado esquerdo vinha
-   para a frente, crescia e saía da margem — o ícone da matéria encostava na
-   beirada da tela. Pela esquerda, quem se afasta é o lado direito, que é
-   justamente onde a espessura tem de aparecer. */
-/* 31/07/2026 — a dobradiça desceu para PERTO DA BASE (50% 88%): com ela no
-   centro-esquerda, o giro do aperto mandava a metade de baixo do bloco para
-   longe do olho e o usuário via o bloco "indo para trás" (3ª reclamação —
-   v3.4, v3.4.2 e agora). Com o pivô embaixo, TODO o bloco gira para frente. */
+/* a transition e a abertura do derrame no aperto moram no bloco unificado
+   "RETORNO AO TOQUE E À CANETA" (03/08/2026) — o chão dos 5 temas anda igual */
+/* transform-origin 50% 88% (a "dobradiça" perto da base): hoje só o hover do
+   MOUSE no desktop ainda gira o bloco — o APERTO e a CANETA pararam de girar
+   em 03/08/2026 (gesto unificado com o claro/escuro, no bloco "RETORNO AO
+   TOQUE E À CANETA"). O pivô na base evita a leitura de "indo para trás". */
 .P .g3in{position:relative;transform-style:preserve-3d;
   transform:rotateY(var(--g3c-ry));transform-origin:50% 88%}
 
@@ -1374,15 +1375,15 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
 .P .g3in>.cap-card .disc-body:hover,
 .P .g3in>.cap-card .aula-body:hover{background:transparent}
 
-/* a espessura: face direita (aparece com a caneta/hover, que ainda giram de
-   lado), face de CIMA (a "tampa" que o aperto novo revela ao girar o topo
-   para a frente) e o fundo. Só a de baixo ficou de fora — nada olha por baixo. */
-/* PARADO as faces ficam invisíveis: com o bloco reto, a face direita virava
-   de perfil e aparecia como um risco solto na beirada — parecia defeito. Ela
-   só acende quando o bloco realmente gira (balanço do dedo, ou caneta). */
+/* a espessura: face direita, face de CIMA (a "tampa") e o fundo. Só a de
+   baixo ficou de fora — nada olha por baixo. */
+/* 03/08/2026 — as faces ficam SEMPRE invisíveis: o aperto e a caneta pararam
+   de girar (gesto unificado com os temas claro/escuro, a pedido do usuário),
+   então nenhum movimento vira o bloco a ponto de mostrar a espessura. A
+   geometria fica pronta aqui caso um gesto com giro volte um dia; quem dá a
+   espessura no dia a dia são as cópias de box-shadow do cartão (o LÁBIO). */
 .P .f3{position:absolute;pointer-events:none;
   opacity:0;transition:opacity .18s var(--g3-ease)}
-.P .g3in.swing .f3,.P .g3in.pen .f3{opacity:1}
 /* 26/07/2026 — POR QUE ELA COMEÇA E TERMINA LONGE DAS PONTAS.
    O cartão tem cantos redondos (26px). Uma face que ia de ponta a ponta
    (top:0;height:100%) cobria também as CURVAS — e, como ela é reta, sobrava
@@ -1434,20 +1435,12 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
    o movimento inteiro — em TODOS os navegadores do aparelho, de uma vez. Como é
    um movimento curto pedido pelo próprio toque (não fica rodando sozinho), ele
    é aceitável mesmo com "reduzir movimento" e por isso continua ligado ali.
-   O movimento (pedido 1.4): o bloco VEM PARA A FRENTE (translateZ) e o topo
-   gira de leve para a frente (rotateX negativo), revelando a TAMPA da caixa
-   — no lugar do empurrão para trás que havia antes. Quem se move é o wrapper:
-   o cartão e a espessura vão juntos. A VOLTA é longa e macia (peso de bloco
-   de vidro); a IDA é mais curta, para aparecer mesmo no toque rápido. */
-.P .g3in{transition:transform .55s cubic-bezier(.22,1,.36,1)}          /* a VOLTA */
-.P .g3in.swing{
-  transition:transform .26s cubic-bezier(.22,1,.36,1);                 /* a IDA, rápida */
-  /* 31/07/2026 — MESMA ANIMAÇÃO dos temas claro/escuro (pedido do usuário):
-     sobe + cresce de leve + giro suave com a PARTE DE CIMA vindo para frente,
-     girando na base (origin 50% 88%, acima). O antigo translateZ(66px) +
-     giro no centro saiu: era ele que lia como "bloco indo para trás". */
-  transform:translateY(-7px) scale(1.035) rotateX(calc(-1 * var(--g3c-tilt)));
-}
+   03/08/2026 — o GIRO saiu de vez (4º pedido do usuário sobre este gesto: até
+   com o pivô na base o rotateX ainda lia diferente do claro/escuro). Agora o
+   aperto do Prometeu é IDÊNTICO ao dos temas L/D — o bloco só FLUTUA, reto,
+   sem virar e sem mostrar a tampa. O MOVIMENTO mora no bloco unificado
+   "RETORNO AO TOQUE E À CANETA" (mais abaixo), que vale para os 5 temas.
+   Aqui fica só o que é EXCLUSIVO do Prometeu: o ACENDER do vidro no aperto. */
 /* durante o balanço o cartão acende, como antes acontecia só no :hover do mouse.
    ⚠️ Esta lista SUBSTITUI a do cartão em repouso — ela não soma. Por isso o fio
    de luz do topo e a COSTURA escura de baixo precisam ser repetidos aqui; sem
@@ -1475,23 +1468,8 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
        Fica por ÚLTIMO para passar por baixo da costura e do bisel. */
     inset 0 0 0 999px rgba(var(--gl),.055);
 }
-/* "Reduzir movimento" ligado no aparelho: mantém o balanço (curto e pedido
-   pelo toque), mas mais rápido e seco — é a contraparte acessível da animação.
-   ⚠️ MESMO RELÓGIO: tudo o que se mexe no aperto — o bloco, as faces/tampa e o
-   derrame no chão — tem de encurtar JUNTO. Foi exatamente isso que quebrou
-   (relatado em 26/07/2026, tablet com "Remover animações" ligado): o bloco ia
-   em .15s, a face pipocava em .01s (antes de o bloco virar) e o derrame ia em
-   .28s e VOLTAVA em .55s — a sombra ainda andava com o bloco já parado.
-   Este bloco tem de ficar DEPOIS das regras acima: @media não aumenta a
-   especificidade, então uma cópia mais em cima seria apagada por elas. */
-@media (prefers-reduced-motion:reduce){
-  .P .g3in{transition-duration:.22s}                          /* a VOLTA */
-  .P .g3box::after{transition-duration:.22s}                  /* ... e o chão junto */
-  .P .g3in.swing{transition-duration:.16s}                    /* a IDA */
-  .P .f3{transition-duration:.16s}                            /* a tampa, junto do giro */
-  .P .g3in:not(.swing) .f3{transition-duration:.22s}          /* ... e fecha junto na volta */
-  .P .g3box:has(.g3in.swing)::after{transition-duration:.16s} /* ... e o chão junto */
-}
+/* O tempo do "Remover animações" também mora no bloco unificado (03/08/2026):
+   mesmo relógio nos 5 temas — bloco e chão encurtam JUNTOS, sempre. */
 
 /* Só no DESKTOP (mouse de verdade): passar por cima já dá o movimento fino do
    exemplo Vencedor, sem clicar — a caixa vira 3° e a "barra" desliza. Fica só
@@ -1516,62 +1494,49 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
 }
 
 /* =====================================================================
-   RETORNO AO TOQUE E À CANETA — temas CLARO (L) e ESCURO (D)
+   RETORNO AO TOQUE E À CANETA — OS 5 TEMAS (unificado em 03/08/2026)
    ---------------------------------------------------------------------
-   Fecha a lacuna que o professor apontou: em L/D não havia NENHUM retorno
-   ao toque nem à caneta (as regras de balanço/hover estavam todas presas
-   ao .P). Usa o mesmo wrapper .g3in que envolve3D já cria em TODO tema:
-     • TOQUE  (classe .swing, posta no pointerdown por app.js): o bloco VEM
-       PARA A FRENTE com um giro leve do topo (pedido 1.4). Em P essa mesma
-       classe revela a caixa de vidro 3D (bloco acima).
+   Nasceu para fechar a lacuna dos temas L/D (que não tinham NENHUM retorno
+   ao toque) e, desde 03/08/2026, virou o gesto ÚNICO de todos os temas: o
+   usuário pediu que o aperto do Prometeu ficasse "igual ao do claro e
+   escuro" — o giro/tampa do Prometeu saiu de vez. Usa o wrapper .g3in que
+   envolve3D já cria em TODO tema:
+     • TOQUE  (classe .swing, posta no pointerdown por app.js): o bloco
+       SOBE da superfície e cresce 3,5% — FLUTUA, reto, sem virar.
      • CANETA (classe .pen, posta no pointermove com pointerType='pen'): o
        bloco sobe 3px — o "movimento mínimo ao passar a caneta" pedido.
-   Cor sempre por --grgb do próprio tema; os 3 temas Prometeu não entram.
-   "Reduzir movimento" só ENCURTA (contraparte acessível), nunca desliga —
-   é um gesto pedido pelo próprio toque. */
-/* ⚠️ 26/07/2026 — DOIS AJUSTES, os dois pedidos pelo professor.
-   (a) ERA IMPERCEPTÍVEL: 12px de avanço a 1100px de distância dão 1,1% de
-       crescimento. Agora o bloco SOBE da chapa de mármore e cresce 3,5% —
-       e a sombra no chão se abre junto, que é o que o olho realmente lê
-       como "levantou".
-   (b) ESTILO DIFERENTE DO PROMETEU, de propósito: no Prometeu o bloco GIRA
-       e abre a tampa da caixa; aqui ele só FLUTUA, reto, sem virar. Mesma
-       função, gesto de outra natureza.
-   A mola (cubic-bezier com passagem acima de 1) saiu: placa de vidro pesada
-   não quica. A curva agora desacelera lisa, do jeito que coisa de verdade
-   para. */
-.L .g3in,.D .g3in{transition:transform .34s cubic-bezier(.16,1,.3,1)}
-.L .g3in.swing,.D .g3in.swing{
+   Cor sempre por --grgb do próprio tema. "Reduzir movimento" só ENCURTA
+   (contraparte acessível), nunca desliga — é gesto pedido pelo toque.
+   A mola (cubic-bezier acima de 1) não volta: placa de vidro pesada não
+   quica; a curva desacelera lisa. */
+.L .g3in,.D .g3in,.P .g3in{transition:transform .34s cubic-bezier(.16,1,.3,1)}
+.L .g3in.swing,.D .g3in.swing,.P .g3in.swing{
   transition:transform .19s cubic-bezier(.16,1,.3,1);   /* a IDA, mais curta */
   transform:translateY(-7px) scale(1.035);
 }
-/* a sombra no chão acompanha o voo: mais larga, mais macia, mais afastada —
-   sem ela o bloco parece só "maior", não "levantado" */
-.L .g3box::after,.D .g3box::after{
+/* a sombra no chão (em P, o derrame de luz) acompanha o voo: mais larga, mais
+   macia, mais afastada — sem ela o bloco parece só "maior", não "levantado" */
+.L .g3box::after,.D .g3box::after,.P .g3box::after{
   transition:transform .34s cubic-bezier(.16,1,.3,1),opacity .34s ease,filter .34s ease}
-.L .g3box:has(.g3in.swing)::after,.D .g3box:has(.g3in.swing)::after{
+.L .g3box:has(.g3in.swing)::after,.D .g3box:has(.g3in.swing)::after,
+.P .g3box:has(.g3in.swing)::after{
   transition-duration:.19s;transform:translateY(6px) scale(1.10,1.25);
   opacity:.62;filter:blur(11px)}
-.L .g3in.pen:not(.swing),.D .g3in.pen:not(.swing){transform:translateY(-3px)}
+.L .g3in.pen:not(.swing),.D .g3in.pen:not(.swing),
+.P .g3in.pen:not(.swing){transform:translateY(-3px)}
 /* ⚠️ MESMO RELÓGIO (a mesma armadilha explicada no Prometeu, acima): até
    26/07/2026 só a IDA do bloco encurtava aqui (.11s) — a sombra do chão ia em
    .19s e a VOLTA das duas ficava nos .34s inteiros. Bloco e sombra andando em
    tempos diferentes é o que o professor viu como "aperto estranho" no tablet
    com "Remover animações" ligado. Encurtar um sem o outro é o bug. */
 @media (prefers-reduced-motion:reduce){
-  .L .g3in,.D .g3in,
-  .L .g3box::after,.D .g3box::after{transition-duration:.18s}            /* a VOLTA */
-  .L .g3in.swing,.D .g3in.swing,
+  .L .g3in,.D .g3in,.P .g3in,
+  .L .g3box::after,.D .g3box::after,
+  .P .g3box::after{transition-duration:.18s}                             /* a VOLTA */
+  .L .g3in.swing,.D .g3in.swing,.P .g3in.swing,
   .L .g3box:has(.g3in.swing)::after,
-  .D .g3box:has(.g3in.swing)::after{transition-duration:.13s}            /* a IDA */
-}
-
-/* CANETA pairando no tema Prometeu: a mesma viradinha do mouse (--g3c-lean),
-   mas ligada por JS (classe .pen) para funcionar na S-Pen do tablet, onde o
-   @media (hover:hover) não alcança. Cede a vez ao balanço via :not(.swing). */
-.P .g3in.pen:not(.swing){
-  transition:transform .3s cubic-bezier(.22,1,.36,1);
-  transform:rotateX(calc(-1 * var(--g3c-lean))) rotateY(calc(var(--g3c-ry) + var(--g3c-lean)));
+  .D .g3box:has(.g3in.swing)::after,
+  .P .g3box:has(.g3in.swing)::after{transition-duration:.13s}            /* a IDA */
 }
 
 

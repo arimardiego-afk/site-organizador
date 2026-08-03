@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@500;600;700&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=1c8d6b8e40">
+<link rel="stylesheet" href="styles.css?v=a334419ac0">
 </head>
 <body class="L">
 <div id="root" class="L">
@@ -119,7 +119,7 @@
     </div>
   </div>
   <div class="content" id="list-discs"></div>
-  <div class="fab-wrap"><button class="fab fab-sec" id="fab-colar-mat" hidden onclick="colarMateria()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-mat-lbl">Colar matéria</span></button><button class="fab" onclick="openAddDisc()"><i class="ti ti-plus" aria-hidden="true"></i> Nova matéria</button></div>
+  <div class="fab-wrap"><div class="fab-row" id="fab-colar-mat-row" hidden><button class="fab fab-sec" id="fab-colar-mat" onclick="colarMateria()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-mat-lbl">Colar matéria</span></button><button class="fab fab-sec fab-x" onclick="descartarCopia('materia')" aria-label="Apagar cópia em espera" title="Apagar cópia em espera"><i class="ti ti-x" aria-hidden="true"></i></button></div><button class="fab" onclick="openAddDisc()"><i class="ti ti-plus" aria-hidden="true"></i> Nova matéria</button></div>
 </div>
 
 <div class="screen" id="s-series">
@@ -133,7 +133,7 @@
     <nav class="crumbs" id="bc-series" aria-label="Trilha de navegação"></nav>
   </div>
   <div class="content" id="list-series"></div>
-  <div class="fab-wrap"><button class="fab fab-sec" id="fab-colar" hidden onclick="colarSerie()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-lbl">Colar série</span></button><button class="fab" onclick="openAddSerie()"><i class="ti ti-plus" aria-hidden="true"></i> Nova série/ano</button></div>
+  <div class="fab-wrap"><div class="fab-row" id="fab-colar-row" hidden><button class="fab fab-sec" id="fab-colar" onclick="colarSerie()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-lbl">Colar série</span></button><button class="fab fab-sec fab-x" onclick="descartarCopia('serie')" aria-label="Apagar cópia em espera" title="Apagar cópia em espera"><i class="ti ti-x" aria-hidden="true"></i></button></div><button class="fab" onclick="openAddSerie()"><i class="ti ti-plus" aria-hidden="true"></i> Nova série/ano</button></div>
 </div>
 
 <div class="screen" id="s-disc">
@@ -154,7 +154,7 @@
   <div class="content" id="list-aulas"></div>
   <!-- barra da transferência seletiva (pressão de 2 s numa aula); o conteúdo vem de refreshSelBar() -->
   <div class="sel-bar" id="sel-bar" hidden></div>
-  <div class="fab-wrap"><button class="fab fab-sec" id="fab-colar-aula" hidden onclick="colarAula()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-aula-lbl">Colar aula</span></button><button class="fab" onclick="openAddAula()"><i class="ti ti-plus" aria-hidden="true"></i> Nova aula</button></div>
+  <div class="fab-wrap"><div class="fab-row" id="fab-colar-aula-row" hidden><button class="fab fab-sec" id="fab-colar-aula" onclick="colarAula()"><i class="ti ti-clipboard" aria-hidden="true"></i> <span id="fab-colar-aula-lbl">Colar aula</span></button><button class="fab fab-sec fab-x" onclick="descartarCopia('aula')" aria-label="Apagar cópia em espera" title="Apagar cópia em espera"><i class="ti ti-x" aria-hidden="true"></i></button></div><button class="fab" onclick="openAddAula()"><i class="ti ti-plus" aria-hidden="true"></i> Nova aula</button></div>
 </div>
 
 <div class="screen" id="s-aula">
@@ -374,7 +374,7 @@
 <div id="toast-zone" aria-live="polite"></div>
 
 </div>
-<script src="i18n.js?v=1c8d6b8e40"></script>
-<script src="app.js?v=1c8d6b8e40"></script>
+<script src="i18n.js?v=a334419ac0"></script>
+<script src="app.js?v=a334419ac0"></script>
 </body>
 </html>

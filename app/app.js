@@ -150,7 +150,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.11', APP_DATE='julho de 2026';
+const APP_VERSION='3.12', APP_DATE='agosto de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -582,11 +582,11 @@ function copiarSerie(id){
   refreshColarBtn();
   showToast(trf('Série <b>{s}</b> copiada. Abra a matéria de destino e toque em <b>Colar</b>.',{s:escH(d.turma||'')}),6000);
 }
-// mostra/esconde o botão Colar e escreve nele o nome da série copiada
+// mostra/esconde a linha do Colar (botão + ✕) e escreve o nome da série copiada
 function refreshColarBtn(){
-  const b=document.getElementById('fab-colar');if(!b)return;
+  const r=document.getElementById('fab-colar-row');if(!r)return;
   const c=lerClip();
-  b.hidden=!c;
+  r.hidden=!c;
   if(c)document.getElementById('fab-colar-lbl').textContent=trf('Colar {s}',{s:c.turma||tr('série')});
 }
 function colarSerie(){
@@ -616,11 +616,11 @@ function copiarAula(id){
   refreshColarAulaBtn();
   showToast(trf('Aula <b>{a}</b> copiada. Abra a série de destino e toque em <b>Colar aula</b>.',{a:escH(a.titulo||'')}),6000);
 }
-// mostra/esconde o botão Colar aula e escreve nele o título da aula copiada
+// mostra/esconde a linha do Colar aula (botão + ✕) e escreve o título copiado
 function refreshColarAulaBtn(){
-  const b=document.getElementById('fab-colar-aula');if(!b)return;
+  const r=document.getElementById('fab-colar-aula-row');if(!r)return;
   const c=lerClipAula();
-  b.hidden=!c;
+  r.hidden=!c;
   if(c)document.getElementById('fab-colar-aula-lbl').textContent=trf('Colar {s}',{s:c.titulo||tr('aula')});
 }
 function colarAula(){
@@ -746,11 +746,11 @@ function copiarMateria(i){
   showToast(trf('Matéria <b>{m}</b> copiada com {n} série(s). Troque de ano letivo e toque em <b>Colar matéria</b>.',
     {m:escH(m),n:ds.length}),7000);
 }
-// mostra/esconde o botão Colar matéria e escreve nele o nome da matéria copiada
+// mostra/esconde a linha do Colar matéria (botão + ✕) e escreve o nome copiado
 function refreshColarMatBtn(){
-  const b=document.getElementById('fab-colar-mat');if(!b)return;
+  const r=document.getElementById('fab-colar-mat-row');if(!r)return;
   const c=lerClipMat();
-  b.hidden=!c;
+  r.hidden=!c;
   if(c)document.getElementById('fab-colar-mat-lbl').textContent=trf('Colar {s}',{s:c.nome||tr('matéria')});
 }
 function colarMateria(){
@@ -770,6 +770,17 @@ function colarMateria(){
   renderDiscs();
   refreshColarMatBtn();
   showToast(trf('Matéria <b>{m}</b> colada com {n} série(s).',{m:escH(nome),n:novas.length}),5000);
+}
+/* ===== Apagar uma cópia em espera (pedido de 03/08/2026) =====
+   O ✕ ao lado de cada botão "Colar …": joga a cópia fora SEM colar. Antes a
+   faixa só saía da tela colando em algum lugar — não havia como desistir. */
+function descartarCopia(tipo){
+  confirmar(tr('Apagar a cópia em espera, sem colar? Nada que já existe no app é apagado.'),()=>{
+    const k=tipo==='serie'?CLIP_KEY:tipo==='aula'?CLIPA_KEY:CLIPM_KEY;
+    try{localStorage.removeItem(k);}catch(e){}
+    refreshColarBtn();refreshColarAulaBtn();refreshColarMatBtn();
+    showToast(tr('Cópia em espera apagada.'),3000);
+  },{sim:tr('Apagar'),ic:'x'});
 }
 function openDisc(id){
   if(transfAulas){ // escolhendo o destino da transferência: o toque no bloco decide
