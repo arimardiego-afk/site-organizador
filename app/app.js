@@ -150,7 +150,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.12', APP_DATE='agosto de 2026';
+const APP_VERSION='3.13', APP_DATE='agosto de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -344,17 +344,22 @@ function buildThemeGroups(){
     g.innerHTML=h;g.setAttribute('aria-label',(window.tr?tr('Tema'):'Tema'));});
 }
 // dir='back' faz a tela entrar pela esquerda (animação scrBack no styles.css)
+const screenScroll={}; // onde cada tela estava rolada (estado da sessão; o goBack restaura)
 function showScreen(id,dir){if(window.mvSair)mvSair(); // trocar de tela encerra o modo mover
   if(id!=='s-disc')selAulas=null; // e o modo seleção também (selAulas é let, não mora no window)
+  const antes=document.querySelector('.screen.active');
+  if(antes)screenScroll[antes.id]=window.scrollY; // lembrar a posição antes de sair
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.classList.remove('nav-back');});
   const el=document.getElementById(id);el.classList.toggle('nav-back',dir==='back');el.classList.add('active');
+  if(dir!=='back')window.scrollTo(0,0); // tela nova começa do topo; ao VOLTAR, o goBack repõe a posição depois de renderizar
   if(window.fecharConfirm)fecharConfirm(); // cartão "tem certeza?" não sobrevive à navegação
   // puxar a tela para baixo só atualiza a página na tela inicial; nas telas de
   // dentro o gesto acidental jogava o professor de volta às matérias (31/07/2026)
   document.documentElement.classList.toggle('sem-ptr',id!=='s-main');
   if(window.refreshTransfBar)refreshTransfBar();
   if(window.posicionarUndo)posicionarUndo();}
-function goBack(to){if(document.getElementById('s-vid').classList.contains('active'))limparDraft();closeModal();showScreen(to,'back');if(to==='s-main')renderDiscs();else if(to==='s-series')renderSeries();else if(to==='s-disc')renderAulas();else if(to==='s-aula')renderCaps();}
+function goBack(to){if(document.getElementById('s-vid').classList.contains('active'))limparDraft();closeModal();showScreen(to,'back');if(to==='s-main')renderDiscs();else if(to==='s-series')renderSeries();else if(to==='s-disc')renderAulas();else if(to==='s-aula')renderCaps();
+  window.scrollTo(0,screenScroll[to]||0);} // devolve a lista na MESMA posição (só depois do render existe altura para rolar)
 
 let curMat=null,MATS=[];
 // escada hierárquica: cada item da lista recua um degrau a mais (teto de 4,
@@ -828,7 +833,7 @@ function renderAulas(){
       <div class="aula-nc" onclick="openAula(${a.id})" aria-label="Abrir aula ${String(a.numero).padStart(2,'0')}"><div class="num-c">A${String(a.numero).padStart(2,'0')}</div></div>
       <div class="aula-body" onclick="openAula(${a.id})">
         <div class="at">${escH(a.titulo)}</div>
-        <div class="as">${a.caps.length} cap. · ${a.caps.reduce((s,c)=>s+c.videos.length,0)} vídeos · ${fmtT(aulaDurSeg(a))}${aulaPend(a)>0?` · <span class="ta-pend">● ${aulaPend(a)} a ministrar</span>`:''}</div>
+        <div class="as">${a.caps.length} cap. · ${(()=>{const nv=a.caps.reduce((s,c)=>s+c.videos.length,0);return `${nv} vídeo${nv!==1?'s':''}`;})()} · ${fmtT(aulaDurSeg(a))}${aulaPend(a)>0?` · <span class="ta-pend">● ${aulaPend(a)} a ministrar</span>`:''}</div>
         ${scanBar(aulaMinSeg(a),aulaDurSeg(a),16)}
         <div class="ac">${(()=>{const cps=a.caps.map((c,i)=>c.videos.length?`CP${i+1}`:null).filter(Boolean);return cps.length?cps.join(' · '):'Sem conteúdo nos capítulos';})()}</div>
       </div>
@@ -1898,7 +1903,11 @@ function autoFetchDurSeVazio(vid,vidId){
   });
 }
 async function fetchYT(id){
-  try{const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);if(r.ok){const j=await r.json();if(j.title&&!document.getElementById('vf-nome').value.trim())document.getElementById('vf-nome').value=j.title;}}catch(e){}
+  /* título via oEmbed: SÓ preenche o campo Nome quando ele está vazio — nunca
+     substitui o que o professor digitou (decisão de 06/08/2026). A CSP libera
+     connect-src https://www.youtube.com só para esta chamada. */
+  let titOk=false;
+  try{const r=await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);if(r.ok){const j=await r.json();const nomeEl=document.getElementById('vf-nome');if(j.title&&!nomeEl.value.trim()){nomeEl.value=j.title;titOk=true;}}}catch(e){}
   let durOk=false;
   try{
     const seg=await fetchYTDur(id);
@@ -1906,7 +1915,8 @@ async function fetchYT(id){
     if(seg>0&&el&&!el.value.trim()){el.value=fmtS(seg);durOk=true;}
   }catch(e){}
   document.getElementById('vf-spin').style.display='none';
-  document.getElementById('vf-hint').textContent=durOk?tr('Título e duração obtidos.'):tr('Título obtido. Preencha a duração se necessário.');
+  /* o aviso diz a verdade: só anuncia o que foi de fato preenchido */
+  document.getElementById('vf-hint').textContent=titOk?(durOk?tr('Título e duração obtidos.'):tr('Título obtido. Preencha a duração se necessário.')):(durOk?tr('Duração obtida automaticamente.'):tr('Link detectado.'));
 }
 function salvarVid(){
   const nome=document.getElementById('vf-nome').value.trim();
