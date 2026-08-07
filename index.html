@@ -110,8 +110,10 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(-
 }
 
 /* HERO */
-.hero{padding:70px 0 40px;display:grid;grid-template-columns:1fr 1.2fr;gap:40px;align-items:center}
-.hero h1{font-size:clamp(30px,5vw,52px);line-height:1.05;font-weight:800;margin:16px 0 14px;letter-spacing:.5px}
+/* atenção: .hero também é .wrap — o padding daqui vence o do .wrap,
+   então a lateral (22px) tem de ser declarada de novo */
+.hero{padding:70px 22px 40px;display:grid;grid-template-columns:1fr 1.5fr;gap:32px;align-items:center}
+.hero h1{font-size:clamp(26px,3.4vw,44px);line-height:1.05;font-weight:800;margin:16px 0 14px;letter-spacing:.5px}
 .hero h1 .cy{color:var(--acc);text-shadow:0 0 24px var(--gl)}
 .hero p.lead{font-size:19px;color:var(--txt2);max-width:520px;margin-bottom:12px}
 .flow{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 26px}
@@ -125,9 +127,9 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(-
 .btn.sec:hover{background:var(--glow1)}
 
 /* PHONE + TABLET (demonstração em movimento no topo; o TABLET é o destaque:
-   maior e na frente — o celular, menor, fica atrás sobreposto pela borda dele) */
-.devices{display:flex;align-items:center;justify-content:center;width:100%;min-width:0}
-.tab{flex:0 1 500px;min-width:300px;margin-right:-80px;border-radius:22px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(127,127,127,.05),0 0 60px var(--gl);padding:10px;position:relative;z-index:2}
+   maior — os dois LADO A LADO, sem sobreposição, pedido de 07/08) */
+.devices{display:flex;align-items:center;justify-content:center;gap:22px;width:100%;min-width:0}
+.tab{flex:0 1 500px;min-width:300px;border-radius:22px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(127,127,127,.05),0 0 60px var(--gl);padding:10px;position:relative;z-index:2}
 .tab::before{content:"";position:absolute;top:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.16)}
 .tab-show{position:relative;width:100%;aspect-ratio:880/631;border-radius:14px;overflow:hidden;background:#050b13}
 .tab-show .ps-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease}
@@ -257,16 +259,18 @@ footer{border-top:1px solid var(--brd2);padding:40px 0 60px;margin-top:30px}
   .install{grid-template-columns:1fr}
   .devices{order:-1}
 }
-@media(max-width:480px){
-  body{font-size:16px}
-  section{padding:44px 0}
-  .hero{padding:32px 0 24px;gap:28px}
-  .sec-h{margin-bottom:28px}
-  .phone{width:190px}
+@media(max-width:600px){
   /* tela estreita: não cabe lado a lado — o tablet (destaque) fica em cima,
      o celular embaixo */
   .devices{flex-direction:column;gap:20px}
-  .tab{flex:none;margin-right:0;width:100%;max-width:360px}
+  .tab{flex:none;width:100%;max-width:360px}
+}
+@media(max-width:480px){
+  body{font-size:16px}
+  section{padding:44px 0}
+  .hero{padding:32px 16px 24px;gap:28px}
+  .sec-h{margin-bottom:28px}
+  .phone{width:190px}
   .price{padding:26px 20px}
 }
 </style>
@@ -587,12 +591,26 @@ const I={
 };
 const LKEY='prometeu.site.lang', TKEY='prometeu.site.theme', SEENKEY='prometeu.site.introseen';
 /* Abertura sempre no topo (herói animado): impede o navegador de restaurar a
-   rolagem antiga em recarga/reabertura. Voltar pelo histórico (bfcache) e
-   âncoras (#preco etc.) continuam funcionando. */
-if(!location.hash){
-  if('scrollRestoration' in history)history.scrollRestoration='manual';
+   rolagem antiga em recarga/reabertura. Âncora (#preco etc.) vinda de OUTRA
+   página funciona uma vez e sai da barra de endereço — assim reabrir a aba
+   depois volta ao topo, e não à seção antiga (bug do tablet, 07/08). */
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+const limpaHash=()=>{try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}};
+const NAVTYPE=(performance.getEntriesByType('navigation')[0]||{}).type||'navigate';
+if(!location.hash || NAVTYPE!=='navigate'){
+  /* sem âncora, OU aba restaurada/recarregada com âncora velha: topo */
+  if(location.hash)limpaHash();
   addEventListener('pageshow',e=>{if(!e.persisted)scrollTo(0,0);});
+}else{
+  /* clique legítimo com âncora (ex.: comprar.html → #preco): garante o pulo
+     (as imagens que carregam empurram a seção) e depois limpa */
+  addEventListener('load',()=>setTimeout(()=>{
+    try{const el=location.hash&&document.querySelector(location.hash);el&&el.scrollIntoView();}catch(e){}
+    limpaHash();
+  },300));
 }
+/* clique nas âncoras do menu desta própria página: pula e limpa a URL */
+addEventListener('hashchange',()=>{if(location.hash)setTimeout(limpaHash,300)});
 let curLang='pt', curTheme='P';
 /* rótulos dos modos (para o balão da animação) */
 const THEME_LABEL={
