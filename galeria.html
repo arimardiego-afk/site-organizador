@@ -79,10 +79,22 @@ header.top p{color:var(--txt2);font-size:17px;max-width:720px}
 .shots{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:4px 0 14px}
 .shot{flex:0 0 auto;width:190px}
 .shot img{width:100%;border-radius:16px;border:1px solid var(--brd);box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 26px var(--gl);display:block;background:#050b13}
-.evoshot{flex:0 0 auto;width:210px}
-.evoshot img{width:100%;border-radius:16px;border:1px solid var(--brd);box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 26px var(--gl);display:block;background:#050b13}
-.evoshot .ecap{margin-top:8px;text-align:center;font-size:13px;color:var(--txt2);line-height:1.4}
-.evoshot .ecap b{display:block;font-family:var(--font-h);font-size:12px;letter-spacing:.5px;color:var(--acc)}
+/* Evolução animada: tablet + celular lado a lado, as 4 eras empilhadas e
+   pré-carregadas; a era visível leva .on (fade por opacity — sem trocar src,
+   sem onload). */
+.evostage{display:flex;gap:22px;align-items:flex-end;justify-content:center;flex-wrap:wrap;padding:10px 0 4px}
+.evodev{position:relative}
+.evodev img{position:absolute;inset:0;width:100%;height:100%;border-radius:16px;border:1px solid var(--brd);box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 26px var(--gl);background:#050b13;opacity:0;transition:opacity .7s ease}
+.evodev img.on{opacity:1}
+.evotab{width:min(430px,90vw);aspect-ratio:880/631}
+.evophone{width:200px;aspect-ratio:390/780}
+@media(max-width:560px){ .evotab{width:min(340px,88vw)} .evophone{width:150px} }
+.evocap{text-align:center;margin-top:14px;font-size:14px;color:var(--txt2);line-height:1.5;min-height:46px}
+.evocap b{display:block;font-family:var(--font-h);font-size:13px;letter-spacing:.5px;color:var(--acc)}
+.evodots{display:flex;gap:9px;justify-content:center;margin-top:8px;padding-bottom:14px}
+.evodots button{width:11px;height:11px;border-radius:50%;border:1px solid var(--brd2);background:none;cursor:pointer;padding:0}
+.evodots button.on{background:var(--acc);border-color:var(--acc)}
+@media(prefers-reduced-motion:reduce){ .evodev img{transition:none} }
 footer{border-top:1px solid var(--brd2);padding:26px 0 50px;color:var(--txt3);font-size:14px;text-align:center;margin-top:30px}
 </style>
 </head>
@@ -131,8 +143,9 @@ const THEMES_G=[
 ];
 const LANGS_G=[['pt','PORTUGUÊS (BRASIL)'],['en','ENGLISH'],['zh','中文（简体）']];
 const SCREENS_G=['01-materias','02-series-horas','03-aulas','04-capitulos','05-formulario-video','06-menu'];
-/* Evolução do design: a mesma tela inicial em 4 marcos (capturas reais dos
-   commits antigos, regeradas por tools/capturar-evolucao.py) */
+/* Evolução do design: a mesma tela inicial em 4 marcos, animada nos dois
+   aparelhos (capturas reais dos commits antigos — celular evo-*.jpg e tablet
+   evo-*-tab.jpg — regeradas por tools/capturar-evolucao.py) */
 const EVO_G=[
   ['evo-1-inicio',  'jul/2026 — O começo',
    'Blocos simples · Flat blocks · 扁平卡片'],
@@ -147,9 +160,12 @@ document.getElementById('gal').innerHTML=`
   <section class="tsec" id="evolucao">
     <h2 data-i="gEvoT">A evolução do programa</h2>
     <p class="tsub" data-i="gEvoS">A mesma tela inicial, do primeiro esboço até hoje.</p>
-    <div class="shots">
-      ${EVO_G.map(([f,mark,cap])=>`<div class="evoshot"><img loading="lazy" src="media/evolucao/${f}.jpg" alt="${mark} — ${cap}"><div class="ecap"><b>${mark}</b>${cap}</div></div>`).join('')}
+    <div class="evostage">
+      <div class="evodev evotab">${EVO_G.map(([f,mark],i)=>`<img src="media/evolucao/${f}-tab.jpg" alt="${mark} (tablet)" class="${i?'':'on'}">`).join('')}</div>
+      <div class="evodev evophone">${EVO_G.map(([f,mark,cap],i)=>`<img src="media/evolucao/${f}.jpg" alt="${mark} — ${cap}" class="${i?'':'on'}">`).join('')}</div>
     </div>
+    <div class="evocap" id="evocap"></div>
+    <div class="evodots" id="evodots">${EVO_G.map(([,mark],i)=>`<button data-e="${i}" class="${i?'':'on'}" aria-label="${mark}"></button>`).join('')}</div>
   </section>`+THEMES_G.map(([t,sw,label])=>`
   <section class="tsec">
     <h2><span class="swatch" style="background:${sw}"></span>${label}</h2>
@@ -161,6 +177,27 @@ document.getElementById('gal').innerHTML=`
         </div>
       </div>`).join('')}
   </section>`).join('');
+
+/* Troca de era: alterna a classe .on nas imagens já carregadas (o CSS faz o
+   fade; no modo "reduzir movimento" vira corte seco). Dot clicado zera o
+   relógio para a era escolhida não sumir na hora. */
+let _evoI=0;
+function _evoGo(i){
+  _evoI=i;
+  document.querySelectorAll('.evodev').forEach(d=>
+    d.querySelectorAll('img').forEach((im,k)=>im.classList.toggle('on',k===i)));
+  document.querySelectorAll('#evodots button').forEach((b,k)=>b.classList.toggle('on',k===i));
+  const [,mark,cap]=EVO_G[i];
+  document.getElementById('evocap').innerHTML=`<b>${mark}</b>${cap}`;
+}
+function _evoNext(){_evoGo((_evoI+1)%EVO_G.length)}
+let _evoTimer=setInterval(_evoNext,3200);
+document.getElementById('evodots').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  clearInterval(_evoTimer); _evoTimer=setInterval(_evoNext,3200);
+  _evoGo(+b.dataset.e);
+});
+_evoGo(0);
 
 /* ===== UI da página (cores/fontes e textos do topo seguem o site) ===== */
 const LANGS=['pt','en','es','zh'];
