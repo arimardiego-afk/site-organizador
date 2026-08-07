@@ -150,7 +150,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.13', APP_DATE='agosto de 2026';
+const APP_VERSION='3.14', APP_DATE='agosto de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -2272,6 +2272,82 @@ const FIGS=[
 '<div class="tut-fig"><svg width="250" height="82" viewBox="0 0 250 82" fill="none" stroke="currentColor" stroke-width="1.5"><g transform="translate(10,16) scale(1.9)"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5-6.5a3 3 0 0 0-6-6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5-6.5"/></g><rect x="82" y="12" width="44" height="58" rx="5"/><text x="104" y="45" text-anchor="middle" fill="currentColor" stroke="none" font-size="9">PDF</text><rect x="142" y="12" width="44" height="58" rx="5"/><circle cx="156" cy="30" r="5"/><path d="M144 62l12-14 8 8 6-6 14 12"/><rect x="202" y="12" width="44" height="58" rx="5"/><text x="224" y="45" text-anchor="middle" fill="currentColor" stroke="none" font-size="9">DOC</text></svg></div>',
 '<div class="tut-fig"><svg width="260" height="100" viewBox="0 0 260 100" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="6" width="252" height="88" rx="10"/><path d="M130 6v88" stroke-dasharray="4 4"/><text x="67" y="46" text-anchor="middle" fill="currentColor" stroke="none" font-size="9">ORGANIZADOR</text><text x="67" y="60" text-anchor="middle" fill="currentColor" stroke="none" font-size="9">DE AULAS</text><text x="193" y="46" text-anchor="middle" fill="currentColor" stroke="none" font-size="9">YOUTUBE /</text><text x="193" y="60" text-anchor="middle" fill="currentColor" stroke="none" font-size="9">ANOTAÇÕES</text><circle cx="130" cy="50" r="6" fill="currentColor" stroke="none" opacity="0.7"/></svg></div>'
 ];
+/* Prints anotados do tutorial (src/tutorial/*.jpg, marcas numeradas iguais nos
+   4 idiomas — só a legenda muda). Chave = índice da seção no TUT. É a FONTE
+   ÚNICA das legendas: tools/gerar-manual.mjs lê este bloco para o manual do
+   site — editar aqui e rodar o gerador, nunca duplicar lá. */
+const TUT_FIGS={
+  0: [{ img: '01-inicio', leg: {
+    pt: ['Menu ☰ (Arquivo e Ajuda)', 'Seletor de temas', 'Barra do ano letivo em uso', 'Copiar a matéria inteira'],
+    en: ['☰ menu (File and Help)', 'Theme selector', 'Current school-year bar', 'Copy the whole subject'],
+    es: ['Menú ☰ (Archivo y Ayuda)', 'Selector de temas', 'Barra del año lectivo en uso', 'Copiar la asignatura entera'],
+    zh: ['☰ 菜单（文件与帮助）', '主题选择器', '当前学年栏', '复制整个科目'] } }],
+  1: [{ img: '02-menu', leg: {
+    pt: ['Gerenciar projetos (anos letivos)', 'Exportar backup (.json)', 'Aumentar o tamanho do texto'],
+    en: ['Manage projects (school years)', 'Export backup (.json)', 'Increase the text size'],
+    es: ['Gestionar proyectos (años lectivos)', 'Exportar copia de seguridad (.json)', 'Aumentar el tamaño del texto'],
+    zh: ['管理项目（学年）', '导出备份（.json）', '放大文字'] } }],
+  2: [{ img: '03-projetos', leg: {
+    pt: ['Baixar o backup só daquele ano', 'Editar Ano e Instituição', 'Duplicar o ano inteiro', 'Excluir o ano letivo'],
+    en: ['Download that year’s backup only', 'Edit Year and Institution', 'Duplicate the whole year', 'Delete the school year'],
+    es: ['Descargar la copia solo de ese año', 'Editar Año e Institución', 'Duplicar el año entero', 'Eliminar el año lectivo'],
+    zh: ['仅下载该学年的备份', '编辑学年与学校', '复制整个学年', '删除该学年'] } }],
+  3: [{ img: '04-series', leg: {
+    pt: ['Copiar a série', 'Relatório da série', 'Abrir a árvore de aulas'],
+    en: ['Copy the grade', 'Grade report', 'Open the lesson tree'],
+    es: ['Copiar la serie', 'Informe de la serie', 'Abrir el árbol de clases'],
+    zh: ['复制年级', '年级报告', '展开课程列表'] } }],
+  4: [{ img: '05-aulas', leg: {
+    pt: ['Copiar a aula'],
+    en: ['Copy the lesson'],
+    es: ['Copiar la clase'],
+    zh: ['复制课程'] } },
+  { img: '06-selecao', leg: {
+    pt: ['Caixinha de seleção (segure a aula por 2 segundos)', 'Barra para transferir as aulas marcadas'],
+    en: ['Selection checkbox (hold the lesson for 2 seconds)', 'Bar to transfer the checked lessons'],
+    es: ['Casilla de selección (mantén pulsada la clase 2 segundos)', 'Barra para transferir las clases marcadas'],
+    zh: ['选择框（长按课程 2 秒）', '转移所选课程的底栏'] } },
+  { img: '07-capitulos', leg: {
+    pt: ['Marcar o capítulo como ministrado', 'Fichas dos capítulos (CP)', 'Observações do capítulo', 'Abrir o vídeo'],
+    en: ['Mark the chapter as taught', 'Chapter chips (CP)', 'Chapter notes', 'Open the video'],
+    es: ['Marcar el capítulo como impartido', 'Fichas de los capítulos (CP)', 'Notas del capítulo', 'Abrir el vídeo'],
+    zh: ['将章节标记为已授课', '章节标签（CP）', '章节备注', '打开视频'] } }],
+  5: [{ img: '08-video', leg: {
+    pt: ['Nome do vídeo', 'Link do YouTube', 'Duração', 'Resumo do vídeo'],
+    en: ['Video name', 'YouTube link', 'Duration', 'Video summary'],
+    es: ['Nombre del vídeo', 'Enlace de YouTube', 'Duración', 'Resumen del vídeo'],
+    zh: ['视频名称', 'YouTube 链接', '时长', '视频摘要'] } }],
+  6: [{ img: '09-materiais', leg: {
+    pt: ['Seção Material didático e documentos', 'Importar PDF, imagem, Word ou áudio', 'Tirar foto'],
+    en: ['Teaching material and documents section', 'Import PDF, image, Word or audio', 'Take a photo'],
+    es: ['Sección Material didáctico y documentos', 'Importar PDF, imagen, Word o audio', 'Tomar una foto'],
+    zh: ['教学材料与文档栏目', '导入 PDF、图片、Word 或音频', '拍照'] } }],
+  7: [{ img: '10-desfazer', leg: {
+    pt: ['Cartão Desfazer (10 segundos)', 'Lixeira com contador', 'Desfazer geral (↩)'],
+    en: ['Undo card (10 seconds)', 'Trash with counter', 'General undo (↩)'],
+    es: ['Tarjeta Deshacer (10 segundos)', 'Papelera con contador', 'Deshacer general (↩)'],
+    zh: ['撤销卡片（10 秒）', '带计数的回收站', '通用撤销（↩）'] } },
+  { img: '11-lixeira', leg: {
+    pt: ['Recuperar um item apagado'],
+    en: ['Restore a deleted item'],
+    es: ['Recuperar un elemento borrado'],
+    zh: ['恢复已删除的项目'] } }],
+  11: [{ img: '12-backup', leg: {
+    pt: ['Exportar backup (.json)', 'Importar backup (.json)'],
+    en: ['Export backup (.json)', 'Import backup (.json)'],
+    es: ['Exportar copia de seguridad (.json)', 'Importar copia de seguridad (.json)'],
+    zh: ['导出备份（.json）', '导入备份（.json）'] } }],
+};
+/* No arquivo único o build.py injeta TUT_IMG_DATA (base64); na PWA as imagens
+   vêm da pasta tutorial/ e entram no pré-cache do service worker. */
+function tutSrc(n){return (typeof TUT_IMG_DATA!=='undefined'&&TUT_IMG_DATA[n])||('tutorial/'+n+'.jpg');}
+function tutFigsHTML(i){
+  const fs=TUT_FIGS[i];if(!fs)return '';
+  return fs.map(f=>{
+    const leg=f.leg[LANG]||f.leg[LANG.split('-')[0]]||f.leg.pt;
+    return `<figure class="tut-shot"><img src="${tutSrc(f.img)}" alt="" loading="lazy" width="460" height="995"><figcaption><ol>${leg.map(tx=>`<li>${tx}</li>`).join('')}</ol></figcaption></figure>`;
+  }).join('');
+}
 const TUT=[
 {ic:'ti-book-2',t:'Visão geral',c:`
 <p>O <b>Organizador de Aulas</b> organiza suas aulas em vídeo em 5 níveis, do geral para o específico:</p>
@@ -2295,6 +2371,7 @@ const TUT=[
 <li><b>Criar:</b> menu ☰ → <b>Criar novo projeto</b> → preencha <b>Ano</b> e <b>Instituição</b>. O projeto novo começa vazio e vira o projeto em uso.</li>
 <li><b>Arquivar:</b> nada se perde — o ano anterior fica guardado na lista de projetos.</li>
 <li><b>Trocar:</b> toque na barra do ano letivo (na tela inicial) ou abra o menu ☰ e toque no projeto na lista — ele vira o projeto em uso e já abre a tela de <b>Gerenciar projetos</b>. O botão <b>Gerenciar projetos</b> fica logo no topo do menu.</li>
+<li><b>Gerenciar projetos:</b> na lista, cada ano tem quatro ícones — <b>baixar</b> (exporta o backup só daquele ano), <b>lápis</b> (editar Ano e Instituição), <b>copiar</b> (duplica o ano inteiro, com tudo dentro) e <b>lixeira</b> (excluir).</li>
 <li><b>Guardar fora do aparelho:</b> use <b>Exportar backup</b> (seção Backup, mais abaixo).</li>
 </ul>`},
 {ic:'ti-books',t:'Matérias e séries',c:`
@@ -2304,6 +2381,7 @@ const TUT=[
 <li><b>Nova série:</b> abra a matéria e toque em <b>Nova série/ano</b>.</li>
 <li><b>Sugestão automática:</b> ao criar série, aula, capítulo ou projeto, o app mostra o próximo número em <b>cinza-claro</b> dentro do campo (ex.: “3° ANO” depois de “2° ANO”). Para aceitar, aperte a <b>seta → do teclado</b>; para outro valor, é só digitar por cima.</li>
 <li><b>Copiar/colar série:</b> o ícone de <b>copiar</b> no cartão da série copia a série inteira (aulas, capítulos, vídeos e anexos). Abra a matéria de destino — inclusive de <b>outro ano/projeto</b> — e toque em <b>Colar série</b>.</li>
+<li><b>Copiar matéria:</b> o ícone de <b>copiar</b> no cartão da matéria copia a matéria inteira, com todas as séries. Troque de ano letivo e toque em <b>Colar matéria</b>; para desistir de uma cópia em espera, toque no <b>✕</b> ao lado do botão Colar.</li>
 <li>Na série, o botão com a <b>setinha (nº de aulas)</b> abre a árvore resumida das aulas.</li>
 <li><b>Horas de cada série:</b> o cartão mostra três indicadores — <b>Horas totais</b> (soma da duração de todos os vídeos), <b>Ministradas</b> (capítulos já marcados como dados) e <b>Não ministradas</b> (o que ainda falta). Eles se atualizam sozinhos conforme você marca os capítulos.</li>
 <li>O ícone de <b>relatório</b> na série gera um documento Word/PDF com toda a estrutura.</li>
@@ -2314,6 +2392,7 @@ const TUT=[
 %FIG2%
 <ul>
 <li><b>Copiar/colar aula:</b> o ícone de <b>copiar</b> no cartão da aula copia a aula inteira (capítulos, vídeos e anexos). Abra a série de destino — pode ser de <b>outro ano/projeto</b> — e toque no botão <b>Colar aula</b> que surge no rodapé.</li>
+<li><b>Transferir várias aulas de uma vez:</b> segure o dedo por <b>2 segundos</b> numa aula, sem arrastar — cada aula ganha uma <b>caixinha de seleção</b>. Marque as que quiser e use a barra que surge no rodapé para copiá-las juntas para outra série.</li>
 <li>A <b>caixinha</b> do capítulo controla a pendência: marcada = ainda falta dar essa aula; vazia = já ministrada. Os contadores “● a ministrar” sobem para aula, série e matéria.</li>
 <li>Os <b>chips CP1…CP11</b> acendem quando o capítulo tem conteúdo; tocar num chip aceso rola até o capítulo.</li>
 <li><b>Observações:</b> cada capítulo tem uma janelinha “Observações” (recolhida por padrão) para anotações livres — lembretes, tarefas, páginas do livro. O ponto ● indica que há texto salvo.</li>
@@ -2338,6 +2417,14 @@ const TUT=[
 <li>O <b>olhinho</b> abre PDFs e imagens na hora; arquivos Word são baixados para abrir no editor do aparelho. Se um PDF não abrir, teste outro documento — alguns arquivos já vêm com defeito de origem.</li>
 <li>O botão de <b>compartilhar</b> envia o documento por <b>WhatsApp</b>, e-mail ou qualquer outro app do aparelho.</li>
 <li>Os anexos entram no backup do projeto e saem nos relatórios.</li>
+</ul>`},
+{ic:'ti-undo',t:'Desfazer, Lixeira e reordenar',c:`
+<p>Errou ou apagou sem querer? O app tem três proteções — e ainda deixa arrastar tudo de lugar:</p>
+<ul>
+<li><b>Cartão Desfazer:</b> ao excluir qualquer item (vídeo, capítulo, aula, série, matéria ou ano letivo), um cartão aparece no <b>canto superior direito</b> por 10 segundos — toque em <b>Desfazer</b> e o item volta na hora, com tudo dentro. Se o cartão sumir, nada se perdeu: o item continua na Lixeira.</li>
+<li><b>Lixeira:</b> depois da primeira exclusão, um botão de <b>lixeira com contador</b> aparece na barra do topo. Ele guarda as <b>10 últimas exclusões</b>; toque nele e use <b>Restaurar</b> no que quiser de volta. Atenção: a lixeira é temporária — <b>fechar o app a esvazia</b>.</li>
+<li><b>Desfazer geral (↩):</b> o botão <b>↩</b> ao lado da lixeira desfaz a <b>última alteração</b>, qualquer que seja (edição, marcação de capítulo, exclusão…), passo a passo, até 30 vezes.</li>
+<li><b>Reordenar arrastando:</b> segure o dedo (meio segundo) em qualquer cartão — matéria, série, aula, capítulo, vídeo ou ano letivo — e arraste para cima ou para baixo para mudar a ordem.</li>
 </ul>`},
 {ic:'ti-palette',t:'Temas',c:`
 <p>O botão no canto superior direito alterna entre os 6 temas — a preferência fica salva:</p>
@@ -2407,7 +2494,7 @@ function buildTutorial(){
     <button class="tut-t${i===0?' open':''}" id="tut-t-${i}" onclick="toggleTut(${i})" aria-expanded="${i===0}">
       <i class="ti ${s.ic} tic" aria-hidden="true"></i><span>${i+1}. ${s.t}</span><i class="ti ti-chevron-down chev" aria-hidden="true"></i>
     </button>
-    <div class="tree-wrap${i===0?' open':''}" id="tut-w-${i}"><div class="tree-inner"><div class="tut-c">${s.c.replace(/%FIG(\d)%/g,(m,k)=>FIGS[+k]||'')}</div></div></div>
+    <div class="tree-wrap${i===0?' open':''}" id="tut-w-${i}"><div class="tree-inner"><div class="tut-c">${s.c.replace(/%FIG(\d)%/g,(m,k)=>FIGS[+k]||'')}${tutFigsHTML(i)}</div></div></div>
   </div>`).join('');
 }
 function openTutorial(){

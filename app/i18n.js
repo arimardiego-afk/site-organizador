@@ -937,6 +937,7 @@ const TUT_ML={
 <li><b>Create:</b> menu ☰ → <b>Create new project</b> → fill in <b>Year</b> and <b>Institution</b>. The new project starts empty and becomes the current one.</li>
 <li><b>Archive:</b> nothing is lost — the previous year stays in the project list.</li>
 <li><b>Switch:</b> tap the school-year bar (home screen), or open the ☰ menu and tap a project in the list — it becomes the current project and opens the <b>Manage projects</b> screen. The <b>Manage projects</b> button sits right at the top of the menu.</li>
+<li><b>Manage projects:</b> in the list, each year has four icons — <b>download</b> (exports the backup of that year only), <b>pencil</b> (edit Year and Institution), <b>copy</b> (duplicates the whole year, with everything inside) and <b>trash</b> (delete).</li>
 <li><b>Keep a copy off the device:</b> use <b>Export backup</b> (Backup section below).</li>
 </ul>`},
 {ic:'ti-books',t:'Subjects and grades',c:`
@@ -946,6 +947,7 @@ const TUT_ML={
 <li><b>New grade:</b> open the subject and tap <b>New grade/year</b>.</li>
 <li><b>Automatic suggestion:</b> when creating a grade, lesson, chapter or project, the app shows the next number in <b>light grey</b> inside the field (e.g. “12th grade” after “11th grade”). To accept it, press the <b>right-arrow → key</b>; for a different value, just type over it.</li>
 <li><b>Copy/paste a grade:</b> the <b>copy</b> icon on the grade card copies the whole grade (lessons, chapters, videos and attachments). Open the target subject — even in <b>another year/project</b> — and tap <b>Paste grade</b>.</li>
+<li><b>Copy a subject:</b> the <b>copy</b> icon on the subject card copies the entire subject, with all its grades. Switch to another school year and tap <b>Paste subject</b>; to cancel a pending copy, tap the <b>✕</b> next to the Paste button.</li>
 <li>In the grade card, the <b>arrow button (lesson count)</b> opens a compact tree of the lessons.</li>
 <li><b>Hours per grade:</b> the card shows three indicators — <b>Total hours</b> (sum of all video durations), <b>Taught</b> (chapters already marked as done) and <b>Not taught</b> (what's still left). They update automatically as you check off chapters.</li>
 <li>The <b>report</b> icon on the grade generates a Word/PDF document with the whole structure.</li>
@@ -956,6 +958,7 @@ const TUT_ML={
 %FIG2%
 <ul>
 <li><b>Copy/paste a lesson:</b> the <b>copy</b> icon on the lesson card copies the whole lesson (chapters, videos and attachments). Open the target grade — it can be in <b>another year/project</b> — and tap the <b>Paste lesson</b> button that appears at the bottom.</li>
+<li><b>Transfer several lessons at once:</b> press and hold a lesson for <b>2 seconds</b>, without dragging — every lesson gets a <b>checkbox</b>. Tick the ones you want and use the bar that appears at the bottom to copy them together to another grade.</li>
 <li>The chapter <b>checkbox</b> controls the pending state: checked = still to be taught; empty = already taught. The “● to teach” counters roll up to lesson, grade and subject.</li>
 <li>The <b>CP1…CP11 chips</b> light up when a chapter has content; tapping a lit chip scrolls to that chapter.</li>
 <li><b>Notes:</b> each chapter has a small “Notes” panel (collapsed by default) for free-form notes — reminders, tasks, book pages. The ● dot shows there is saved text.</li>
@@ -980,6 +983,14 @@ const TUT_ML={
 <li>The <b>eye</b> opens PDFs and images right away; Word files are downloaded to open in the device's editor. If a PDF won't open, try another document — some files are corrupted at the source.</li>
 <li>The <b>share</b> button sends the document via <b>WhatsApp</b>, e-mail or any other app on the device.</li>
 <li>Attachments are included in project backups and in reports.</li>
+</ul>`},
+{ic:'ti-undo',t:'Undo, Trash and reordering',c:`
+<p>Made a mistake or deleted something by accident? The app has three safety nets — and lets you drag everything into place:</p>
+<ul>
+<li><b>Undo card:</b> when you delete any item (video, chapter, lesson, grade, subject or school year), a card appears in the <b>top-right corner</b> for 10 seconds — tap <b>Undo</b> and the item comes right back, with everything inside. If the card disappears, nothing is lost: the item is still in the Trash.</li>
+<li><b>Trash:</b> after the first deletion, a <b>trash button with a counter</b> appears in the top bar. It keeps the <b>last 10 deletions</b>; tap it and use <b>Restore</b> on whatever you want back. Note: the trash is temporary — <b>closing the app empties it</b>.</li>
+<li><b>General undo (↩):</b> the <b>↩</b> button next to the trash undoes the <b>last change</b>, whatever it was (an edit, a chapter checkbox, a deletion…), step by step, up to 30 times.</li>
+<li><b>Reorder by dragging:</b> press and hold (half a second) any card — subject, grade, lesson, chapter, video or school year — and drag it up or down to change the order.</li>
 </ul>`},
 {ic:'ti-palette',t:'Themes',c:`
 <p>The button in the top-right corner cycles through the 6 themes — the preference is saved:</p>
@@ -1065,6 +1076,7 @@ const TUT_ML={
 <li><b>Crear:</b> menú ☰ → <b>Crear nuevo proyecto</b> → rellena <b>Año</b> e <b>Institución</b>. El proyecto nuevo empieza vacío y pasa a ser el actual.</li>
 <li><b>Archivar:</b> no se pierde nada — el año anterior queda guardado en la lista de proyectos.</li>
 <li><b>Cambiar:</b> toca la barra del año lectivo (pantalla inicial), o abre el menú ☰ y toca un proyecto de la lista — pasa a ser el proyecto en uso y abre la pantalla de <b>Gestionar proyectos</b>. El botón <b>Gestionar proyectos</b> está justo arriba en el menú.</li>
+<li><b>Gestionar proyectos:</b> en la lista, cada año tiene cuatro iconos — <b>descargar</b> (exporta la copia solo de ese año), <b>lápiz</b> (editar Año e Institución), <b>copiar</b> (duplica el año entero, con todo dentro) y <b>papelera</b> (eliminar).</li>
 <li><b>Guardar fuera del dispositivo:</b> usa <b>Exportar copia de seguridad</b> (sección más abajo).</li>
 </ul>`},
 {ic:'ti-books',t:'Asignaturas y cursos',c:`
@@ -1074,6 +1086,7 @@ const TUT_ML={
 <li><b>Nuevo curso:</b> abre la asignatura y toca <b>Nuevo curso/año</b>.</li>
 <li><b>Sugerencia automática:</b> al crear un curso, clase, capítulo o proyecto, la app muestra el siguiente número en <b>gris claro</b> dentro del campo (p. ej. “3.º curso” tras “2.º curso”). Para aceptarlo, pulsa la <b>tecla de flecha → derecha</b>; para otro valor, basta con escribir encima.</li>
 <li><b>Copiar/pegar un curso:</b> el icono de <b>copiar</b> en la tarjeta del curso copia el curso entero (clases, capítulos, vídeos y adjuntos). Abre la asignatura de destino — incluso de <b>otro año/proyecto</b> — y toca <b>Pegar curso</b>.</li>
+<li><b>Copiar una asignatura:</b> el icono de <b>copiar</b> en la tarjeta de la asignatura copia la asignatura entera, con todos sus cursos. Cambia de año lectivo y toca <b>Pegar asignatura</b>; para cancelar una copia en espera, toca la <b>✕</b> junto al botón Pegar.</li>
 <li>En el curso, el botón con la <b>flecha (n.º de clases)</b> abre el árbol resumido de las clases.</li>
 <li><b>Horas de cada curso:</b> la tarjeta muestra tres indicadores — <b>Horas totales</b> (suma de la duración de todos los vídeos), <b>Impartidas</b> (capítulos ya marcados como dados) y <b>No impartidas</b> (lo que aún falta). Se actualizan solos a medida que marcas los capítulos.</li>
 <li>El icono de <b>informe</b> del curso genera un documento Word/PDF con toda la estructura.</li>
@@ -1084,6 +1097,7 @@ const TUT_ML={
 %FIG2%
 <ul>
 <li><b>Copiar/pegar una clase:</b> el icono de <b>copiar</b> en la tarjeta de la clase copia la clase entera (capítulos, vídeos y adjuntos). Abre el curso de destino — puede ser de <b>otro año/proyecto</b> — y toca el botón <b>Pegar clase</b> que aparece abajo.</li>
+<li><b>Transferir varias clases a la vez:</b> mantén pulsada una clase durante <b>2 segundos</b>, sin arrastrar — cada clase muestra una <b>casilla de selección</b>. Marca las que quieras y usa la barra que aparece abajo para copiarlas juntas a otro curso.</li>
 <li>La <b>casilla</b> del capítulo controla lo pendiente: marcada = aún falta impartirlo; vacía = ya impartido. Los contadores “● por impartir” suben a clase, curso y asignatura.</li>
 <li>Los <b>chips CP1…CP11</b> se encienden cuando el capítulo tiene contenido; tocar un chip encendido desplaza hasta ese capítulo.</li>
 <li><b>Notas:</b> cada capítulo tiene un panel “Notas” (plegado por defecto) para anotaciones libres — recordatorios, tareas, páginas del libro. El punto ● indica que hay texto guardado.</li>
@@ -1108,6 +1122,14 @@ const TUT_ML={
 <li>El <b>ojo</b> abre PDF e imágenes al momento; los archivos Word se descargan para abrirlos en el editor del dispositivo. Si un PDF no se abre, prueba con otro documento — algunos archivos vienen dañados de origen.</li>
 <li>El botón de <b>compartir</b> envía el documento por <b>WhatsApp</b>, correo o cualquier otra app del dispositivo.</li>
 <li>Los adjuntos entran en la copia de seguridad del proyecto y salen en los informes.</li>
+</ul>`},
+{ic:'ti-undo',t:'Deshacer, Papelera y reordenar',c:`
+<p>¿Te equivocaste o borraste algo sin querer? La app tiene tres protecciones — y además deja arrastrarlo todo de sitio:</p>
+<ul>
+<li><b>Tarjeta Deshacer:</b> al eliminar cualquier elemento (vídeo, capítulo, clase, curso, asignatura o año lectivo), aparece una tarjeta en la <b>esquina superior derecha</b> durante 10 segundos — toca <b>Deshacer</b> y el elemento vuelve al instante, con todo dentro. Si la tarjeta desaparece, no se pierde nada: el elemento sigue en la Papelera.</li>
+<li><b>Papelera:</b> tras la primera eliminación, aparece un <b>botón de papelera con contador</b> en la barra superior. Guarda las <b>últimas 10 eliminaciones</b>; tócalo y usa <b>Restaurar</b> en lo que quieras recuperar. Ojo: la papelera es temporal — <b>cerrar la app la vacía</b>.</li>
+<li><b>Deshacer general (↩):</b> el botón <b>↩</b> junto a la papelera deshace el <b>último cambio</b>, sea cual sea (una edición, la casilla de un capítulo, una eliminación…), paso a paso, hasta 30 veces.</li>
+<li><b>Reordenar arrastrando:</b> mantén pulsada (medio segundo) cualquier tarjeta — asignatura, curso, clase, capítulo, vídeo o año lectivo — y arrástrala arriba o abajo para cambiar el orden.</li>
 </ul>`},
 {ic:'ti-palette',t:'Temas',c:`
 <p>El botón de la esquina superior derecha alterna entre los 6 temas — la preferencia queda guardada:</p>
@@ -1193,6 +1215,7 @@ const TUT_ML={
 <li><b>创建：</b>菜单 ☰ → <b>新建项目</b> → 填写<b>年份</b>和<b>学校</b>。新项目从空白开始并成为当前项目。</li>
 <li><b>归档：</b>不会丢失任何内容 — 上一学年保留在项目列表中。</li>
 <li><b>切换：</b>点按主屏幕的学年栏，或打开 ☰ 菜单并点按列表中的某个项目——它会成为当前项目并打开<b>管理项目</b>屏幕。<b>管理项目</b>按钮就在菜单顶部。</li>
+<li><b>管理项目：</b>列表中的每个学年都有四个图标 — <b>下载</b>（仅导出该学年的备份）、<b>铅笔</b>（编辑年份和学校）、<b>复制</b>（复制整个学年及其全部内容）和<b>垃圾桶</b>（删除）。</li>
 <li><b>保存到设备之外：</b>使用<b>导出备份</b>（见下方备份部分）。</li>
 </ul>`},
 {ic:'ti-books',t:'科目与年级',c:`
@@ -1202,6 +1225,7 @@ const TUT_ML={
 <li><b>新年级：</b>打开科目后点按<b>新年级</b>。</li>
 <li><b>自动建议：</b>创建年级、课程、章节或项目时，应用会在输入框中以<b>浅灰色</b>显示下一个编号（例如“高二”之后显示“高三”）。按键盘上的<b>右箭头 → 键</b>即可接受；若要其他值，直接输入覆盖即可。</li>
 <li><b>复制/粘贴年级：</b>年级卡片上的<b>复制</b>图标可复制整个年级（课程、章节、视频和附件）。打开目标科目——甚至是<b>另一个学年/项目</b>——再点按<b>粘贴年级</b>。</li>
+<li><b>复制科目：</b>科目卡片上的<b>复制</b>图标可复制整个科目及其所有年级。切换到另一个学年后点按<b>粘贴科目</b>；若要取消待粘贴的副本，点按粘贴按钮旁的 <b>✕</b>。</li>
 <li>年级卡片上的<b>箭头按钮（课程数）</b>可展开课程树。</li>
 <li><b>每个年级的时长：</b>卡片显示三个指标——<b>总时长</b>（所有视频时长之和）、<b>已授课</b>（已标记为完成的章节）和<b>未授课</b>（尚未完成的部分）。勾选章节时它们会自动更新。</li>
 <li>年级上的<b>报告</b>图标可生成包含整个结构的 Word/PDF 文档。</li>
@@ -1212,6 +1236,7 @@ const TUT_ML={
 %FIG2%
 <ul>
 <li><b>复制/粘贴课程：</b>课程卡片上的<b>复制</b>图标可复制整节课（章节、视频和附件）。打开目标年级——可以是<b>另一个学年/项目</b>——再点按底部出现的<b>粘贴课程</b>按钮。</li>
+<li><b>一次转移多节课：</b>在某节课上按住 <b>2 秒</b>且不拖动 — 每节课都会出现<b>选择框</b>。勾选想要的课程，然后用底部出现的操作栏把它们一起复制到另一个年级。</li>
 <li>章节的<b>勾选框</b>控制待办状态：勾选 = 尚未授课；空 = 已授课。“● 待授课”计数会汇总到课程、年级和科目。</li>
 <li><b>CP1…CP11 圆片</b>在章节有内容时亮起；点按亮起的圆片可滚动到对应章节。</li>
 <li><b>备注：</b>每个章节都有一个默认收起的“备注”面板，可自由记录 — 提醒、任务、教材页码。● 圆点表示已保存文字。</li>
@@ -1236,6 +1261,14 @@ const TUT_ML={
 <li><b>眼睛</b>图标可直接打开 PDF 和图片；Word 文件会下载后用设备上的编辑器打开。如果某个 PDF 打不开，请换一个文档试试 — 有些文件本身已损坏。</li>
 <li><b>分享</b>按钮可通过 <b>WhatsApp</b>、电子邮件或设备上的其他应用发送文档。</li>
 <li>附件会包含在项目备份和报告中。</li>
+</ul>`},
+{ic:'ti-undo',t:'撤销、回收站与排序',c:`
+<p>操作错了或不小心删除了？应用有三重保护 — 还可以拖动调整一切的位置：</p>
+<ul>
+<li><b>撤销卡片：</b>删除任何内容（视频、章节、课程、年级、科目或学年）时，<b>右上角</b>会出现一张持续 10 秒的卡片 — 点按<b>撤销</b>，该内容会立刻完整恢复。卡片消失也不要紧：它仍在回收站里。</li>
+<li><b>回收站：</b>第一次删除后，顶栏会出现一个<b>带计数的垃圾桶按钮</b>。它保存<b>最近 10 次删除</b>；点按它并对想找回的内容使用<b>恢复</b>。注意：回收站是临时的 — <b>关闭应用即清空</b>。</li>
+<li><b>全局撤销（↩）：</b>垃圾桶旁的 <b>↩</b> 按钮可逐步撤销<b>最近的更改</b>，无论是什么（编辑、章节勾选、删除…），最多 30 步。</li>
+<li><b>拖动排序：</b>按住（约半秒）任意卡片 — 科目、年级、课程、章节、视频或学年 — 上下拖动即可调整顺序。</li>
 </ul>`},
 {ic:'ti-palette',t:'主题',c:`
 <p>右上角的按钮在 6 种主题间切换 — 偏好会被保存：</p>

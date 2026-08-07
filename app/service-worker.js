@@ -4,20 +4,34 @@
    um hash do conteúdo — isso garante que toda publicação com mudança real
    gera um service-worker.js diferente (o navegador detecta sozinho) e URLs
    novas para os arquivos versionados (o cache HTTP nunca serve versão velha). */
-const CACHE = 'prometeu-1cefd0eb77';
+const CACHE = 'prometeu-33d9d2b7e8';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=1cefd0eb77',
-  './app.js?v=1cefd0eb77',
-  './i18n.js?v=1cefd0eb77',
+  './styles.css?v=33d9d2b7e8',
+  './app.js?v=33d9d2b7e8',
+  './i18n.js?v=33d9d2b7e8',
   './privacidade.html',
   './termos.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './icons/favicon-64.png'
+  './icons/favicon-64.png',
+  // prints anotados do tutorial — sem eles no pré-cache, o tutorial ficaria
+  // sem figuras no primeiro uso offline
+  './tutorial/01-inicio.jpg',
+  './tutorial/02-menu.jpg',
+  './tutorial/03-projetos.jpg',
+  './tutorial/04-series.jpg',
+  './tutorial/05-aulas.jpg',
+  './tutorial/06-selecao.jpg',
+  './tutorial/07-capitulos.jpg',
+  './tutorial/08-video.jpg',
+  './tutorial/09-materiais.jpg',
+  './tutorial/10-desfazer.jpg',
+  './tutorial/11-lixeira.jpg',
+  './tutorial/12-backup.jpg'
 ];
 
 // Instala e pré-carrega os arquivos locais no cache, ignorando o cache HTTP

@@ -663,6 +663,14 @@ textarea.finput{resize:vertical;min-height:120px;line-height:1.45}
 .tut-fig{display:flex;justify-content:center;padding:8px 0 12px;color:var(--acc)}
 .tut-fig svg{max-width:100%;height:auto}
 .tut-fig text{font-family:inherit}
+/* Print anotado do tutorial: imagem + legenda numerada (as marcas na imagem) */
+.tut-shot{margin:10px 0 12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.tut-shot img{width:min(300px,100%);height:auto;border-radius:10px;border:1px solid var(--brd);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.tut-shot figcaption{width:100%;max-width:420px}
+.tut-shot figcaption ol{margin:0;padding-left:22px}
+.tut-shot figcaption li{margin-bottom:3px}
+.tut-shot figcaption li::marker{color:var(--acc);font-weight:700}
+.P .tut-shot img{border-radius:4px;box-shadow:0 0 10px rgba(var(--grgb),.25)}
 .P .tut-sec{border-radius:4px}
 .P .tut-fig{filter:drop-shadow(0 0 6px rgba(var(--grgb),.4))}
 .D .tut-fig{color:#fff;filter:drop-shadow(0 0 5px rgba(255,255,255,.4))}

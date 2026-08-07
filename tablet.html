@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="media/icone.png">
 <title>No tablet — Organizador de Aulas</title>
 <meta name="description" content="O Organizador de Aulas no tablet: tela cheia, tela dividida com o YouTube, janela flutuante e layout que aproveita a tela grande.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,8 +31,8 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--txt);line-height
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(1100px 560px at 82% -10%,var(--glow1),transparent 60%),radial-gradient(820px 460px at -8% 18%,var(--glow2),transparent 55%);}
 /* Arte em mármore do Prometeu como marca d'água do fundo */
-:root{--arte:url("media/artes/arte-02-fundo.webp");--arteop:.08}
-html.t-L{--arte:url("media/artes/arte-01-fundo.webp");--arteop:.09}
+:root{--arte:url("media/artes/arte-02-fundo.webp");--arteop:.22}
+html.t-L{--arte:url("media/artes/arte-01-fundo.webp");--arteop:.28}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:var(--arte) center 30%/min(92vmin,940px) no-repeat;opacity:var(--arteop)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
@@ -41,7 +42,7 @@ a{color:var(--acc);text-decoration:none}
 nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(--nav);border-bottom:1px solid var(--brd2)}
 .nav-in{display:flex;align-items:center;gap:10px 14px;min-height:60px;flex-wrap:wrap;padding:8px 0}
 .brand{font-weight:900;font-size:15px;letter-spacing:.5px;color:var(--txt);display:flex;align-items:center;gap:8px}
-.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc)}
+.brand .dot{width:26px;height:26px;border-radius:50%;box-shadow:0 0 10px var(--gl);display:block}
 .nav-links{margin-left:auto;display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
 .nav-links a{color:var(--txt2);font-size:14px;font-weight:600;transition:color .2s}
 .nav-links a:hover,.nav-links a.here{color:var(--acc)}
@@ -75,7 +76,7 @@ footer{border-top:1px solid var(--brd2);padding:26px 0 50px;color:var(--txt3);fo
 </head>
 <body>
 <nav><div class="wrap nav-in">
-  <a class="brand" href="index.html"><span class="dot"></span> ORGANIZADOR DE AULAS</a>
+  <a class="brand" href="index.html"><img class="dot" src="media/icone.png" alt=""> ORGANIZADOR DE AULAS</a>
   <div class="nav-links">
     <a href="index.html#recursos" data-i="nav1">Recursos</a>
     <a href="index.html#preco" data-i="nav3">Preço</a>
