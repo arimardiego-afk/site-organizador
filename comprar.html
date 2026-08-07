@@ -45,6 +45,11 @@ html{scroll-behavior:smooth;background:var(--htmlbg);-webkit-text-size-adjust:10
 body{font-family:var(--font-b);background:var(--bg);color:var(--txt);line-height:1.55;font-size:17px}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(1100px 560px at 82% -10%,var(--glow1),transparent 60%),radial-gradient(820px 460px at -8% 18%,var(--glow2),transparent 55%);}
+/* Arte em mármore do Prometeu como marca d'água do fundo */
+:root{--arte:url("media/artes/arte-02-fundo.webp");--arteop:.08}
+html.t-L{--arte:url("media/artes/arte-01-fundo.webp");--arteop:.09}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:var(--arte) center 30%/min(92vmin,940px) no-repeat;opacity:var(--arteop)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
 h1,h2,h3,.brand,.eyebrow{font-family:var(--font-h)}
 a{color:var(--acc);text-decoration:none}

@@ -45,6 +45,11 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--txt);line-height
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(1100px 560px at 82% -10%,var(--glow1),transparent 60%),
              radial-gradient(820px 460px at -8% 18%,var(--glow2),transparent 55%);}
+/* Arte em mármore do Prometeu como marca d'água do fundo */
+:root{--arte:url("media/artes/arte-02-fundo.webp");--arteop:.08}
+html.t-L{--arte:url("media/artes/arte-01-fundo.webp");--arteop:.09}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:var(--arte) center 30%/min(92vmin,940px) no-repeat;opacity:var(--arteop)}
 .wrap{max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
 h1,h2,h3,.brand{font-family:var(--font-h)}
 a{color:var(--acc);text-decoration:none}
@@ -110,7 +115,7 @@ footer{border-top:1px solid var(--brd2);padding:26px 0 50px;color:var(--txt3);fo
 </div></nav>
 
 <header class="hero wrap">
-  <img class="photo" id="devPhoto" src="dev-foto.jpg" alt="Arimar Diego França da Silva"
+  <img class="photo" id="devPhoto" src="dev-foto.jpg?v=2" alt="Arimar Diego França da Silva"
        onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo noimg',textContent:'AD'}))">
   <div>
     <div class="role" data-i="role">Criador do app · Professor</div>

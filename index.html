@@ -62,6 +62,12 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--txt);line-height
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(1200px 600px at 80% -10%,var(--glow1),transparent 60%),
              radial-gradient(900px 500px at -10% 20%,var(--glow2),transparent 55%);}
+/* Arte em mármore do Prometeu como marca d'água do fundo:
+   negra com dourado nos temas escuros, branca no claro */
+:root{--arte:url("media/artes/arte-02-fundo.webp");--arteop:.08}
+html.t-L{--arte:url("media/artes/arte-01-fundo.webp");--arteop:.09}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:var(--arte) center 30%/min(92vmin,940px) no-repeat;opacity:var(--arteop)}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;position:relative;z-index:1}
 h1,h2,h3,.brand,.eyebrow,.badge{font-family:var(--font-h)}
 a{color:inherit;text-decoration:none}
@@ -102,7 +108,7 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(-
 }
 
 /* HERO */
-.hero{padding:70px 0 40px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero{padding:70px 0 40px;display:grid;grid-template-columns:1fr 1.2fr;gap:40px;align-items:center}
 .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.05;font-weight:800;margin:16px 0 14px;letter-spacing:.5px}
 .hero h1 .cy{color:var(--acc);text-shadow:0 0 24px var(--gl)}
 .hero p.lead{font-size:19px;color:var(--txt2);max-width:520px;margin-bottom:12px}
@@ -116,8 +122,16 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:var(-
 .btn.sec{background:transparent;color:var(--acc)}
 .btn.sec:hover{background:var(--glow1)}
 
-/* PHONE (vídeo de uso do app no topo) */
-.phone{justify-self:center;width:274px;border-radius:36px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(127,127,127,.05),0 0 60px var(--gl);padding:13px 12px;position:relative;overflow:hidden}
+/* PHONE + TABLET (demonstração em movimento no topo; o tablet fica atrás,
+   à esquerda, e o celular sobrepõe a borda dele — os dois seguem o tema) */
+.devices{display:flex;align-items:center;justify-content:center;width:100%;min-width:0}
+.tab{flex:0 1 380px;min-width:260px;margin-right:-100px;border-radius:22px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(127,127,127,.05),0 0 60px var(--gl);padding:10px;position:relative;z-index:1}
+.tab::before{content:"";position:absolute;top:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.16)}
+.tab-show{position:relative;width:100%;aspect-ratio:880/631;border-radius:14px;overflow:hidden;background:#050b13}
+.tab-show .ps-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease}
+.tab-show .ps-img.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.tab-show .ps-img{transition:none}}
+.phone{justify-self:center;flex:0 0 auto;z-index:2;width:274px;border-radius:36px;background:linear-gradient(160deg,#0d2233,#071521);border:1px solid var(--brd);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 6px rgba(127,127,127,.05),0 0 60px var(--gl);padding:13px 12px;position:relative;overflow:hidden}
 .phone::before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);width:92px;height:6px;border-radius:6px;background:rgba(255,255,255,.14);z-index:2}
 .phone-vid{width:100%;display:block;border-radius:24px;background:#050b13;aspect-ratio:400/866;object-fit:cover}
 .phone-show{position:relative;width:100%;aspect-ratio:400/866;border-radius:24px;overflow:hidden;background:#050b13}
@@ -239,7 +253,7 @@ footer{border-top:1px solid var(--brd2);padding:40px 0 60px;margin-top:30px}
   .flow,.cta{justify-content:center}
   .grid{grid-template-columns:1fr}
   .install{grid-template-columns:1fr}
-  .phone{order:-1}
+  .devices{order:-1}
 }
 @media(max-width:480px){
   body{font-size:16px}
@@ -247,6 +261,9 @@ footer{border-top:1px solid var(--brd2);padding:40px 0 60px;margin-top:30px}
   .hero{padding:32px 0 24px;gap:28px}
   .sec-h{margin-bottom:28px}
   .phone{width:246px}
+  /* tela estreita: não cabe lado a lado — tablet passa para baixo do celular */
+  .devices{flex-direction:column;gap:20px}
+  .tab{flex:none;margin-right:0;width:100%;max-width:340px;order:2}
   .price{padding:26px 20px}
 }
 </style>
@@ -293,10 +310,18 @@ footer{border-top:1px solid var(--brd2);padding:40px 0 60px;margin-top:30px}
       <a class="btn sec" href="#preco" data-i="cta2">Comprar · US$ 5</a>
     </div>
   </div>
-  <div class="phone" aria-hidden="true">
-    <div id="heroShow" class="phone-show">
-      <img class="ps-img on" alt="">
-      <img class="ps-img" alt="">
+  <div class="devices" aria-hidden="true">
+    <div class="tab">
+      <div id="heroTab" class="tab-show">
+        <img class="ps-img on" alt="">
+        <img class="ps-img" alt="">
+      </div>
+    </div>
+    <div class="phone">
+      <div id="heroShow" class="phone-show">
+        <img class="ps-img on" alt="">
+        <img class="ps-img" alt="">
+      </div>
     </div>
   </div>
 </header>
@@ -558,6 +583,13 @@ const I={
   fcr:['Todos os direitos reservados','All rights reserved','Todos los derechos reservados','保留所有权利']
 };
 const LKEY='prometeu.site.lang', TKEY='prometeu.site.theme', SEENKEY='prometeu.site.introseen';
+/* Abertura sempre no topo (herói animado): impede o navegador de restaurar a
+   rolagem antiga em recarga/reabertura. Voltar pelo histórico (bfcache) e
+   âncoras (#preco etc.) continuam funcionando. */
+if(!location.hash){
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
+  addEventListener('pageshow',e=>{if(!e.persisted)scrollTo(0,0);});
+}
 let curLang='pt', curTheme='P';
 /* rótulos dos modos (para o balão da animação) */
 const THEME_LABEL={
@@ -584,30 +616,44 @@ function updateShots(){
   document.querySelectorAll('#shotsTrack img[data-shot]').forEach(img=>{img.src='screenshots/'+sl+'-'+curTheme+'-'+img.dataset.shot+'.jpg';});
   heroReset();
 }
-/* Demonstração em movimento no celular do hero: passa pelas telas reais do app
-   NA COR DO TEMA atual e troca na hora quando o usuário muda de tema/idioma. */
+/* Demonstração em movimento no hero: celular E tablet passam pelas telas reais
+   do app NA COR DO TEMA atual e trocam na hora quando muda tema/idioma.
+   Cada aparelho tem seu par de camadas em fusão; o tablet começa uma tela à
+   frente para os dois não mostrarem a mesma coisa ao mesmo tempo. */
 const HERO_SHOTS=['01-materias','02-series-horas','03-aulas','04-capitulos','05-formulario-video','06-menu'];
-let _hIdx=0,_hLayer=0,_hTimer=null;
-function _heroSrc(i){return 'screenshots/'+shotLang()+'-'+curTheme+'-'+HERO_SHOTS[i]+'.jpg';}
+const TAB_SHOTS=['01-materias','02-series-horas','03-capitulos','04-video'];
+const _hs=[
+  {id:'heroShow',pre:'',    shots:HERO_SHOTS,off:0,idx:0,layer:0},
+  {id:'heroTab', pre:'tab-',shots:TAB_SHOTS, off:1,idx:0,layer:0},
+];
+let _hTimer=null;
+function _heroSrc(s,i){return 'screenshots/'+s.pre+shotLang()+'-'+curTheme+'-'+s.shots[i]+'.jpg';}
 function heroReset(){ // muda de tema/idioma: recarrega o quadro atual na cor nova
-  const box=document.getElementById('heroShow'); if(!box)return;
-  box.querySelectorAll('.ps-img')[_hLayer].src=_heroSrc(_hIdx);
+  for(const s of _hs){const box=document.getElementById(s.id); if(!box)continue;
+    const imgs=box.querySelectorAll('.ps-img');
+    // cancela troca pendente: sem isso, um quadro já em carregamento no tema
+    // antigo entraria por cima do novo logo depois da troca de tema/idioma
+    imgs[s.layer^1].onload=null;
+    imgs[s.layer].src=_heroSrc(s,s.idx);}
 }
-function _heroGo(i){ // transição suave para o próximo quadro
-  const box=document.getElementById('heroShow'); if(!box)return;
-  const imgs=box.querySelectorAll('.ps-img'), cur=imgs[_hLayer], nxt=imgs[_hLayer^1];
-  const swap=()=>{nxt.classList.add('on');cur.classList.remove('on');_hLayer^=1;};
-  nxt.onload=swap; nxt.src=_heroSrc(i); if(nxt.complete)swap();
+function _heroGo(s){ // transição suave para o próximo quadro
+  const box=document.getElementById(s.id); if(!box)return;
+  const imgs=box.querySelectorAll('.ps-img'), cur=imgs[s.layer], nxt=imgs[s.layer^1];
+  // swap de uso único: com a imagem em cache, `complete` chama na hora E o
+  // onload chama de novo — duas viradas de s.layer desalinham a camada visível
+  const swap=()=>{nxt.onload=null;nxt.classList.add('on');cur.classList.remove('on');s.layer^=1;};
+  s.idx=(s.idx+1)%s.shots.length;
+  nxt.onload=swap; nxt.src=_heroSrc(s,s.idx); if(nxt.complete)swap();
 }
 function heroPlay(){
-  const box=document.getElementById('heroShow'); if(!box)return;
-  const imgs=box.querySelectorAll('.ps-img');
-  _hIdx=0;_hLayer=0;
-  imgs[0].src=_heroSrc(0); imgs[0].classList.add('on'); imgs[1].classList.remove('on');
+  for(const s of _hs){const box=document.getElementById(s.id); if(!box)continue;
+    const imgs=box.querySelectorAll('.ps-img');
+    s.idx=s.off;s.layer=0;
+    imgs[0].src=_heroSrc(s,s.idx); imgs[0].classList.add('on'); imgs[1].classList.remove('on');}
   if(_hTimer)clearInterval(_hTimer);
   // roda sempre (o usuário quer a demonstração em movimento); sob "movimento
   // reduzido" o CSS já tira o fade e a troca vira um corte seco, mais suave.
-  _hTimer=setInterval(()=>{_hIdx=(_hIdx+1)%HERO_SHOTS.length;_heroGo(_hIdx);},2600);
+  _hTimer=setInterval(()=>{for(const s of _hs)_heroGo(s);},2600);
 }
 function setL(l){
   if(!LANGS.includes(l))l='pt';

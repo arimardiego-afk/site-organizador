@@ -45,6 +45,11 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--txt);line-height
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(1100px 560px at 82% -10%,var(--glow1),transparent 60%),
              radial-gradient(820px 460px at -8% 18%,var(--glow2),transparent 55%);}
+/* Arte em mármore do Prometeu como marca d'água do fundo */
+:root{--arte:url("media/artes/arte-02-fundo.webp");--arteop:.08}
+html.t-L{--arte:url("media/artes/arte-01-fundo.webp");--arteop:.09}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:var(--arte) center 30%/min(92vmin,940px) no-repeat;opacity:var(--arteop)}
 .wrap{max-width:1120px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
 h1,h2,h3,.brand{font-family:var(--font-h)}
 a{color:var(--acc);text-decoration:none}
@@ -74,6 +79,10 @@ header.top p{color:var(--txt2);font-size:17px;max-width:720px}
 .shots{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:4px 0 14px}
 .shot{flex:0 0 auto;width:190px}
 .shot img{width:100%;border-radius:16px;border:1px solid var(--brd);box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 26px var(--gl);display:block;background:#050b13}
+.evoshot{flex:0 0 auto;width:210px}
+.evoshot img{width:100%;border-radius:16px;border:1px solid var(--brd);box-shadow:0 14px 40px rgba(0,0,0,.4),0 0 26px var(--gl);display:block;background:#050b13}
+.evoshot .ecap{margin-top:8px;text-align:center;font-size:13px;color:var(--txt2);line-height:1.4}
+.evoshot .ecap b{display:block;font-family:var(--font-h);font-size:12px;letter-spacing:.5px;color:var(--acc)}
 footer{border-top:1px solid var(--brd2);padding:26px 0 50px;color:var(--txt3);font-size:14px;text-align:center;margin-top:30px}
 </style>
 </head>
@@ -122,7 +131,26 @@ const THEMES_G=[
 ];
 const LANGS_G=[['pt','PORTUGUÊS (BRASIL)'],['en','ENGLISH'],['zh','中文（简体）']];
 const SCREENS_G=['01-materias','02-series-horas','03-aulas','04-capitulos','05-formulario-video','06-menu'];
-document.getElementById('gal').innerHTML=THEMES_G.map(([t,sw,label])=>`
+/* Evolução do design: a mesma tela inicial em 4 marcos (capturas reais dos
+   commits antigos, regeradas por tools/capturar-evolucao.py) */
+const EVO_G=[
+  ['evo-1-inicio',  'jul/2026 — O começo',
+   'Blocos simples · Flat blocks · 扁平卡片'],
+  ['evo-2-vidro3d', 'v3.2 — Vidro 3D',
+   'Caixas de vidro · Glass boxes · 玻璃卡片'],
+  ['evo-3-marmore', 'v3.5 — Mármore',
+   'Logo e tampa 3D · Marble & 3D lid · 大理石与 3D 底座'],
+  ['evo-5-atual',   'v3.13 — Hoje',
+   'Vidro fosco · Frosted glass · 磨砂玻璃'],
+];
+document.getElementById('gal').innerHTML=`
+  <section class="tsec" id="evolucao">
+    <h2 data-i="gEvoT">A evolução do programa</h2>
+    <p class="tsub" data-i="gEvoS">A mesma tela inicial, do primeiro esboço até hoje.</p>
+    <div class="shots">
+      ${EVO_G.map(([f,mark,cap])=>`<div class="evoshot"><img loading="lazy" src="media/evolucao/${f}.jpg" alt="${mark} — ${cap}"><div class="ecap"><b>${mark}</b>${cap}</div></div>`).join('')}
+    </div>
+  </section>`+THEMES_G.map(([t,sw,label])=>`
   <section class="tsec">
     <h2><span class="swatch" style="background:${sw}"></span>${label}</h2>
     ${LANGS_G.map(([l,ltag])=>`
@@ -146,6 +174,11 @@ const I={
   nav7:['Desenvolvedor','Developer','Desarrollador','开发者'],
   nav8:['Tablet','Tablet','Tablet','平板'],
   gTitle:['Galeria','Gallery','Galería','图库'],
+  gEvoT:['A evolução do programa','How the app evolved','La evolución del programa','应用的演进'],
+  gEvoS:['A mesma tela inicial, do primeiro esboço até hoje.',
+         'The same home screen, from the first draft to today.',
+         'La misma pantalla inicial, del primer boceto hasta hoy.',
+         '同一主屏，从最初的草稿到现在。'],
   gLead:['Todas as telas do aplicativo, nos 5 modos de cor e em 3 idiomas (Português, English, 中文). Esta página mostra sempre tudo — independentemente do modo e do idioma escolhidos acima.',
          'Every screen of the app, in all 5 color modes and 3 languages (Português, English, 中文). This page always shows everything — regardless of the mode and language chosen above.',
          'Todas las pantallas de la app, en los 5 modos de color y 3 idiomas (Português, English, 中文). Esta página siempre lo muestra todo — sin importar el modo y el idioma elegidos arriba.',
