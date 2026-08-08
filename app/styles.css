@@ -377,7 +377,9 @@ textarea.finput{resize:vertical;min-height:120px;line-height:1.45}
 .mat-x:hover{color:#e53935;background:rgba(229,57,53,0.1)}
 .mat-row .mat-s:hover{color:var(--acc);background:var(--chip)}
 .at-pay{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-bottom:4px}
-.at-alt{font-size:12px;color:var(--txt3);margin:10px 0 2px;font-weight:600}
+/* regra única do .at-alt ("ou, se você já tem um código") — havia uma segunda
+   cópia lá embaixo, na tela Ativar, e a de baixo vencia calada. Consolidada. */
+.at-alt{font-size:calc(15px*var(--fscale));color:var(--txt);margin:10px 0 2px;font-weight:700}
 .add-mat{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:600;color:var(--acc);background:var(--card2);border:0.5px solid var(--brd);border-radius:8px;padding:9px 12px;cursor:pointer;width:100%}
 .add-mat:hover{background:var(--chip)}
 .vid-badges{display:inline-flex;gap:7px;margin-left:8px;color:var(--acc);font-size:10.5px;align-items:center}
@@ -720,31 +722,33 @@ body{min-height:100dvh}
    nos 5 temas. O site já traz o mesmo aviso; aqui é para quem baixou o app. */
 .at-card.juros i{color:#e0a13a}
 .at-card.juros{border-color:rgba(224,161,58,.55)}
-.at-card b{font-size:14px}
+.at-card b{font-size:calc(16px*var(--fscale))}
 /* A seção do formulário ganha o MESMO painel de vidro dos cartões (a lista de
    seletores lá embaixo). Sem ele, o título, os rótulos e as dicas ficavam
    soltos direto em cima do mármore do fundo e sumiam — era isso que ele via
    como "letras apagadas" no tema claro, não o tamanho da fonte. */
 .at-sec{padding:14px;margin-bottom:16px}
-.at-sec h3{font-size:calc(15px*var(--fscale));margin:2px 0 10px;color:var(--acc)}
+.at-sec h3{font-size:calc(18px*var(--fscale));font-weight:700;margin:2px 0 10px;color:var(--acc)}
 .at-steps{margin:0 0 16px;padding-left:20px}
-.at-steps li{margin-bottom:6px;font-size:13px;line-height:1.4}
+.at-steps li{margin-bottom:6px;font-size:calc(15px*var(--fscale));line-height:1.45}
 .at-copy{display:flex;gap:8px;align-items:stretch;margin-bottom:6px}
-.at-copy code{flex:1;background:var(--inp);border:0.5px solid var(--inpb);border-radius:8px;padding:9px 11px;font-size:12.5px;color:var(--txt);word-break:break-all;font-family:ui-monospace,monospace;display:flex;align-items:center}
+.at-copy code{flex:1;background:var(--inp);border:0.5px solid var(--inpb);border-radius:8px;padding:9px 11px;font-size:calc(13.5px*var(--fscale));font-weight:600;color:var(--txt);word-break:break-all;font-family:ui-monospace,monospace;display:flex;align-items:center}
 .at-copy code.small{font-size:10.5px;line-height:1.35}
 .at-copy .btn-sec{flex:0 0 auto;width:auto;padding:9px 14px}
-.at-msg{font-size:12.5px;margin:8px 0;min-height:16px}
+.at-msg{font-size:calc(14px*var(--fscale));font-weight:600;margin:8px 0;min-height:16px}
 .at-msg.erro{color:#d9534f}
 
-/* Letra maior e mais clara SÓ na tela Ativar/Comprar (pedido dele: estava
-   "pequena e apagada"). Escopo em .at-sec / .at-card para não mexer nas dicas
-   do resto do app. Especificidade 0,2,0 — ganha do `.fhint` solto, que já é
-   redeclarado mais abaixo na folha do vidro. */
-.at-sec .flbl{font-size:calc(13px*var(--fscale));color:var(--txt2)}
-.at-sec .fhint,.at-card .fhint{font-size:calc(13px*var(--fscale));color:var(--txt2);line-height:1.5}
-.at-card.juros .fhint{color:var(--txt)}
-.at-card.juros b{font-size:15px}
-.at-alt{font-size:13px;color:var(--txt2)}
+/* Letra MAIOR, MAIS GROSSA e de cor cheia SÓ na tela Ativar/Comprar (2ª volta
+   do pedido dele: mesmo com o painel de vidro atrás, "ainda não está legível
+   o suficiente"). Aqui todo texto usa --txt (a cor cheia) e peso 500/700 —
+   nada de --txt2/--txt3, que são cinzas de apoio e foi o que ele leu como
+   "apagado". Escopo em .at-sec / .at-card para não engordar as dicas do resto
+   do app. Especificidade 0,2,0 — ganha do `.fhint` solto, redeclarado mais
+   abaixo na folha do vidro. */
+.at-sec .flbl{font-size:calc(15px*var(--fscale));font-weight:700;color:var(--txt)}
+.at-sec .finput{font-size:calc(15px*var(--fscale))}
+.at-sec .fhint,.at-card .fhint{font-size:calc(15px*var(--fscale));font-weight:500;color:var(--txt);line-height:1.5}
+.at-card.juros b{font-size:calc(17px*var(--fscale))}
 
 /* Botão que abre/fecha as duas telas de exemplo do Mercado Pago */
 .mpx-btn{margin-top:10px;background:transparent;border:1px solid rgba(224,161,58,.6);color:#e0a13a;
@@ -758,7 +762,7 @@ body{min-height:100dvh}
 .mpx-col{border:1px solid var(--brd);border-radius:12px;padding:12px;background:var(--card);margin-top:12px}
 .mpx-col.bad{border-color:#e0435a}
 .mpx-col.good{border-color:#0f9d63}
-.mpx-tag{display:flex;align-items:center;gap:8px;font-weight:700;font-size:calc(13px*var(--fscale));margin-bottom:9px}
+.mpx-tag{display:flex;align-items:center;gap:8px;font-weight:800;font-size:calc(15px*var(--fscale));margin-bottom:9px}
 .mpx-tag.bad{color:#ff6b81}
 .mpx-tag.good{color:#3ec98a}
 .mpx-tag .ball{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;
@@ -795,7 +799,7 @@ body{min-height:100dvh}
 .mpx-pay.ok{background:#0f9d63}
 .mpx-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;
   background:#e6f4ea;color:#0a7a3d}
-.mpx-cap{font-size:calc(13px*var(--fscale));color:var(--txt);margin-top:9px;line-height:1.45}
+.mpx-cap{font-size:calc(15px*var(--fscale));font-weight:500;color:var(--txt);margin-top:9px;line-height:1.45}
 
 /* =====================================================================
    VIDRO 3D — a superfície comum a TODOS os módulos

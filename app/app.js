@@ -150,7 +150,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.15', APP_DATE='agosto de 2026';
+const APP_VERSION='3.16', APP_DATE='agosto de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
