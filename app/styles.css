@@ -714,8 +714,19 @@ body{min-height:100dvh}
 .at-card i{flex-shrink:0;font-size:22px;color:var(--acc);margin-top:2px}
 .at-card.ok i{color:#2e9e5b}
 .at-card.fim i{color:var(--acc)}
+/* Aviso "não pague juros": a tela do Mercado Pago pode vir com a Linha de
+   Crédito pré-marcada. Cor de alerta é semântica (como o verde do .ok e o
+   vermelho do .at-msg.erro), por isso não sai de --acc: precisa gritar igual
+   nos 5 temas. O site já traz o mesmo aviso; aqui é para quem baixou o app. */
+.at-card.juros i{color:#e0a13a}
+.at-card.juros{border-color:rgba(224,161,58,.55)}
 .at-card b{font-size:14px}
-.at-sec h3{font-size:14px;margin:6px 0 10px;color:var(--acc)}
+/* A seção do formulário ganha o MESMO painel de vidro dos cartões (a lista de
+   seletores lá embaixo). Sem ele, o título, os rótulos e as dicas ficavam
+   soltos direto em cima do mármore do fundo e sumiam — era isso que ele via
+   como "letras apagadas" no tema claro, não o tamanho da fonte. */
+.at-sec{padding:14px;margin-bottom:16px}
+.at-sec h3{font-size:calc(15px*var(--fscale));margin:2px 0 10px;color:var(--acc)}
 .at-steps{margin:0 0 16px;padding-left:20px}
 .at-steps li{margin-bottom:6px;font-size:13px;line-height:1.4}
 .at-copy{display:flex;gap:8px;align-items:stretch;margin-bottom:6px}
@@ -724,6 +735,67 @@ body{min-height:100dvh}
 .at-copy .btn-sec{flex:0 0 auto;width:auto;padding:9px 14px}
 .at-msg{font-size:12.5px;margin:8px 0;min-height:16px}
 .at-msg.erro{color:#d9534f}
+
+/* Letra maior e mais clara SÓ na tela Ativar/Comprar (pedido dele: estava
+   "pequena e apagada"). Escopo em .at-sec / .at-card para não mexer nas dicas
+   do resto do app. Especificidade 0,2,0 — ganha do `.fhint` solto, que já é
+   redeclarado mais abaixo na folha do vidro. */
+.at-sec .flbl{font-size:calc(13px*var(--fscale));color:var(--txt2)}
+.at-sec .fhint,.at-card .fhint{font-size:calc(13px*var(--fscale));color:var(--txt2);line-height:1.5}
+.at-card.juros .fhint{color:var(--txt)}
+.at-card.juros b{font-size:15px}
+.at-alt{font-size:13px;color:var(--txt2)}
+
+/* Botão que abre/fecha as duas telas de exemplo do Mercado Pago */
+.mpx-btn{margin-top:10px;background:transparent;border:1px solid rgba(224,161,58,.6);color:#e0a13a;
+  border-radius:9px;padding:8px 12px;font-size:calc(13px*var(--fscale));font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;font-family:inherit}
+.mpx-btn i,.mpx-btn svg{width:17px;height:17px;font-size:17px;color:#e0a13a;margin:0;flex-shrink:0}
+.mpx-wrap{display:grid;grid-template-rows:0fr;overflow:hidden}
+.mpx-wrap.open{grid-template-rows:1fr}
+.mpx-wrap>.mpx-in{min-height:0}
+@media (prefers-reduced-motion:no-preference){.mpx-wrap{transition:grid-template-rows .28s ease}}
+.mpx-col{border:1px solid var(--brd);border-radius:12px;padding:12px;background:var(--card);margin-top:12px}
+.mpx-col.bad{border-color:#e0435a}
+.mpx-col.good{border-color:#0f9d63}
+.mpx-tag{display:flex;align-items:center;gap:8px;font-weight:700;font-size:calc(13px*var(--fscale));margin-bottom:9px}
+.mpx-tag.bad{color:#ff6b81}
+.mpx-tag.good{color:#3ec98a}
+.mpx-tag .ball{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;
+  justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.mpx-tag.bad .ball{background:#e0435a}
+.mpx-tag.good .ball{background:#0f9d63}
+/* Daqui para baixo é a REPRODUÇÃO da tela do Mercado Pago: fundo branco e
+   cores fixas de propósito, em todos os temas — é uma "foto" da tela dele,
+   não interface nossa. Por isso não usa as variáveis de tema. */
+.mpx{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e2e2;color:#1a1a2a;
+  font-family:'Segoe UI',system-ui,Arial,sans-serif}
+.mpx-top{padding:9px 12px;border-bottom:1px solid #eee;font-size:11px;color:#888}
+.mpx-body{padding:12px}
+.mpx-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#555}
+.mpx-row.total{border-top:1px solid #eee;margin-top:6px;padding-top:8px;font-weight:800;color:#111;font-size:15px}
+.mpx-row .iof{color:#c62828}
+.mpx-opt{border:1px solid #e2e2e2;border-radius:9px;padding:9px 11px;margin-top:8px;display:flex;
+  align-items:center;gap:9px;font-size:13px}
+.mpx-opt.sel{border-color:#2d7ff9;box-shadow:0 0 0 2px rgba(45,127,249,.2)}
+.mpx-opt.sel-bad{border-color:#e0435a;box-shadow:0 0 0 2px rgba(224,67,90,.2)}
+.mpx-opt .cet{font-size:10px;color:#e0435a}
+.mpx-opt .radio{width:15px;height:15px;border-radius:50%;border:2px solid #2d7ff9;flex:0 0 15px;position:relative}
+.mpx-opt .radio::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:#2d7ff9}
+.mpx-opt.sel-bad .radio{border-color:#e0435a}
+.mpx-opt.sel-bad .radio::after{background:#e0435a}
+.mpx-opt.off .radio{border-color:#bbb}
+.mpx-opt.off .radio::after{background:none}
+.mpx-credito{margin-top:9px;border-radius:9px;padding:11px;background:linear-gradient(120deg,#22b7c9,#1786c9);
+  color:#fff;font-size:12px}
+.mpx-credito .lc{display:inline-block;background:#fff;color:#0a6;border-radius:20px;padding:2px 9px;
+  font-size:10px;font-weight:700;margin-top:6px}
+.mpx-pay{margin-top:11px;background:#5b3df5;color:#fff;text-align:center;border-radius:9px;padding:10px;
+  font-weight:700;font-size:13px}
+.mpx-pay.ok{background:#0f9d63}
+.mpx-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;
+  background:#e6f4ea;color:#0a7a3d}
+.mpx-cap{font-size:calc(13px*var(--fscale));color:var(--txt);margin-top:9px;line-height:1.45}
 
 /* =====================================================================
    VIDRO 3D — a superfície comum a TODOS os módulos
@@ -785,7 +857,7 @@ body{min-height:100dvh}
 .esc-4{margin-left:calc(var(--esc) * 4)}
 
 /* --- o painel de vidro --- */
-.card,.cap-card,.mat-sec,.tut-sec,.at-card,.arq-row,.dw-proj,.fcard{
+.card,.cap-card,.mat-sec,.tut-sec,.at-card,.at-sec,.arq-row,.dw-proj,.fcard{
   position:relative;
   border-radius:var(--g3-radius);
   border:var(--g3-bw) solid rgba(var(--g3-bc),var(--g3-ba));
@@ -1720,14 +1792,14 @@ body.mv-arrastando{cursor:grabbing;-webkit-user-select:none;user-select:none}
 
 /* --- demais superficies (secoes, formularios, anexos) na mesma linguagem,
    senao ficam como papel opaco colado por cima do marmore --- */
-.L .mat-sec,.L .tut-sec,.L .at-card,.L .fcard,.L .arq-row{
+.L .mat-sec,.L .tut-sec,.L .at-card,.L .at-sec,.L .fcard,.L .arq-row{
   border-color:rgba(255,255,255,.85);
   background:rgba(255,255,255,.55);
   box-shadow:0 10px 22px rgba(60,40,35,.14),inset 0 1px 0 rgba(255,255,255,.90);
   backdrop-filter:blur(5px) saturate(115%);
   -webkit-backdrop-filter:blur(5px) saturate(115%);
 }
-.D .mat-sec,.D .tut-sec,.D .at-card,.D .fcard,.D .arq-row{
+.D .mat-sec,.D .tut-sec,.D .at-card,.D .at-sec,.D .fcard,.D .arq-row{
   border-color:rgba(var(--vgl),.16);
   background:rgba(12,12,16,.45);
   box-shadow:0 10px 22px rgba(0,0,0,.50),inset 0 1px 0 rgba(var(--vgl),.20);

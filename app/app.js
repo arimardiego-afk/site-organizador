@@ -150,7 +150,7 @@ const THEME_META={ // sw = cor de acento da bolinha do seletor (a cara do tema)
 const SEED={"disciplinas":[]}; // app entregue vazio — o usuario cria as proprias materias
 
 /* ===== Projetos (anos letivos) — cada projeto guarda um banco completo ===== */
-const APP_VERSION='3.14', APP_DATE='agosto de 2026';
+const APP_VERSION='3.15', APP_DATE='agosto de 2026';
 const PROJ_KEY='prometeu.projects.v1';
 let projReg=null;
 function loadProjects(){
@@ -2841,6 +2841,51 @@ function pagarAgora(){
 }
 function openAtivar(){pushNav();closeMenu();renderAtivar();showScreen('s-ativar');}
 function refreshLicUI(){const s=document.getElementById('s-ativar');if(s&&s.classList.contains('active'))renderAtivar();}
+/* As duas telas do Mercado Pago, lado errado e lado certo — as MESMAS que o
+   site mostra em comprar.html. Ficam recolhidas atrás do botão do aviso para
+   não empurrar o campo do código para baixo. É uma reprodução (desenho em
+   HTML), não uma foto: fica nítida em qualquer tela e não pesa nada. */
+function telasMP(){
+  return `<div class="mpx-col bad">
+      <div class="mpx-tag bad"><span class="ball">✗</span>${tr('Assim NÃO — cobra juros')}</div>
+      <div class="mpx">
+        <div class="mpx-top">🛍️ Organizador de Aulas</div>
+        <div class="mpx-body">
+          <div class="mpx-row"><span>${tr('Sua compra')}</span><span>R$ 25,00</span></div>
+          <div class="mpx-row"><span class="iof">${tr('Juros e IOF')}</span><span class="iof">R$ 6,14</span></div>
+          <div class="mpx-row total"><span>${tr('Total')}</span><span>R$ 31,14</span></div>
+          <div class="mpx-opt sel-bad"><span class="radio"></span><span>1x R$ 31,14 <span class="cet">CET: 887,78%</span></span></div>
+          <div class="mpx-credito"><b>${tr('Use agora e pague depois')}</b><br><span class="lc">${tr('LINHA DE CRÉDITO')}</span></div>
+          <div class="mpx-pay">${tr('Pagar')}</div>
+        </div>
+      </div>
+      <div class="mpx-cap">${tr('Aqui você pagaria R$ 6,14 a mais, só de juros e IOF.')}</div>
+    </div>
+    <div class="mpx-col good">
+      <div class="mpx-tag good"><span class="ball">✓</span>${tr('Assim SIM — valor certo')}</div>
+      <div class="mpx">
+        <div class="mpx-top">🛍️ Organizador de Aulas</div>
+        <div class="mpx-body">
+          <div class="mpx-row"><span>${tr('Sua compra')}</span><span>R$ 25,00</span></div>
+          <div class="mpx-row total"><span>${tr('Total')}</span><span>R$ 25,00</span></div>
+          <div class="mpx-opt sel"><span class="radio"></span><span><span class="mpx-pill">Pix</span> R$ 25,00</span></div>
+          <div class="mpx-opt off"><span class="radio"></span><span>${tr('Cartão de crédito · à vista')}</span></div>
+          <div class="mpx-pay ok">${tr('Pagar')} R$ 25,00</div>
+        </div>
+      </div>
+      <div class="mpx-cap">${tr('Valor certo, sem juros. Se perguntarem, dá para continuar sem entrar na conta.')}</div>
+    </div>`;
+}
+function toggleTelasMP(){
+  const w=document.getElementById('mpx-telas'),b=document.getElementById('mpx-bt');
+  if(!w||!b)return;
+  const abrir=!w.classList.contains('open');
+  w.classList.toggle('open',abrir);
+  b.setAttribute('aria-expanded',abrir?'true':'false');
+  // O ícone continua o mesmo (o olho); quem muda é só o texto do botão —
+  // trocar a classe de um <i> já virado SVG exigiria repintar à toa.
+  b.querySelector('span').textContent=abrir?tr('Esconder as telas'):tr('Ver as duas telas do Mercado Pago');
+}
 function renderAtivar(){
   const el=document.getElementById('at-body');if(!el)return;
   const dias=trialDiasRestantes();
@@ -2854,6 +2899,10 @@ function renderAtivar(){
       ${PIX_CFG.link?`
       <label class="flbl">${tr('Seu e-mail (para receber o código de ativação)')}</label>
       <input class="finput" id="at-email" type="email" autocomplete="email" placeholder="exemplo@gmail.com">
+      <div class="at-card juros" style="margin:12px 0 0"><i class="ti ti-alert-triangle" aria-hidden="true"></i><div><b>${tr('Atenção antes de pagar')}</b><div class="fhint">${trf('Se o seu aparelho já tem conta do Mercado Pago, a tela pode vir com a “Linha de Crédito” pré-escolhida — ela cobra juros e IOF, e o total fica maior que o anunciado. {b} — dá para continuar como convidado, sem entrar na conta. Essa tela é do Mercado Pago; não temos como removê-la.',{b:'<b>'+tr('Escolha sempre Pix ou cartão comum')+'</b>'})}</div>
+        <button class="mpx-btn" id="mpx-bt" aria-expanded="false" aria-controls="mpx-telas" onclick="toggleTelasMP()"><i class="ti ti-eye" aria-hidden="true"></i><span>${tr('Ver as duas telas do Mercado Pago')}</span></button>
+        <div class="mpx-wrap" id="mpx-telas"><div class="mpx-in">${telasMP()}</div></div>
+      </div></div>
       <button class="btn-pri at-pay" style="margin-top:10px" onclick="pagarAgora()"><i class="ti ti-key" aria-hidden="true"></i> ${tr('Pagar agora (Pix ou cartão)')}</button>
       <div class="fhint" style="margin:8px 0 4px">${tr('Pagamento seguro pelo Mercado Pago. O código de ativação chega em poucos minutos no e-mail informado acima — cole-o no campo abaixo.')}</div>`:''}
       <label class="flbl" style="margin-top:16px">${tr('Código de ativação (recebido por e-mail)')}</label>
