@@ -10,10 +10,18 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
+/* ⚠️ CONSERTO DO TIL — nao apagar. A Orbitron TEM os glifos "ã" e "õ", mas os
+   desenha com acento GRAVE ("nào" por "não"); como o glifo existe, nenhuma
+   fonte de reserva entra e o erro passa CALADO. Medido em 22/08/2026: so
+   ã õ Ã Õ estao errados. Esta familia cobre SO esses 4 e vem antes da
+   Orbitron na pilha. Vem do sistema: nao adiciona pedido de rede nem CSP. */
+@font-face{font-family:'TilCerto';
+  src:local('Segoe UI Semibold'),local('Segoe UI'),local('Roboto'),local('Noto Sans'),local('Arial');
+  unicode-range:U+00C3,U+00D5,U+00E3,U+00F5}
 :root{ --bg:#050b13;--bg2:#081420;--card:#0a1a28;--card2:#0e2436;
   --txt:#e3f6ff;--txt2:#8fb6cc;--txt3:#4f7183;--acc:#22d3ee;--acc2:#0ea5b7;--gl:rgba(34,211,238,.35);
   --brd:rgba(34,211,238,.18);--brd2:rgba(255,255,255,.06);--glow1:rgba(34,211,238,.10);--glow2:rgba(14,165,183,.08);
-  --nav:rgba(5,11,19,.72);--btxt:#04121a;--htmlbg:#050b13;--font-h:'Orbitron',sans-serif;--font-b:'Rajdhani',system-ui,sans-serif; }
+  --nav:rgba(5,11,19,.72);--btxt:#04121a;--htmlbg:#050b13;--font-h:'TilCerto','Orbitron',sans-serif;--font-b:'Rajdhani',system-ui,sans-serif; }
 html.t-D{ --bg:#000;--bg2:#070707;--card:#0d0d0d;--card2:#141414;--txt:#fff;--txt2:#b8b8b8;--txt3:#6f6f6f;--acc:#f2f2f2;--acc2:#cfcfcf;
   --gl:rgba(255,255,255,.22);--brd:rgba(255,255,255,.16);--brd2:rgba(255,255,255,.06);--glow1:rgba(255,255,255,.05);--glow2:rgba(255,255,255,.03);
   --nav:rgba(0,0,0,.8);--btxt:#000;--htmlbg:#000;--font-h:'Segoe UI',system-ui,Arial,sans-serif;--font-b:'Segoe UI',system-ui,Arial,sans-serif; }
